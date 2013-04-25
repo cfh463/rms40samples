@@ -6,3 +6,6 @@ sim-*
 # build output
 bin/
 public/api/generated/
+
+# simulator
+rhosimulator/
