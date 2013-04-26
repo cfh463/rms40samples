@@ -9,7 +9,7 @@ class SignatureController < Rho::RhoController
   end
 
   def new
-    Signature.takeFullScreen(url_for :action => :signature_callback)
+    Rho::Signature.takeFullScreen(url_for :action => :signature_callback)
     redirect :action => :index
   end
 
