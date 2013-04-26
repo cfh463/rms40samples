@@ -3,7 +3,7 @@
                <SECTIONS>
                <SECTION>
                <DESC>
-                   Show the contents of the log file in a window with controls to refresh, clear and send
+                   Show the contents of the log file in a window with controls to refresh, clear and send. Useful for debugging and to ask users to look for error messages
                </DESC>
                <CODE lang=’ruby’>
            <![CDATA[
