@@ -28,8 +28,13 @@ class LogController < Rho::RhoController
   end
   
   def clean_log_file
+    # Read log file
     @logFileContentBefore = Rho::Log.readLogFile 16384
+    
+    # Clear log file
     Rho::Log.cleanLogFile
+    
+    # Read log file again - this time it will be empty
     @logFileContentAfter = Rho::Log.readLogFile 16384
     render :action => :display_log_file_before_and_after
   end
