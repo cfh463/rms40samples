@@ -1,0 +1,28 @@
+<EXAMPLES >
+           <EXAMPLE title="This is the title for the example that will be the heading of the section and appear in the menu">
+               <SECTIONS>
+               <SECTION>
+               <DESC>
+                   This is the section that will appear before the code block
+               </DESC>
+               <CODE lang=’ruby’>
+           <![CDATA[
+This is the code that is to be shown in a code block
+                   ]]>
+
+               </CODE>
+               </SECTION>
+               <SECTION>
+               <DESC>
+                   this is another section that is part of the same example, use multi sections when want to separate code blocks with descriptions for each
+               </DESC>
+               <CODE>
+           <![CDATA[
+This is the second code block of the same example
+                   ]]>
+
+               </CODE>
+               </SECTION>
+               </SECTIONS>
+           </EXAMPLE>
+       </EXAMPLES>
