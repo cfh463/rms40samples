@@ -15,4 +15,9 @@ class LogController < Rho::RhoController
     Rho::Log.info("Foo acquired value Bar in method Baz", "Miscellaneous")    
     redirect :index
   end
+  
+  def show_log
+    Rho::Log.showLog
+    redirect :index
+  end
 end
