@@ -21,9 +21,16 @@ class LogController < Rho::RhoController
     redirect :index
   end
   
-  def display_log_file
+  def read_log_file
     @logFileContent = Rho::Log.readLogFile 16384
     Rho::Log.info(@logFileContent, "Log file content")
-    render :action => :display_log_file
+    render :action => :read_log_file
+  end
+  
+  def clean_log_file
+    @logFileContentBefore = Rho::Log.readLogFile 16384
+    Rho::Log.cleanLogFile
+    @logFileContentAfter = Rho::Log.readLogFile 16384
+    render :action => :display_log_file_before_and_after
   end
 end
