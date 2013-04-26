@@ -20,4 +20,10 @@ class LogController < Rho::RhoController
     Rho::Log.showLog
     redirect :index
   end
+  
+  def display_log_file
+    @logFileContent = Rho::Log.readLogFile 16384
+    Rho::Log.info(@logFileContent, "Log file content")
+    render :action => :display_log_file
+  end
 end
