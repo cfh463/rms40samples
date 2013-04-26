@@ -1,0 +1,31 @@
+<EXAMPLES >
+           <EXAMPLE title="Logging categories">
+               <SECTIONS>
+               <SECTION>
+               <DESC>
+                   Categories help you organize your logging messages and find related statements using tools like grep or a text editor's "search" function.
+               </DESC>
+               <CODE lang=’ruby’>
+           <![CDATA[
+    Rho::Log.info("Consectetuer adipiscing elit", "Lorem Ipsum")
+    Rho::Log.info("Foo acquired value Bar in method Baz", "Miscellaneous")    
+
+                   ]]>
+
+               </CODE>
+               </SECTION>
+               <SECTION>
+               <DESC>
+                   The above code will result in logging statements like these:
+               </DESC>
+               <CODE>
+           <![CDATA[
+  Lorem Ipsum| Consectetuer adipiscing elit
+Miscellaneous| Foo acquired value Bar in method Baz
+                   ]]>
+
+               </CODE>
+               </SECTION>
+               </SECTIONS>
+           </EXAMPLE>
+       </EXAMPLES>
