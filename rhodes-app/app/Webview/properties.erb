@@ -1,0 +1,27 @@
+<div data-role="page">
+
+    
+  <div data-role="header" data-position="inline">
+    <h1>Control webview properties</h1>
+  </div>
+
+  <div data-role="content">
+  <ul>
+    <li><a href="<%= url_for :action => :setproperties %>">Set properties in Ruby</a></li>
+    <li><a href="#" onclick="setProperties()">Set properties in Javascript</a></li>
+  </div>
+
+</div>
+
+<script type="text/javascript">
+  function setProperties() {
+  /*  
+    TODO: WebView JS API not implemented yet
+    
+    Rho.WebView.fullScreen = !Rho.WebView.fullScreen;    
+    Rho.WebView.navigate("<%= url_for :action => :showrequest %>");
+  */
+  }
+</script>
+
+<script type="text/javascript" charset="utf-8" src="/public/js/rho_javascript_api.js"></script>

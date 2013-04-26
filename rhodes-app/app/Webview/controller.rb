@@ -10,4 +10,17 @@ class WebviewController < Rho::RhoController
     render
   end
   
+  def setproperties
+    Rho::WebView.acceptLanguage = 'en-us, de, es'
+    Rho::WebView.fullScreen = !Rho::WebView.fullScreen
+     
+    redirect(url_for(:action => :showrequest))
+  end
+  
+  def showrequest
+    @acceptLanguage = @request["headers"]["Accept-Language"]
+    @fullScreen = Rho::WebView.fullScreen ? "Yes" : "No"
+
+    render :action => :showrequest
+  end
 end
