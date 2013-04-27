@@ -17,11 +17,13 @@ class LogController < Rho::RhoController
   end
   
   def show_log
+    # Show the contents of the log file in a window with controls to refresh, clear and send. Useful for debugging and when asking users to report error messages
     Rho::Log.showLog
     redirect :index
   end
   
   def read_log_file
+    # Read at most 16384 symbols
     @logFileContent = Rho::Log.readLogFile 16384
     Rho::Log.info(@logFileContent, "Log file content")
     render :action => :read_log_file
