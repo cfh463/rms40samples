@@ -21,7 +21,7 @@ symbian:
 android:
   version: '2.1'
 extensions:
-- json
-- rhoconnect-client
+  - json
+  - rhoconnect-client
+  - rho-javascript
 
-sdk: 
