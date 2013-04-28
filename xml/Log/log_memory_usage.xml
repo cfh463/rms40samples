@@ -1,0 +1,37 @@
+<EXAMPLES >
+           <EXAMPLE title="This is the title for the example that will be the heading of the section and appear in the menu">
+               <SECTIONS>
+               <SECTION>
+               <DESC>
+                   You can ask the system to automatically log memory usage information on a set interval. 
+                   This can be used to debug potential memory leaks in operations where a high number of objects are touched in memory. 
+               </DESC>
+               <CODE lang=’ruby’>
+           <![CDATA[
+    # Request that memory usage be logged automatically by the system every second.
+    Rho::Log.memoryPeriod = 1000
+	# Perform memory-intensive operations here. Examining the log will tell us if we have a memory leak
+	# Once our task finishes, disable automatic memory logging
+	Rho::Log.memoryPeriod = 0
+                   ]]>
+
+               </CODE>
+               </SECTION>
+               <SECTION>
+               <DESC>
+                   The same API is available in Javascript
+               </DESC>
+               <CODE lang='javascript'>
+           <![CDATA[
+	Rho.Log.memoryPeriod = 1000;
+	// Perform memory-intensive operations here. Examining the log will tell us if we have a memory leak
+	// Once our task finishes, disable automatic memory logging
+	Rho.Log.memoryPeriod = 0;
+
+                   ]]>
+
+               </CODE>
+               </SECTION>
+               </SECTIONS>
+           </EXAMPLE>
+       </EXAMPLES>
