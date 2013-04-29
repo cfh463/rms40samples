@@ -7,11 +7,14 @@
 
   <div data-role="content">
     <ul data-role="listview">
-      <li><a href="#">Controlling Webview properties</a></li>
+      <li><a href="<%= url_for :action => :properties %>">Controlling Webview properties</a></li>
       <li><a href="#">Controlling sizing</a></li>
       <li><a href="#">Navigating to pages</a></li>
       <li><a href="#">Interacting with Webview - Cookies</a></li>
-      <li><a href="#">Interacting with Webview - execute_js</a></li>      
+      <li><a href="<%= url_for :action => :call_js %>">Interacting with Webview - execute_js</a></li> 
+       <li><a href="<%= url_for :action => :navigate %>">Navigating to pages</a></li>    
+        <li><a href="<%= url_for :action => :refresh %>">Refresh the page</a></li>  
+        <li><a href="<%= url_for :action => :save %>">Save the page</a></li>    
     </ul>
   </div>
 
