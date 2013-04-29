@@ -23,5 +23,4 @@ android:
 extensions:
 - json
 - rhoconnect-client
-
-sdk: 
+- rho-javascript

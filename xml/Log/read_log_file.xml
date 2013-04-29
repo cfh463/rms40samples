@@ -1,0 +1,18 @@
+<EXAMPLES >
+           <EXAMPLE title="Read log file content">
+               <SECTIONS>
+               <SECTION>
+               <DESC>
+                   Retrieve the contents of the log file as a string
+               </DESC>
+               <CODE lang=’ruby’>
+           <![CDATA[
+# Read at most 16384 symbols
+logFileContent = Rho::Log.readLogFile 16384
+                   ]]>
+
+               </CODE>
+               </SECTION>
+               </SECTIONS>
+           </EXAMPLE>
+       </EXAMPLES>

@@ -1,0 +1,17 @@
+<EXAMPLES >
+           <EXAMPLE title="Show log file">
+               <SECTIONS>
+               <SECTION>
+               <DESC>
+                   Show the contents of the log file in a window with controls to refresh, clear and send. Useful for debugging and when asking users to report error messages
+               </DESC>
+               <CODE lang=’ruby’>
+           <![CDATA[
+Rho::Log.showLog
+                   ]]>
+
+               </CODE>
+               </SECTION>
+               </SECTIONS>
+           </EXAMPLE>
+       </EXAMPLES>
