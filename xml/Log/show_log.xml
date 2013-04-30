@@ -12,6 +12,14 @@ Rho::Log.showLog
 
                </CODE>
                </SECTION>
+               <SECTION>
+               <CODE lang=’javascript’>
+           <![CDATA[
+Rho.Log.showLog
+                   ]]>
+
+               </CODE>
+               </SECTION>
                </SECTIONS>
            </EXAMPLE>
        </EXAMPLES>

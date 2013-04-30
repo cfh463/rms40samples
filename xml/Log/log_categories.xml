@@ -15,6 +15,17 @@
                </CODE>
                </SECTION>
                <SECTION>
+               <CODE lang=’javascript’>
+           <![CDATA[
+    Rho.Log.info("Consectetuer adipiscing elit", "Lorem Ipsum")
+    Rho.Log.info("Foo acquired value Bar in method Baz", "Miscellaneous")    
+
+                   ]]>
+
+               </CODE>
+               </SECTION>
+
+               <SECTION>
                <DESC>
                    The above code will result in logging statements like these:
                </DESC>

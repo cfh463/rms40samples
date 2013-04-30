@@ -13,6 +13,16 @@ logFileContent = Rho::Log.readLogFile 16384
 
                </CODE>
                </SECTION>
+               <SECTION>
+               <CODE lang=’javascript’>
+           <![CDATA[
+# Read at most 16384 symbols
+logFileContent = Rho.Log.readLogFile 16384
+                   ]]>
+
+               </CODE>
+               </SECTION>
+
                </SECTIONS>
            </EXAMPLE>
        </EXAMPLES>
