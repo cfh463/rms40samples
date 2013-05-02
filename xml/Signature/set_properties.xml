@@ -19,11 +19,17 @@
                </SECTION>
                <SECTION>
                <DESC>
-                   this is another section that is part of the same example, use multi sections when want to separate code blocks with descriptions for each
+                   Properties can also be set from Javascript
                </DESC>
-               <CODE>
+               <CODE lang='javascript'>
            <![CDATA[
-This is the second code block of the same example
+    // Change fullscreen from true (default) to false           
+    Rho.Signature.fullScreen = false;
+    // Change background color from white (default) to black
+    Rho.Signature.bgColor = "#000000";
+    // Change pen color from blue (default) to white
+    Rho.Signature.penColor = "#FFFFFF";  
+
                    ]]>
 
                </CODE>
