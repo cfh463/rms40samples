@@ -1,0 +1,39 @@
+<EXAMPLES >
+           <EXAMPLE title="Set signature capture properties">
+               <SECTIONS>
+               <SECTION>
+               <DESC>
+                   Several properties affect the appearance of the signature capture functionality. You can set their values before showing the capture interface:
+               </DESC>
+               <CODE lang=’ruby’>
+           <![CDATA[ 
+	# Change fullscreen from true (default) to false           
+    Rho::Signature.fullScreen = false;
+    # Change background color from white (default) to black
+    Rho::Signature.bgColor = "#000000"
+    # Change pen color from blue (default) to white
+    Rho::Signature.penColor = "#FFFFFF"  
+                   ]]>
+
+               </CODE>
+               </SECTION>
+               <SECTION>
+               <DESC>
+                   Properties can also be set from Javascript
+               </DESC>
+               <CODE lang='javascript'>
+           <![CDATA[
+    // Change fullscreen from true (default) to false           
+    Rho.Signature.fullScreen = false;
+    // Change background color from white (default) to black
+    Rho.Signature.bgColor = "#000000";
+    // Change pen color from blue (default) to white
+    Rho.Signature.penColor = "#FFFFFF";  
+
+                   ]]>
+
+               </CODE>
+               </SECTION>
+               </SECTIONS>
+           </EXAMPLE>
+       </EXAMPLES>
