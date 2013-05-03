@@ -1,0 +1,42 @@
+<div data-role="page">
+
+
+  <div data-role="header" data-position="inline">
+    <h1>Network Events</h1>
+  </div>
+  <div data-role="content">
+    <ul data-role="listview">
+      <li><a href="#" id="detect_connection">Detect Connection</a></li>
+      <li><a href="#">Stop Detect Connection</a></li>
+      <li><a href="#" id="start_nw_status_notification">Start Status Notify</a></li>
+      <li><a href="#" id="stop_nw_status_notification">Stop Status Notify</a></li>     
+    </ul>
+  </div>
+
+</div>
+<script>
+$("#detect_connection").live("click",function() {
+ 
+  $.post('/app/Network/detect_connection', function(data) {
+ 
+  });
+  
+});
+
+$("#start_nw_status_notification").live("click",function() {
+ 
+  $.post('/app/Network/start_status_notify', function(data) {
+ 
+  });
+  
+});
+
+$("#stop_nw_status_notification").live("click",function() {
+ 
+  $.post('/app/Network/stop_status_notify', function(data) {
+ 
+  });
+  
+});
+
+</script>
