@@ -1,0 +1,49 @@
+<EXAMPLES >
+           <EXAMPLE title="Refresh the page">
+               <SECTIONS>
+               <SECTION>
+               <DESC>
+                   Reload the current URL into the WebView. This is useful especially after having updated data that must be now shown to the user 
+               </DESC>
+               <CODE lang=’ruby’>
+           <![CDATA[
+    # Update database or variables here
+    # ...      
+    # Refresh the current page to show new information
+    Rho::WebView.refresh
+                   ]]>
+
+               </CODE>
+               </SECTION>
+               <SECTION>
+               <DESC>
+                   By default, "refresh" will update the current view. If you are using the native Tabbar and have multiple WebViews, you can specify which one to refresh
+               </DESC>
+               <CODE lang='ruby'>
+           <![CDATA[
+     # Reload the page on WebView number 2
+      Rho::WebView.refresh(2)
+                   ]]>
+
+               </CODE>
+               </SECTION>
+               
+               <SECTION>
+               <DESC>
+                   Also available from Javascript
+               </DESC>
+               <CODE lang='javascript'>
+           <![CDATA[
+     # Reload the current page
+      Rho.WebView.refresh()
+
+     # Reload the page on WebView number 3
+      Rho.WebView.refresh(3)
+      
+                   ]]>
+
+               </CODE>
+               </SECTION>               
+               </SECTIONS>
+           </EXAMPLE>
+       </EXAMPLES>

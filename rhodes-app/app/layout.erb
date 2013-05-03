@@ -27,6 +27,9 @@
         <link rel="stylesheet" href="/public/jqmobile/jquery.mobile-1.0.1.min.css">
         <link rel="stylesheet" href="/public/css/jqmobile-patch.css">
 
+        <script type="text/javascript" charset="utf-8" src="/public/api/rhoapi-modules.js"></script>
+
+
         <script type="text/javascript">
             $(document).bind("mobileinit", function(){
                 // jQuery-Mobile init options initialization goes here. For example, you may
@@ -63,7 +66,7 @@
 
     <% end %>
 
-    <script type="text/javascript" charset="utf-8" src="/public/api/rhoapi-modules.js"></script> 
+     
     
     <% if System::get_property('platform') == 'APPLE' %>
         <link href="/public/css/iphone.css" type="text/css" rel="stylesheet"/>

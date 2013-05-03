@@ -1,0 +1,55 @@
+<EXAMPLES >
+           <EXAMPLE title="Execute javascript">
+               <SECTIONS>
+               <SECTION>
+               <DESC>
+                   You can call the WebView and make it execute Javascript code from a Ruby controller. This can be particularly helpful in order to reuse Javascript functionality 
+                   that is already included in your pages 
+               </DESC>
+               <CODE lang=’ruby’>
+           <![CDATA[
+    #call javascript alert on the current page
+    Rho::WebView.executeJavascript("alert('This is Webview.executejavascript function');")
+
+                   ]]>
+
+               </CODE>
+               </SECTION>
+               <SECTION>
+               <DESC>
+               		As an example, you can invoke JQuery Mobile's changePage
+               </DESC>
+               <CODE lang=’ruby’>
+           <![CDATA[
+	#call JQuery Mobile from a Ruby controller
+	Rho::WebView.executeJavascript("$.mobile.changePage('#my_page');")
+                   ]]>
+
+               </CODE>
+               </SECTION>
+               <SECTION>
+               <DESC>
+					You can also call your own functions               		
+               </DESC>
+               <CODE lang=’javascript’>
+           <![CDATA[
+           function greet(name) {
+           		alert("Hello, "+name);  
+           }
+                   ]]>
+
+               </CODE>
+               </SECTION>
+               <SECTION>
+               <CODE lang=’ruby’>
+           <![CDATA[
+	#call a custom Javascript function from Ruby
+	Rho::WebView.executeJavascript("greet('John Doe');")
+                   ]]>
+
+               </CODE>
+               </SECTION>
+                              
+               </SECTIONS>
+           </EXAMPLE>
+       </EXAMPLES>
