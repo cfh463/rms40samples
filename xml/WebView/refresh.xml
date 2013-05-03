@@ -5,7 +5,7 @@
                <DESC>
                    Reload the current URL into the WebView. This is useful especially after having updated data that must be now shown to the user 
                </DESC>
-               <CODE lang=’ruby’>
+               <CODE lang='ruby'>
            <![CDATA[
     # Update database or variables here
     # ...      

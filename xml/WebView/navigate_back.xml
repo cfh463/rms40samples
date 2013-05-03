@@ -5,7 +5,7 @@
                <DESC>
                    This is the section that will appear before the code block
                </DESC>
-               <CODE lang=’ruby’>
+               <CODE lang='ruby'>
            <![CDATA[
      #Force WebView to navigate to the previous page using Browser back.
       Rho::WebView.navigateBack

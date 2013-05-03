@@ -6,7 +6,7 @@
                    You can ask the system to automatically log memory usage information on a set interval. 
                    This can be used to debug potential memory leaks in operations where a high number of objects are touched in memory. 
                </DESC>
-               <CODE lang=’ruby’>
+               <CODE lang='ruby'>
            <![CDATA[
     # Request that memory usage be logged automatically by the system every second.
     Rho::Log.memoryPeriod = 1000

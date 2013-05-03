@@ -5,7 +5,7 @@
                <DESC>
                    Several properties affect the appearance of the signature capture functionality. You can set their values before showing the capture interface:
                </DESC>
-               <CODE lang=’ruby’>
+               <CODE lang='ruby'>
            <![CDATA[ 
 	# Change fullscreen from true (default) to false           
     Rho::Signature.fullScreen = false;
