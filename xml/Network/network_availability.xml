@@ -1,0 +1,37 @@
+<EXAMPLES >
+           <EXAMPLE title="Check whether the network is available">
+              <SECTION>
+               <DESC>
+                   You can check whether the mobile, Wi-Fi or other network is available. This can be useful for example if you only want to perform large data transfers on wi-fi and avoid doing them while on the cell network
+               </DESC>
+               <CODE>
+                <RUBY>
+           <![CDATA[
+  	# check the network availability for...
+  	# Cell network
+  	cell_network = Rho::Network.hasCellNetwork
+  	# Wi-Fi
+  	wifi_network = Rho::Network.hasWifiNetwork
+    # Any network
+    network = Rho::Network.hasNetwork
+                   ]]>
+                 </RUBY>
+                <JAVASCRIPT>
+           <![CDATA[
+    function network_availability() {
+      // shows the network availability for...
+      // Cell network
+      var cell_network = Rho.Network.hasCellNetwork()
+      // Wi-Fi network
+      var wifi_network = Rho.Network.hasWifiNetwork()
+      // Any network
+      var network = Rho.Network.hasNetwork()
+      
+      alert("Cell network: "+cell_network+"\nWi-Fi network: "+wifi_network+"\nNetwork: "+network);
+    }
+                   ]]>
+                 </JAVASCRIPT>
+               </CODE>
+               </SECTION>
+           </EXAMPLE>
+       </EXAMPLES>

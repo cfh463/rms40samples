@@ -18,7 +18,7 @@
     </ul>
     <h2>Javascript</h2>
     <ul data-role="listview">
-      <li><a href="#">Detect network availability</a></li>
+      <li><a href="#" onclick="network_availability()">Detect network availability</a></li>
       <li><a href="#" onclick="start_status_notify()">Start detecting network events</a></li>
       <li><a href="#" onclick="stop_status_notify()">Stop detecting network events</a></li>
       <li><a href="#" onclick="upload_file()">Upload file</a></li>
@@ -86,6 +86,17 @@
     }
     
         
+    function network_availability() {
+      // shows the network availability for...
+      // Cell network
+      var cell_network = Rho.Network.hasCellNetwork()
+      // Wi-Fi network
+      var wifi_network = Rho.Network.hasWifiNetwork()
+      // Any network
+      var network = Rho.Network.hasNetwork()
+      
+      alert("Cell network: "+cell_network+"\nWi-Fi network: "+wifi_network+"\nNetwork: "+network);
+    }
     
   </script>
 </div>
