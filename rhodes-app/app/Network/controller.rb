@@ -11,10 +11,10 @@ class NetworkController < Rho::RhoController
   end
 
   def network_availability
-  	#shows the network availability
-  	@cell_newtwork = Rho::Network.hasCellNetwork()
-  	@network = Rho::Network.hasNetwork()
-  	@wifi_network = Rho::Network.hasWifiNetwork()
+  	# check the network availability
+  	@cell_network = Rho::Network.hasCellNetwork
+  	@wifi_network = Rho::Network.hasWifiNetwork
+    @network = Rho::Network.hasNetwork
   end
 
   def network_events
