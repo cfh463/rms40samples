@@ -1,0 +1,53 @@
+<EXAMPLES >
+           <EXAMPLE title="Download file and save it to permanent storage">
+              <SECTION>
+               <DESC>
+                   Download any file from an external server and store it in your device
+               </DESC>
+               <CODE>
+                <RUBY>
+           <![CDATA[
+  def download_file
+      #Download a file to the specified filename.
+      downloadfileProps = Hash.new
+      downloadfileProps["url"]='http://www.google.com/images/icons/product/chrome-48.png'
+      downloadfileProps["filename"] = Rho::Application.publicFolder+"/images/sample.png"
+      downloadfileProps["overwriteFile"] = true
+      Rho::Network.downloadFile(downloadfileProps, url_for(:action => :download_file_callback))
+  end
+  
+  def download_file_callback
+  	if @params["status"] == "ok"
+  		Alert.show_popup "Download Success,path is /public/images/sample.png "
+  	else
+  		Alert.show_popup "Download Failed"
+  	end
+  end
+
+                   ]]>
+                 </RUBY>
+                <JAVASCRIPT>
+           <![CDATA[
+    function download_file_callback(params) {
+      if (params["status"] == "ok") {
+        alert("Download Succeeded, path is /public/images/sample.png");
+      } else {
+        alert("Download Failed");
+      }
+    }
+
+    function download_file() {
+      // Download a file to the specified filename. Be careful with the overwriteFile parameter!
+      downloadfileProps = {
+        url: "http://www.google.com/images/icons/product/chrome-48.png",
+        filename: Rho.Application.publicFolder+"/images/sample.png",
+        overwriteFile: true
+      };
+      Rho.Network.downloadFile(downloadfileProps, download_file_callback);
+    }
+                   ]]>
+                 </JAVASCRIPT>
+               </CODE>
+               </SECTION>
+           </EXAMPLE>
+       </EXAMPLES>

@@ -43,58 +43,58 @@ class NetworkController < Rho::RhoController
   end
 
   def start_status_notify
-  	Alert.show_popup "Started network status notifications"
-  	Rho::Network.startStatusNotify(3000, url_for(:action => :start_status_notify_callabck))
+    # Request the system to check every 3 seconds and call us back if there is a change in network connectivity
+  	Rho::Network.startStatusNotify(3000, url_for(:action => :status_notify_callback))
+    Alert.show_popup "Started network status notifications"
+    redirect :index
   end
 
-  def start_status_notify_callabck
-  	puts @params
-  	Alert.show_popup("Status notify callabck")
+  # This is our notification that the status of the network changed. old_status and new_status can be "disconnected" or "connected"
+  def status_notify_callback
+  	Alert.show_popup("Network status changed from #{@params["prev_status"]} to #{@params["current_status"]}")
   end
 
 
   def stop_status_notify
-  	Alert.show_popup "Stopped network status notifications"
+    # Stop network status notifications
   	Rho::Network.stopStatusNotify
+    Alert.show_popup "Stopped network status notifications"
   end
 
   def upload_file
-    #Upload the specified file using HTTP POST.
-    server = 'http://rhologs.heroku.com'
+    # Upload the specified file using HTTP POST.
     uploadfileProps = Hash.new
-    uploadfileProps['url'] = server + "/clwqient_log?client_id=&device_pin=&log_name=uptest"
-    uploadfileProps['filename'] = Rho::RhoApplication::get_base_app_path.to_s+"/public/images/backButton.png"
-    uploadfileProps['body'] = "uploading file"
-    uploadfileProps['fileContentType']="application/json"
+    uploadfileProps["url"] = "http://www.example.com"
+    uploadfileProps["filename"] = Rho::Application.publicFolder+"/images/backButton.png"
+    uploadfileProps["body"] = "uploading file"
+    uploadfileProps["fileContentType"]="image/png"
     Rho::Network.uploadFile(uploadfileProps, url_for(:action => :upload_file_callback))
-end
+  end
 
-def upload_file_callback
-	puts "upload_file_callback method #{@params}------"
-	if @params['status'] == "ok"
-		Alert.show_popup "Upload Success."
-	else
-		Alert.show_popup "Upload Failed."
-	end
-end
+  def upload_file_callback
+  	if @params["status"] == "ok"
+  		Alert.show_popup "Upload Succeeded."
+  	else
+  		Alert.show_popup "Upload Failed."
+  	end
+  end
 
-def download_file
-    #Download a file to the specified filename.
+  def download_file
+    # Download a file to the specified filename. Be careful with the overwriteFile parameter!
     downloadfileProps = Hash.new
-    downloadfileProps['url']='http://www.google.com/images/icons/product/chrome-48.png'
-    downloadfileProps['filename'] = File.join(Rho::RhoApplication::get_base_app_path.to_s + "/public/images/sample.png")
-    downloadfileProps['overwriteFile'] = true
+    downloadfileProps["url"]='http://www.google.com/images/icons/product/chrome-48.png'
+    downloadfileProps["filename"] = Rho::Application.publicFolder+"/images/sample.png"
+    downloadfileProps["overwriteFile"] = true
     Rho::Network.downloadFile(downloadfileProps, url_for(:action => :download_file_callback))
-end
-
-def download_file_callback
-	puts "download_file_callback method #{@params}------"
-	if @params['status'] == "ok"
-		Alert.show_popup "Download Success,path is /public/images/sample.png "
-	else
-		Alert.show_popup "Download Failed"
-	end
-end
+  end
+  
+  def download_file_callback
+  	if @params["status"] == "ok"
+  		Alert.show_popup "Download Success,path is /public/images/sample.png "
+  	else
+  		Alert.show_popup "Download Failed"
+  	end
+  end
 
 
 
