@@ -1,5 +1,7 @@
 <EXAMPLES >
            <EXAMPLE title="Download file and save it to permanent storage">
+              <SECTIONS>
+               
               <SECTION>
                <DESC>
                    Download any file from an external server and store it in your device
@@ -49,5 +51,7 @@
                  </JAVASCRIPT>
                </CODE>
                </SECTION>
+             </SECTIONS>
+               
            </EXAMPLE>
        </EXAMPLES>
