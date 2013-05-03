@@ -5,7 +5,7 @@
                <DESC>
                    In order to capture a signature in fullscreen mode you need to 
                </DESC>
-               <CODE lang=’ruby’>
+               <CODE lang='ruby'>
            <![CDATA[
   def capture_fullscreen
   	# Invoke signature capture screen and assign callback
