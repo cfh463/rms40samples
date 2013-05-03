@@ -1,32 +1,26 @@
 <EXAMPLES >
            <EXAMPLE title="Use full-screen mode">
-               <SECTIONS>
-               <SECTION>
+              <SECTION>
                <DESC>
-                   The WebView can be set to use all the available screen real-estate by turning on "full-screen" mode 
+                   The WebView can be set to use all the available screen real-estate by turning on "full-screen" mode
                </DESC>
-               <CODE lang=’ruby’>
+               <CODE>
+                <RUBY>
            <![CDATA[
-           # Toggle fullScreen on / off
-		Rho::WebView.fullScreen = !Rho::WebView.fullScreen 
+		# Toggle fullScreen on / off
+		Rho::WebView.fullScreen = !Rho::WebView.fullScreen
                    ]]>
-
-               </CODE>
-               </SECTION>
-               <SECTION>
-               <DESC>
-                   This property can also be assigned to in Javascript   
-               </DESC>
-               <CODE lang='javascript'>
+                 </RUBY>
+                <JAVASCRIPT>
            <![CDATA[
-   		# Fullscreen can also be invoked from Javascript
+   		// Fullscreen can also be invoked from Javascript
 		Rho.WebView.fullScreen = true;
 		
 		Rho.WebView.fullScreen = false;
-                   ]]>
 
+                   ]]>
+                 </JAVASCRIPT>
                </CODE>
                </SECTION>
-               </SECTIONS>
            </EXAMPLE>
        </EXAMPLES>

@@ -1,32 +1,23 @@
 <EXAMPLES >
-           <EXAMPLE title="Navigate back">
-               <SECTIONS>
-               <SECTION>
+           <EXAMPLE title="Navigate to the previous page">
+              <SECTION>
                <DESC>
-                   This is the section that will appear before the code block
                </DESC>
-               <CODE lang='ruby'>
+               <CODE>
+                <RUBY>
            <![CDATA[
      #Force WebView to navigate to the previous page using Browser back.
       Rho::WebView.navigateBack
 
                    ]]>
-
-               </CODE>
-               </SECTION>
-               <SECTION>
-               <DESC>
-                   The same method is available in Javascript
-               </DESC>
-               <CODE lang='javascript'>
+                 </RUBY>
+                <JAVASCRIPT>
            <![CDATA[
-     #Force WebView to navigate to the previous page using Browser back.
+     //Force WebView to navigate to the previous page using Browser back.
       Rho.WebView.navigateBack();
-	
                    ]]>
-
+                 </JAVASCRIPT>
                </CODE>
                </SECTION>
-               </SECTIONS>
            </EXAMPLE>
        </EXAMPLES>

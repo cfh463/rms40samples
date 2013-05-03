@@ -1,9 +1,9 @@
 <EXAMPLES >
-           <EXAMPLE title="Navigate">
+           <EXAMPLE title="Navigate to a different URL">
                <SECTIONS>
                <SECTION>
                <DESC>
-                   This is the section that will appear before the code block
+                   You can make the WebView load a different URL from a controller
                </DESC>
                <CODE lang='ruby'>
            <![CDATA[
@@ -31,7 +31,7 @@
                </DESC>
                <CODE lang='javascript'>
            <![CDATA[
-     #Navigate out of the local application and into an externally-served site
+     // Navigate out of the local application and into an externally-served site
       Rho.WebView.navigate("http://www.example.com");
                    ]]>
 

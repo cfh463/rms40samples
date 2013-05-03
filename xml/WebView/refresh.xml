@@ -34,10 +34,10 @@
                </DESC>
                <CODE lang='javascript'>
            <![CDATA[
-     # Reload the current page
+     // Reload the current page
       Rho.WebView.refresh()
 
-     # Reload the page on WebView number 3
+     // Reload the page on WebView number 3
       Rho.WebView.refresh(3)
       
                    ]]>
