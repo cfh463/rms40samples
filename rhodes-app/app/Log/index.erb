@@ -37,24 +37,20 @@
     Rho.Log.info("Foo acquired value Bar in method Baz", "Miscellaneous");
   }
   
-  /* TODO: This API does not seem to be implemented yet in Javascript */
   function log_memory_usage() {
     // Request that memory usage be logged automatically by the system every second
     Rho.Log.memoryPeriod = 1000;
   }
   
-  /* TODO: This API does not seem to be implemented yet in Javascript */
   function show_log() {
     Rho.Log.showLog();
   }
 
-  /* TODO: This API does not seem to be implemented yet in Javascript */
   function read_log_file() {
     var log_contents = Rho.Log.readLogFile(400);
     alert('Log file contents: '+log_contents);
   }
 
-  /* TODO: This API does not seem to be implemented yet in Javascript */
   function clean_log_file() {
     var log_contents_before = Rho.Log.readLogFile(400);
     alert('Log file contents before cleaning: '+log_contents_before);
