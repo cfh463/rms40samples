@@ -1,0 +1,50 @@
+<EXAMPLES >
+           <EXAMPLE title="Request a notification from the system when network availability changes">
+              <SECTION>
+               <DESC>
+                   When you need to be notified of changes in the status of the network (connected / disconnected), use Network.startStatusNotify
+               </DESC>
+               <CODE>
+                <RUBY>
+           <![CDATA[
+  def start_status_notify
+    # Request the system to check every 3 seconds and call us back if there is a change in network connectivity
+  	Rho::Network.startStatusNotify(3000, url_for(:action => :status_notify_callback))
+    Alert.show_popup "Started network status notifications"
+  end
+
+  # This is our notification that the status of the network changed. old_status and new_status can be "disconnected" or "connected"
+  def status_notify_callback
+  	Alert.show_popup("Network status changed from #{@params["prev_status"]} to #{@params["current_status"]}")
+  end
+
+
+  def stop_status_notify
+  	# Stop network status notifications
+  	Rho::Network.stopStatusNotify
+    Alert.show_popup "Stopped network status notifications"
+  end
+                   ]]>
+                 </RUBY>
+                <JAVASCRIPT>
+           <![CDATA[
+    function status_notify_callback(params) {
+      alert("Network status changed from "+params["prev_status"]+" to "+params["current_status"]);
+    }
+  
+    function start_status_notify() {
+      # Request the system to check every 3 seconds and call us back if there is a change in network connectivity
+      Rho.Network.startStatusNotify(3000, status_notify_callback);
+    }
+    
+    function stop_status_notify() {
+      // Stop network status notifications
+      Rho.Network.stopStatusNotify();
+    }
+
+                   ]]>
+                 </JAVASCRIPT>
+               </CODE>
+               </SECTION>
+           </EXAMPLE>
+       </EXAMPLES>
