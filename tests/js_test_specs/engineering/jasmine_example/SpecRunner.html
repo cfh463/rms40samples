@@ -1,0 +1,62 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+	<META HTTP-Equiv="quitbutton" Content="visibility:visible">
+	<META HTTP-Equiv="ReloadButton" Content="visibility:visible">
+	<title>Jasmine Spec Runner</title>
+
+  <link rel="shortcut icon" type="image/png" href="lib/jasmine-1.2.0/jasmine_favicon.png">
+  <link rel="stylesheet" type="text/css" href="lib/jasmine-1.2.0/jasmine.css">
+  <script type="text/javascript" src="lib/jasmine-1.2.0/jasmine.js"></script>
+  <script type="text/javascript" src="lib/jasmine-1.2.0/jasmine-html.js"></script>
+  <script type="text/javascript" src="lib/jasmine-1.2.0/jasmine.junit_reporter.js"></script>
+
+  <!-- include source files here... -->
+  <script type="text/javascript" src="src/ScannerTest.js"></script>
+  
+  <!-- include spec files here... -->
+  <script type="text/javascript" src="spec/ScannerSpec.js"></script>
+  <script type="text/javascript" src="spec/DummySpec.js"></script>
+
+  <script type="text/javascript">
+  (function() {
+	var jasmineEnv = jasmine.getEnv();
+    jasmineEnv.updateInterval = 1000;
+	
+    var htmlReporter = new jasmine.HtmlReporter();
+	var junitReporter = new jasmine.JUnitXmlReporter();
+	junitReporter.useDotNotation = false
+    jasmineEnv.addReporter(htmlReporter);
+	jasmineEnv.addReporter(new jasmine.JUnitXmlReporter('.\\', true, true));
+    jasmineEnv.specFilter = function(spec) {
+		return htmlReporter.specFilter(spec);
+    };
+
+    var currentWindowOnload = window.onload;
+	window.onload = function() {
+		if (currentWindowOnload) {
+			currentWindowOnload();
+        }
+        execJasmine();
+    };
+
+    function execJasmine() {
+		jasmineEnv.execute();
+    }
+	})();
+  </script>
+
+</head>
+
+<body>
+	<p>
+	<div id="divOutput">Output goes here...</div>
+	</p>
+	<p>
+	<textarea id="textAreaOutput" rows="5" cols="30">
+	Output result goes here...
+	</textarea>
+	</p>
+</body>
+</html>

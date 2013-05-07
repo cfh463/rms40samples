@@ -1,0 +1,51 @@
+#sdk: "C:/DevelopmentTools/rhomobile/rhodes" 
+paths:
+  extensions:
+#  - C:/DevelopmentTools/rhomobile/rhodes/lib/extensions
+#  - C:/DevelopmentTools/rhomobile/rhodes/lib
+#  - C:/DevelopmentTools/rhomobile/Motorola-Extensions/lib/commonAPI
+#  - C:/DevelopmentTools/rhomobile/rhoconnect-client/ext
+#  - C:/DevelopmentTools/rhomobile/Motorola-Extensions/extensions/
+  - C:/DevelopmentTools/rhomobile/Motorola-Extensions/build/ci/extensions
+#  - C:/Users/fpc843/workspace/fpc843_rhoelements_dev/NEON/R2D1/RhoElementsOneExtension/extensions
+#  neon: C:/Users/fpc843/workspace/fpc843_rhoelements_dev/NEON
+sdkversion: "3.5.0"
+app_type: "rhoelements"
+name: "mspec_example"
+version: 1.0
+vendor: "MotorolaSolutions"
+build: "debug"
+bbver: 4.6
+applog: "rholog.txt"
+capabilities:
+  - sdcard
+iphone:
+  configuration: "Release"
+  sdk: "iphonesimulator5.0"
+  provisionprofile: 
+  codesignidentity: 
+  entitlements: 
+  BundleIdentifier: "com.motorolasolutions.mspecexample"
+  BundleURLScheme: "mspecexample"
+wp:
+  productid: "c848a8a0-1b9f-0130-26cf-00ffb02bf306"
+symbian:
+  uid: "0xe72e715f"
+android:
+  capabilities:
+    - network_state
+    - sdcard
+    - calendar
+#    - motoroladev
+    - native_browser
+  version: 2.1
+  production:
+    certificate: "../../android/hybrid/TestResultsWriter/rhoelements_ci.keystore"
+    password: "rhoelements_ci"
+    alias: "rhoelements_ci"
+extensions:
+  - json
+  - mspec
+  - fileutils
+  - instrumentation
+  - rhoconnect-client
