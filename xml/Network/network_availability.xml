@@ -1,6 +1,7 @@
 <EXAMPLES >
            <EXAMPLE title="Check whether the network is available">
-              <SECTION>
+              <SECTIONS>
+               <SECTION>
                <DESC>
                    You can check whether the mobile, Wi-Fi or other network is available. This can be useful for example if you only want to perform large data transfers on wi-fi and avoid doing them while on the cell network
                </DESC>
@@ -33,5 +34,7 @@
                  </JAVASCRIPT>
                </CODE>
                </SECTION>
+             </SECTIONS>
+               
            </EXAMPLE>
        </EXAMPLES>
