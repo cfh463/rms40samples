@@ -5,10 +5,10 @@
                <DESC>
                    Categories help you organize your logging messages and find related statements using tools like grep or a text editor's "search" function.
                </DESC>
-               <CODE lang=’ruby’>
+               <CODE lang='ruby'>
            <![CDATA[
-    Rho::Log.info("Consectetuer adipiscing elit", "Lorem Ipsum")
-    Rho::Log.info("Foo acquired value Bar in method Baz", "Miscellaneous")    
+Rho::Log.info("Consectetuer adipiscing elit", "Lorem Ipsum")
+Rho::Log.info("Foo acquired value Bar in method Baz", "Miscellaneous")    
 
                    ]]>
 
@@ -29,9 +29,9 @@
                <DESC>
                    The above code will result in logging statements like these:
                </DESC>
-               <CODE>
+               <CODE lang='ruby'>
            <![CDATA[
-  Lorem Ipsum| Consectetuer adipiscing elit
+Lorem Ipsum| Consectetuer adipiscing elit
 Miscellaneous| Foo acquired value Bar in method Baz
                    ]]>
 

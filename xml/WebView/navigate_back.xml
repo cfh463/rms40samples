@@ -1,0 +1,23 @@
+<EXAMPLES >
+           <EXAMPLE title="Navigate to the previous page">
+              <SECTION>
+               <DESC>
+               </DESC>
+               <CODE>
+                <RUBY>
+           <![CDATA[
+     #Force WebView to navigate to the previous page using Browser back.
+      Rho::WebView.navigateBack
+
+                   ]]>
+                 </RUBY>
+                <JAVASCRIPT>
+           <![CDATA[
+     //Force WebView to navigate to the previous page using Browser back.
+      Rho.WebView.navigateBack();
+                   ]]>
+                 </JAVASCRIPT>
+               </CODE>
+               </SECTION>
+           </EXAMPLE>
+       </EXAMPLES>

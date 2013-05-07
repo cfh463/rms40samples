@@ -1,0 +1,57 @@
+<EXAMPLES >
+           <EXAMPLE title="Upload files via HTTP POST">
+              <SECTION>
+               <DESC>
+                   You can upload any file to an external server via HTTP POST and be notified whether the transfer succeeded or not
+               </DESC>
+               <CODE>
+                <RUBY>
+           <![CDATA[
+  def upload_file
+    # Upload the specified file using HTTP POST.
+    uploadfileProps = Hash.new
+    uploadfileProps['url'] = "http://www.example.com"
+    uploadfileProps['filename'] = Rho::Application.publicFolder+"/images/backButton.png"
+    uploadfileProps['body'] = "uploading file"
+    uploadfileProps['fileContentType']="image/png"
+    Rho::Network.uploadFile(uploadfileProps, url_for(:action => :upload_file_callback))
+  end
+
+  def upload_file_callback
+  	if @params['status'] == "ok"
+  		Alert.show_popup "Upload Succeeded."
+  	else
+  		Alert.show_popup "Upload Failed."
+  	end
+  end
+
+                   ]]>
+                 </RUBY>
+                <JAVASCRIPT>
+           <![CDATA[
+    function upload_file_callback(params) {
+      // Check the result of the upload and act accordingly
+      if (params["status"] == "ok") {
+        alert("Upload Succeeded.");
+      } else {
+        alert("Upload Failed.");
+      }
+    }
+    
+    function upload_file() {
+        // Upload the specified file using HTTP POST.
+        uploadfileProps = {
+          url: "http://www.example.com",
+          filename: Rho.Application.publicFolder+"/images/backButton.png",
+          body: "uploading file",
+          fileContentType: "image/png"
+        };
+
+        Rho.Network.uploadFile(uploadfileProps, upload_file_callback);      
+    }
+                   ]]>
+                 </JAVASCRIPT>
+               </CODE>
+               </SECTION>
+           </EXAMPLE>
+       </EXAMPLES>

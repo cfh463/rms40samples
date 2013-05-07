@@ -5,16 +5,16 @@
                <DESC>
                    Clear the contents of the log file. In this example, logFileContentBefore will contain the log up until that point, while logFileContentAfter will be empty
                </DESC>
-               <CODE lang=’ruby’>
+               <CODE lang='ruby'>
            <![CDATA[
-    # Read log file
-    logFileContentBefore = Rho::Log.readLogFile 16384
-    
-    # Clear log file
-    Rho::Log.cleanLogFile
-    
-    # Read log file again - this time it will be empty
-    logFileContentAfter = Rho::Log.readLogFile 16384
+# Read log file
+logFileContentBefore = Rho::Log.readLogFile 16384
+
+# Clear log file
+Rho::Log.cleanLogFile
+
+# Read log file again - this time it will be empty
+logFileContentAfter = Rho::Log.readLogFile 16384
 
                    ]]>
 

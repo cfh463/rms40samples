@@ -1,0 +1,26 @@
+<EXAMPLES >
+           <EXAMPLE title="Use full-screen mode">
+              <SECTION>
+               <DESC>
+                   The WebView can be set to use all the available screen real-estate by turning on "full-screen" mode
+               </DESC>
+               <CODE>
+                <RUBY>
+           <![CDATA[
+		# Toggle fullScreen on / off
+		Rho::WebView.fullScreen = !Rho::WebView.fullScreen
+                   ]]>
+                 </RUBY>
+                <JAVASCRIPT>
+           <![CDATA[
+   		// Fullscreen can also be invoked from Javascript
+		Rho.WebView.fullScreen = true;
+		
+		Rho.WebView.fullScreen = false;
+
+                   ]]>
+                 </JAVASCRIPT>
+               </CODE>
+               </SECTION>
+           </EXAMPLE>
+       </EXAMPLES>
