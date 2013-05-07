@@ -6,13 +6,32 @@
   </div>
 
   <div data-role="content">
+    <h2>Ruby</h2>
     <ul data-role="listview">
       <li><a href="<%= url_for :action => :scan_using_default_scanner %>">Scan using default scanner</a></li>
-      <li><a href="#">Allow user to choose scanner</a></li>
-      <li><a href="#">Set symbology</a></li>
-      <li><a href="#">Control scanner properties</a></li>
-      <li><a href="#">Change audible options</a></li>
+      <li><a href="<%= url_for :action => :choose_scanner %>">Select scanner to use</a></li>
+      <li><a href="<%= url_for :action => :set_symbology %>">Set symbology</a></li>
+      <li><a href="<%= url_for :action => :control_properties %>">Control scanner properties</a></li>
+      <li><a href="<%= url_for :action => :change_audible_options %>">Change audible options</a></li>
     </ul>
+  <h2>Javascript</h2>
+  <ul data-role="listview">
+    <li><a href="#" onclick="scan_using_default_scanner()">Scan using default scanner</a></li>
+    <li><a href="#" onclick="choose_scanner()">Select scanner to use</a></li>
+    <li><a href="#" onclick="set_symbology()">Set symbology</a></li>
+    <li><a href="#" onclick="control_properties()">Control scanner properties</a></li>
+    <li><a href="#" onclick="change_audible_options()">Change audible options</a></li>
+  </ul>
+    
   </div>
 
+  <script type="text/javascript">
+    function scan_received(params) {
+      
+    }
+    
+    function scan_using_default_scanner() {
+      Rho.Barcode.take({}, scan_received);
+    }
+  </script>
 </div>
