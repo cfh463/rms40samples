@@ -12,10 +12,13 @@ class BarcodeController < Rho::RhoController
   end
   
   def scan_using_default_scanner
-    Rho::Barcode.take({}, url_for(:action => :scan_received))
+    # Scan with default options
+    Rho::Barcode.take({}, url_for(:action => :scan_received_callback))
   end
   
-  def scan_received
+  def scan_received_callback
+    # Did we actually find a barcode ?
+    # If status is not 'ok', the scan was cancelled
     if @params["status"] == "ok"
       Rho::Log.info(@params["barcode"],"Barcode result")
     else
@@ -24,15 +27,13 @@ class BarcodeController < Rho::RhoController
   end
   
   def choose_scanner
-    Rho::Log.info(self.inspect, "========= Self.inspect")
     $scanners = Rho::Barcode.enumerate
     render
   end
     
   def scan_using_chosen_scanner
-    Rho::Log.info(@params.inspect, "========== Params.inspect")
     scanner = $scanners[@params["scannerIndex"].to_i]
-    scanner.take({}, url_for(:action => :scan_received))
+    scanner.take({}, url_for(:action => :scan_received_callback))
   end
   
   def set_symbology
@@ -42,7 +43,7 @@ class BarcodeController < Rho::RhoController
     # ... and enable only the one we are interested in:
     Rho::Barcode.upca = true
     # All other barcode symbologies will be ignored
-    Rho::Barcode.take({}, url_for(:action => :scan_received))
+    Rho::Barcode.take({}, url_for(:action => :scan_received_callback))
   end
   
   def control_properties
@@ -83,6 +84,6 @@ class BarcodeController < Rho::RhoController
     # One-second long
     Rho::Barcode.decodeDuration = 1000
     
-    Rho::Barcode.take({}, url_for(:action => :scan_received))
+    Rho::Barcode.take({}, url_for(:action => :scan_received_callback))
   end
 end
