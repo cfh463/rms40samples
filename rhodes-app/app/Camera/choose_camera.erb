@@ -1,0 +1,16 @@
+<div data-role="page">
+
+    
+  <div data-role="header" data-position="inline">
+    <h1>Select a scanner</h1>
+  </div>
+
+  <div data-role="content">
+    <ul data-role="listview">
+    <% $cameras.each_with_index do |camera, index| %>
+      <li><a href="<%= url_for(:action => :take_picture_using_chosen_camera, :query => {:camera_index => index}) %>"><%= camera.cameraType %></li> 
+    <% end %>
+    </ul>
+  </div>
+
+</div>

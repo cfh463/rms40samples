@@ -1,0 +1,72 @@
+<EXAMPLES >
+           <EXAMPLE title="Choose which camera to use when taking images">
+            <SECTIONS>
+               
+              <SECTION>
+               <DESC>
+                   On devices with more than one camera, you can select which camera to use for taking pictures
+               </DESC>
+               <CODE>
+                <RUBY>
+           <![CDATA[
+
+# controller.rb
+def choose_camera
+  $cameras = Rho::Camera.enumerate
+  render
+end
+
+def take_picture_using_chosen_camera
+  camera = $cameras[@params["cameraIndex"].to_i]
+  camera.take({}, url_for(:action => :picture_taken_callback))
+end
+
+
+# choose_camera.erb
+<ul data-role="listview">
+  <% $cameras.each_with_index do |camera, index| %>
+    <li><a href="<%= url_for(:action => :take_picture_using_chosen_camera, :query => {:camera_index => index}) %>"><%= camera.cameraType %></li> 
+  <% end %>
+</ul>
+                   ]]>
+                 </RUBY>
+                <JAVASCRIPT>
+           <![CDATA[
+
+
+<div id="camera_list">
+</div>
+
+
+var cameras = [];
+
+function choose_camera() {
+  // get all available cameras
+  cameras = Rho.Camera.enumerate();
+
+  // build an HTML list
+  var cameraList = "<ul>";
+       
+  for (var cameraIndex=0; cameraIndex<cameras.length; cameraIndex++) {
+    var camera = cameras[cameraIndex];
+    // Create a link for each camera with an onclick handler
+    cameraList = cameraList +'<li><a href="#" class="take_picture_with_selected_camera" onclick="take_picture_with_camera('+cameraIndex+')">'+camera.cameraType+'</a></li>';
+  }
+  
+  cameraList = cameraList+"</ul>";
+  
+  // make camera list visible to the user
+  $("#camera_list").html(cameraList);
+}
+
+function take_picture_with_camera(cameraIndex) {
+  var camera = cameras[cameraIndex];
+  camera.take_picture({}, picture_taken_callback);
+}
+                   ]]>
+                 </JAVASCRIPT>
+               </CODE>
+               </SECTION>
+               </SECTIONS>
+           </EXAMPLE>
+       </EXAMPLES>
