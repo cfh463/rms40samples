@@ -1,0 +1,50 @@
+<EXAMPLES >
+           <EXAMPLE title="Get folders where items are stored">
+            <SECTIONS>
+               
+              <SECTION>
+               <DESC>
+                   There are times where you need access to files bundled with your application, or to write files to a safe folder. These examples show how to retrieve each of the several important folders available
+               </DESC>
+               <CODE>
+                <RUBY>
+           <![CDATA[
+# Get and show the various app folders
+appFolder = Rho::Application.appBundleFolder
+appsBundleFolder = Rho::Application.appsBundleFolder
+databaseBlobFolder = Rho::Application.databaseBlobFolder
+publicFolder = Rho::Application.publicFolder
+userFolder = Rho::Application.userFolder
+
+message = "App bundle folder: "+appFolder+"\n"+
+"Apps bundle folder: "+appsBundleFolder+"\n"+ 
+"Database blob folder: "+databaseBlobFolder+"\n"+ 
+"Public folder: "+publicFolder+"\n"+ 
+"User folder: "+userFolder
+    
+Alert.show_popup(message)
+                   ]]>
+                 </RUBY>
+                <JAVASCRIPT>
+           <![CDATA[
+     // Get and show the various app folders
+     var appFolder = Rho.Application.appBundleFolder;
+     var appsBundleFolder = Rho.Application.appsBundleFolder;
+     var databaseBlobFolder = Rho.Application.databaseBlobFolder;
+     var publicFolder = Rho.Application.publicFolder;
+     var userFolder = Rho.Application.userFolder;
+     
+     var message = "App bundle folder: "+appFolder+"\n"+
+     "Apps bundle folder: "+appsBundleFolder+"\n"+ 
+     "Database blob folder: "+databaseBlobFolder+"\n"+ 
+     "Public folder: "+publicFolder+"\n"+ 
+     "User folder: "+userFolder;
+     
+     alert(message);
+                   ]]>
+                 </JAVASCRIPT>
+               </CODE>
+               </SECTION>
+               </SECTIONS>
+           </EXAMPLE>
+       </EXAMPLES>

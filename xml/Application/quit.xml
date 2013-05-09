@@ -1,0 +1,24 @@
+<EXAMPLES >
+           <EXAMPLE title="Quit your application">
+            <SECTIONS>
+               
+              <SECTION>
+               <DESC>
+                   
+               </DESC>
+               <CODE>
+                <RUBY>
+           <![CDATA[
+Rho::Application.quit
+                   ]]>
+                 </RUBY>
+                <JAVASCRIPT>
+           <![CDATA[
+Rho.Application.quit();
+                   ]]>
+                 </JAVASCRIPT>
+               </CODE>
+               </SECTION>
+               </SECTIONS>
+           </EXAMPLE>
+       </EXAMPLES>

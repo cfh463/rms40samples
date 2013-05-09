@@ -11,6 +11,7 @@ class ApplicationController < Rho::RhoController
   end
   
   def app_folder 
+    # Get and show the various app folders
     appFolder = Rho::Application.appBundleFolder
     appsBundleFolder = Rho::Application.appsBundleFolder
     databaseBlobFolder = Rho::Application.databaseBlobFolder
