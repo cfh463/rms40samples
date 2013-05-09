@@ -6,13 +6,60 @@
   </div>
 
   <div data-role="content">
+ <h2>Ruby</h2>
     <ul data-role="listview">
-      <li><a href="#">Get device capabilities</a></li>
-      <li><a href="#">Install / uninstall other applications</a></li>
-      <li><a href="#">Detecting version information</a></li>
-      <li><a href="#">Changing localServerPort for debug purposes</a></li>
-      <li><a href="#">Zipping files</a></li>      
+      <li><a href="<%= url_for :action => :is_motorola_device %>">Get device capabilities</a></li>
+      <li><a href="<%= url_for :action => :install_or_uninstall_app %>">Install / uninstall other applications</a></li>
+      <li><a href="<%= url_for :action => :get_version_info %>">Detecting version information</a></li>
+      <li><a href="<%= url_for :action => :local_serverport %>">LocalServerPort for debug purposes</a></li>
+      <li><a href="<%= url_for :action => :zip %>">Zipping files</a></li>      
     </ul>
+
+	<h2>Javascript</h2>
+	    <ul data-role="listview">
+	      <li><a href="#" onclick= "is_motorola_device()">Get device capabilities</a></li>
+	      <li><a href="#" onclick="install_or_uninstall_app()">Install / uninstall other applications</a></li>
+	      <li><a href="#" onclick = "get_version_info()">Detecting version information</a></li>
+	      <li><a href="#" onclick="local_serverport()">LocalServerPort for debug purposes</a></li>
+	      <li><a href="#" onclick="zip()">Zipping files</a></li>      
+	    </ul>
   </div>
 
 </div>
+
+<script type="text/javascript">
+
+function is_motorola_device() {
+	// Gives true if device supports Motorola device capabilities, such as Scanner, etc.
+	var is_device_supported = Rho.System.isMotorolaDevice();
+	alert(is_device_supported)
+}
+
+function install_or_uninstall_app() {
+    // install an application from given url
+	Rho.System.applicationInstall("/bin/target/android/rhodes-app-debug.apk")
+	
+	// uninstall the application
+		Rho.System.applicationUninstall("rhodes-app")
+		
+}
+
+function get_version_info() {
+	var version_info = Rho.System.osVersion();
+	alert(version_info)
+}
+
+function local_serverport() {
+	// Gives Port of the local (embedded) HTTP server
+	var local_port = Rho.System.localServerPort();
+	alert(local_port);
+}
+
+function zip() {
+	// unzip the file 
+	Rho.System.unzipFile("/app/public/sample.zip")
+	
+	// zip file
+		Rho.System.zipFile("/app/public", "/app/public/sample.txt")
+}
+</script>

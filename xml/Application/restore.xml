@@ -1,0 +1,24 @@
+<EXAMPLES >
+           <EXAMPLE title="Restore your application">
+            <SECTIONS>
+               
+              <SECTION>
+               <DESC>
+                   
+               </DESC>
+               <CODE>
+                <RUBY>
+           <![CDATA[
+Rho::Application.restore
+                   ]]>
+                 </RUBY>
+                <JAVASCRIPT>
+           <![CDATA[
+Rho.Application.restore();
+                   ]]>
+                 </JAVASCRIPT>
+               </CODE>
+               </SECTION>
+               </SECTIONS>
+           </EXAMPLE>
+       </EXAMPLES>
