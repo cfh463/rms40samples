@@ -12,15 +12,26 @@ class ApplicationController < Rho::RhoController
   
   def app_folder 
     appFolder = Rho::Application.appBundleFolder
-    Alert.show_popup(appFolder)
-    render :action => :wait
+    appsBundleFolder = Rho::Application.appsBundleFolder
+    databaseBlobFolder = Rho::Application.databaseBlobFolder
+    publicFolder = Rho::Application.publicFolder
+    userFolder = Rho::Application.userFolder
+
+    message = "App bundle folder: "+appFolder+"\n"+
+    "Apps bundle folder: "+appsBundleFolder+"\n"+ 
+    "Database blob folder: "+databaseBlobFolder+"\n"+ 
+    "Public folder: "+publicFolder+"\n"+ 
+    "User folder: "+userFolder
+    
+    Alert.show_popup(message)
+    redirect :action => :index
   end
 
    def set_locale
   	Rho::Application.setLocale('en')
   	current_locale = Rho::Application.locale
   	Alert.show_popup(current_locale)
-  	render :action => :wait
+  	redirect :action => :index
    end
 
    def quit_app 
@@ -28,7 +39,7 @@ class ApplicationController < Rho::RhoController
    end
 
   def minimize_app
-  Rho::Application.minimize
+    Rho::Application.minimize
   end
   
   def restore_app
