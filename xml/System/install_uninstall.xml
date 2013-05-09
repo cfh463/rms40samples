@@ -1,0 +1,34 @@
+<EXAMPLES >
+           <EXAMPLE title="Install / uninstall other applications">
+            <SECTIONS>
+               
+              <SECTION>
+               <DESC>
+                   You can ask the system to install or uninstall a different application. This feature is useful for installing sub-applications, custom upgrades, etc
+               </DESC>
+               <CODE>
+                <RUBY>
+           <![CDATA[
+#install an application from given url
+Rho::System.applicationInstall("/bin/target/android/rhodes-app-debug.apk")
+
+# uninstall the application
+Rho::System.applicationUninstall("rhodes-app")
+
+                   ]]>
+                 </RUBY>
+                <JAVASCRIPT>
+           <![CDATA[
+// install an application from given url
+Rho.System.applicationInstall("/bin/target/android/rhodes-app-debug.apk");
+  
+// uninstall the application
+Rho.System.applicationUninstall("rhodes-app");
+
+                   ]]>
+                 </JAVASCRIPT>
+               </CODE>
+               </SECTION>
+               </SECTIONS>
+           </EXAMPLE>
+       </EXAMPLES>
