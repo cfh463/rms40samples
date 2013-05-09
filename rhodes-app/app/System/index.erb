@@ -8,7 +8,7 @@
   <div data-role="content">
  <h2>Ruby</h2>
     <ul data-role="listview">
-      <li><a href="<%= url_for :action => :is_motorola_device %>">Get device capabilities</a></li>
+      <li><a href="<%= url_for :action => :capabilities %>">Get device capabilities</a></li>
       <li><a href="<%= url_for :action => :install_or_uninstall_app %>">Install / uninstall other applications</a></li>
       <li><a href="<%= url_for :action => :get_version_info %>">Detecting version information</a></li>
       <li><a href="<%= url_for :action => :local_serverport %>">LocalServerPort for debug purposes</a></li>
@@ -17,49 +17,66 @@
 
 	<h2>Javascript</h2>
 	    <ul data-role="listview">
-	      <li><a href="#" onclick= "is_motorola_device()">Get device capabilities</a></li>
+	      <li><a href="#" onclick="capabilities()">Get device capabilities</a></li>
 	      <li><a href="#" onclick="install_or_uninstall_app()">Install / uninstall other applications</a></li>
-	      <li><a href="#" onclick = "get_version_info()">Detecting version information</a></li>
+	      <li><a href="#" onclick="get_version_info()">Detecting version information</a></li>
 	      <li><a href="#" onclick="local_serverport()">LocalServerPort for debug purposes</a></li>
 	      <li><a href="#" onclick="zip()">Zipping files</a></li>      
 	    </ul>
   </div>
 
-</div>
-
 <script type="text/javascript">
 
-function is_motorola_device() {
-	// Gives true if device supports Motorola device capabilities, such as Scanner, etc.
-	var is_device_supported = Rho.System.isMotorolaDevice();
-	alert(is_device_supported)
+function capabilities() {
+  // Returns true if device supports Motorola device capabilities, such as Scanner, etc.
+  var is_motorola_device = Rho.System.isMotorolaDevice;
+  
+  var has_calendar = Rho.System.hasCalendar;
+  var has_camera = Rho.System.hasCamera;
+  var has_cell_network = Rho.System.hasCellNetwork;
+  var has_wifi_network = Rho.System.hasWifiNetwork;
+  var has_network = Rho.System.hasNetwork;
+  var has_sqlite = Rho.System.hasSqlite;
+  var has_touchscreen = Rho.System.hasTouchscreen;
+
+  message = "Motorola device: "+is_motorola_device+"\n"+
+  "Calendar: "+has_calendar+"\n"+ 
+  "Camera: "+has_camera+"\n"+
+  "Cell network: "+has_cell_network+"\n"+
+  "WiFi: "+has_wifi_network+"\n"+
+  "Network: "+has_network+"\n"+
+  "SQLite: "+has_sqlite+"\n"+
+  "Touchscreen: "+has_touchscreen;
+
+  alert(message);
 }
 
 function install_or_uninstall_app() {
-    // install an application from given url
-	Rho.System.applicationInstall("/bin/target/android/rhodes-app-debug.apk")
-	
-	// uninstall the application
-		Rho.System.applicationUninstall("rhodes-app")
-		
+  // install an application from given url
+  Rho.System.applicationInstall("/bin/target/android/rhodes-app-debug.apk");
+  
+  // uninstall the application
+  Rho.System.applicationUninstall("rhodes-app");
 }
 
 function get_version_info() {
-	var version_info = Rho.System.osVersion();
-	alert(version_info)
+  var version_info = Rho.System.osVersion;
+  alert(version_info);
 }
 
 function local_serverport() {
-	// Gives Port of the local (embedded) HTTP server
-	var local_port = Rho.System.localServerPort();
-	alert(local_port);
+  // Retrieve port of the local (embedded) HTTP server
+  var local_port = Rho.System.localServerPort;
+  alert(local_port);
 }
 
 function zip() {
-	// unzip the file 
-	Rho.System.unzipFile("/app/public/sample.zip")
-	
-	// zip file
-		Rho.System.zipFile("/app/public", "/app/public/sample.txt")
+  // unzip file 
+  Rho.System.unzipFile("/app/public/sample.zip");
+  
+  // zip file
+  Rho.System.zipFile("/app/public/zipfile.zip", "/app/public/sample.txt");
 }
 </script>
+</div>
+
