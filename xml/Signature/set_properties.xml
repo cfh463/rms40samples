@@ -7,13 +7,10 @@
                </DESC>
                <CODE lang='ruby'>
            <![CDATA[ 
-	# Change fullscreen from true (default) to false           
-    Rho::Signature.fullScreen = false;
-    # Change background color from white (default) to black
-    Rho::Signature.bgColor = "#000000"
-    # Change pen color from blue (default) to white
-    Rho::Signature.penColor = "#FFFFFF"  
-                   ]]>
+# Change background color from white (default) to black
+# Change pen color from blue (default) to white
+Rho::Signature.takeFullScreen({:bgColor => "#000000", :penColor => "#FFFFFF"}, url_for(:action => :signature_callback))
+               ]]>
 
                </CODE>
                </SECTION>
@@ -23,13 +20,9 @@
                </DESC>
                <CODE lang='javascript'>
            <![CDATA[
-    // Change fullscreen from true (default) to false           
-    Rho.Signature.fullScreen = false;
-    // Change background color from white (default) to black
-    Rho.Signature.bgColor = "#000000";
-    // Change pen color from blue (default) to white
-    Rho.Signature.penColor = "#FFFFFF";  
-
+# Change background color from white (default) to black
+# Change pen color from blue (default) to white
+Rho.Signature.takeFullScreen({bgColor: "#000000", penColor : "#FFFFFF"}, signature_callback)
                    ]]>
 
                </CODE>

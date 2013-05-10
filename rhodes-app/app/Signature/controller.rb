@@ -45,8 +45,15 @@ class SignatureController < Rho::RhoController
   end
   
   def capture_inline
-    Rho::Signature.show({:fullScreen => false})
-    render :action => :show_signature
+    Rho::Signature.show({
+      :top => 0,
+      :left => 0,
+      :width => 320,
+      :height => Rho::System.screenHeight / 3,
+      :fullScreen => false,
+    })
+    
+#    render :action => :show_signature
   end
 
   def do_capture          
