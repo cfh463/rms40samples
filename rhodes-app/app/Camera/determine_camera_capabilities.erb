@@ -1,0 +1,19 @@
+<div data-role="page">
+
+    
+  <div data-role="header" data-position="inline">
+    <h1>Select a scanner</h1>
+  </div>
+
+  <div data-role="content">
+    <h2>Camera properties</h2>
+    <ul data-role="listview">
+    
+    <% @properties.each_pair do |name,value| %>
+      <li><%= name %> : <%= value %></li>
+    <% end %>
+
+    </ul>
+  </div>
+
+</div>

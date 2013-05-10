@@ -1,0 +1,36 @@
+<html>
+<head>
+	<title>Signature Test Page</title>
+	<link rel="stylesheet" type="text/css" href="../lib/jasmine-1.2.0/jasmine.css">
+	<script src="../lib/jasmine-1.2.0/jasmine.js"></script>
+	<script src="../lib/jasmine-1.2.0/jasmine-html.js"></script>
+	<script src="../lib/jasmine-1.2.0/jasmine.junit_reporter.js"></script>
+	<!-- include source files here... -->
+	<script src="SignatureTest.js"></script>
+	<script>
+		function loadEvent()
+		{
+			var jasmineEnv = jasmine.getEnv();
+			jasmineEnv.updateInterval = 1000;
+
+			var htmlReporter = new jasmine.HtmlReporter();
+			var junitReporter = new jasmine.JUnitXmlReporter();
+			
+			junitReporter.useDotNotation = false;
+			jasmineEnv.addReporter(htmlReporter);
+			jasmineEnv.addReporter(new jasmine.JUnitXmlReporter('.\\', true, true));
+			
+			jasmineEnv.specFilter = function(spec) {
+				return htmlReporter.specFilter(spec);
+			};
+			
+			jasmineEnv.execute();
+		}
+		window.addEventListener('load', loadEvent);
+	</script>
+</head>
+<body>
+	<h1>Signature Tests</h1>
+	<div>Test: <span id="testName"></span></div>
+</body>
+</html>

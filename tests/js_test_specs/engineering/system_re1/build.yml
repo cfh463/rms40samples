@@ -1,0 +1,35 @@
+sdk: "B:/git/rhodes"
+paths:
+  extensions:
+   - C:/Neon/git/Motorola-Extensions/build/ci/extensions
+   - C:/Neon/git/Motorola-Extensions/lib/commonAPI
+   - B:/git/Motorola-Extensions/build/ci/extensions
+   - B:/git/Motorola-Extensions/lib/commonAPI
+sdkversion: 3.3.2
+name: system_re1_ats
+app_type: rhoelements
+version: 1.0
+vendor: rhomobile
+build: debug
+bbver: 4.6
+applog: rholog.txt
+iphone:
+  configuration: Release
+  sdk: iphonesimulator5.0
+  provisionprofile:
+  codesignidentity:
+  entitlements:
+  BundleIdentifier: com.rhomobile.apigeneratorspec
+  BundleURLScheme: apigeneratorspec
+wp:
+  productid: 'b6479381-42a8-0130-78de-3caec51bd50e'
+symbian:
+  uid: '0xe1a1ef92'
+android:
+  version: 2.1
+wm:
+  #use_shared_runtime: yes
+  #sdk: MC3000c50b (ARMV4I)
+extensions: ["json", "Coreapi"]
+#capabilities:
+#- non_motorola_device

@@ -1,6 +1,7 @@
 <EXAMPLES >
            <EXAMPLE title="Request a notification from the system when network availability changes">
-              <SECTION>
+              <SECTIONS>
+               <SECTION>
                <DESC>
                    When you need to be notified of changes in the status of the network (connected / disconnected), use Network.startStatusNotify
                </DESC>
@@ -46,5 +47,7 @@
                  </JAVASCRIPT>
                </CODE>
                </SECTION>
+             </SECTIONS>
+               
            </EXAMPLE>
        </EXAMPLES>

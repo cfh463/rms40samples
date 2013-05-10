@@ -1,0 +1,47 @@
+<EXAMPLES >
+           <EXAMPLE title="Select picture from device gallery">
+            <SECTIONS>
+               
+              <SECTION>
+               <DESC>
+                   Apart from taking new pictures, the Camera API also lets you access existing images on the device's gallery
+               </DESC>
+               <CODE>
+                <RUBY>
+           <![CDATA[
+def select_picture_from_gallery 
+  Rho::Camera.choose_picture({}, url_for(:action => :picture_taken_callback))
+end
+
+def picture_taken_callback
+  # Did we really take a picture?
+  if (@params["status"]=="ok")
+    # If so, show it
+    Rho::WebView.navigate(url_for(:action => :show_picture, :query => {:image => Rho::Application.expandDatabaseBlobFilePath(@params["imageUri"])}))
+  else
+    # Otherwise we are done here
+    Rho::WebView.navigate(url_for(:action => :index))
+  end
+end
+                   ]]>
+                 </RUBY>
+                <JAVASCRIPT>
+           <![CDATA[
+function select_picture_from_gallery() {
+  Rho.Camera.choose_picture({}, picture_taken_callback);
+}
+
+function picture_taken_callback(params) {
+  // Did we receive an image?
+  if (params["status"]=="ok") {
+  	// Show it in an <img> tag
+    $("#captured_image").attr("src", Rho.Application.expandDatabaseBlobFilePath(params["imageUri"]));
+  }
+}
+                   ]]>
+                 </JAVASCRIPT>
+               </CODE>
+               </SECTION>
+               </SECTIONS>
+           </EXAMPLE>
+       </EXAMPLES>

@@ -1,0 +1,63 @@
+<HTML>
+<HEAD>
+  <link rel="shortcut icon" type="image/png" href="./lib/jasmine-1.2.0/jasmine_favicon.png">
+  <link rel="stylesheet" type="text/css" href="./lib/jasmine-1.2.0/jasmine.css">
+  <script type="text/javascript" src="./lib/jasmine-1.2.0/jasmine.js"></script>
+  <script type="text/javascript" src="./lib/jasmine-1.2.0/jasmine-html.js"></script>
+  <script type="text/javascript" src="./lib/jasmine-1.2.0/jasmine.junit_reporter.js"></script>
+  <script src="/public/jquery/jquery-1.6.4.min.js" type="text/javascript"></script>
+  <script src="../public/jquery/jquery-1.6.4.min.js" type="text/javascript"></script>
+
+  <!-- include source files here... -->
+  <script type="text/javascript" src="systemRE1Test.js"></script>
+  
+  <!-- include spec files here... -->
+  <script type="text/javascript" src="systemRE1Spec.js"></script>
+
+<TITLE>RE1 APIs in System Common API Test Page</TITLE>
+<style>
+	a {text-decoration:none}
+</style>
+
+
+  <script type="text/javascript">
+    (function() {
+	var jasmineEnv = jasmine.getEnv();
+    jasmineEnv.updateInterval = 1000;
+	
+    var htmlReporter = new jasmine.HtmlReporter();
+	var junitReporter = new jasmine.JUnitXmlReporter();
+	junitReporter.useDotNotation = false
+    jasmineEnv.addReporter(htmlReporter);
+	jasmineEnv.addReporter(new jasmine.JUnitXmlReporter('.\\', true, true));
+    jasmineEnv.specFilter = function(spec) {
+		return htmlReporter.specFilter(spec);
+    };
+
+    var currentWindowOnload = window.onload;
+	window.onload = function() {
+		if (currentWindowOnload) {
+			currentWindowOnload();
+        }
+        execJasmine();
+    };
+
+    function execJasmine() {
+		jasmineEnv.execute();
+    }
+	})();
+	
+	
+
+  </script>
+</HEAD>
+<BODY>
+<BR>
+<H1>RE1 APIs in System Common API Tests</H1>
+This page tests those APIs in System which were derived from RE1, ie: getUUID, getOEM and Registry related calls.  This test suite does not test persistent settings, those can be tested once we have the File API in place.
+<P>
+	<!--textarea id='output1' rows=4 cols=30>Output Goes Here</textarea-->
+
+  </BODY>
+
+</HTML>

@@ -1,0 +1,24 @@
+<EXAMPLES >
+           <EXAMPLE title="Minimize your application">
+            <SECTIONS>
+               
+              <SECTION>
+               <DESC>
+                   
+               </DESC>
+               <CODE>
+                <RUBY>
+           <![CDATA[
+Rho::Application.minimize
+                   ]]>
+                 </RUBY>
+                <JAVASCRIPT>
+           <![CDATA[
+Rho.Application.minimize();
+                   ]]>
+                 </JAVASCRIPT>
+               </CODE>
+               </SECTION>
+               </SECTIONS>
+           </EXAMPLE>
+       </EXAMPLES>

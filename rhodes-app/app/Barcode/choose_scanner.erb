@@ -1,0 +1,16 @@
+<div data-role="page">
+
+    
+  <div data-role="header" data-position="inline">
+    <h1>Select a scanner</h1>
+  </div>
+
+  <div data-role="content">
+    <ul data-role="listview">
+    <% $scanners.each_with_index do |scanner, index| %>
+      <li><a href="<%= url_for(:action => :scan_using_chosen_scanner, :query => {:scanner_index => index}) %>"><%= scanner.friendlyName %></li> 
+    <% end %>
+    </ul>
+  </div>
+
+</div>

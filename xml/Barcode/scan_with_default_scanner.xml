@@ -1,0 +1,36 @@
+<EXAMPLES >
+           <EXAMPLE title="Scan barcodes with the default scanner">
+            <SECTIONS>
+               
+              <SECTION>
+               <DESC>
+                   Getting started with barcode scanning is very straightforward. If you do not need to customize the defaults, you need very little code. 
+               </DESC>
+               <CODE>
+                <RUBY>
+           <![CDATA[
+def scan_using_default_scanner
+  # Scan with default options
+  Rho::Barcode.take({}, url_for(:action => :scan_received))
+end
+  
+def scan_received
+  # Did we actually find a barcode ?
+  # If status is not 'ok', the scan was cancelled
+  if @params["status"] == "ok"
+    Rho::Log.info(@params["barcode"],"Barcode result")
+  else
+    Rho::Log.info("Cancelled", "Barcode result")
+  end
+end
+                   ]]>
+                 </RUBY>
+                <JAVASCRIPT>
+           <![CDATA[
+                   ]]>
+                 </JAVASCRIPT>
+               </CODE>
+               </SECTION>
+               </SECTIONS>
+           </EXAMPLE>
+       </EXAMPLES>

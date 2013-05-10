@@ -1,0 +1,1 @@
+This directory only contains files to be replaced in rhodes/spec/framework_spec in order to be run in ATS

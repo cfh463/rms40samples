@@ -1,0 +1,48 @@
+<EXAMPLES >
+           <EXAMPLE title="Take picture with default camera">
+            <SECTIONS>
+              <SECTION>
+               <DESC>
+                   Take an image with as little code as possible, using all default values
+               </DESC>
+               <CODE>
+                <RUBY>
+           <![CDATA[
+def take_picture_with_default_camera
+  # Capture an image from the default camera on the device, using the default image settings
+  Rho::Camera.take_picture({}, :picture_taken_callback)
+end
+  
+def picture_taken_callback
+  # Did we really take a picture?
+  if (@params["status"]=="ok")
+    # If so, show it
+    Rho::WebView.navigate(url_for(:action => :show_picture, :query => {:image => Rho::Application.expandDatabaseBlobFilePath(@params["imageUri"])}))
+  else
+    # Otherwise we are done here
+    Rho::WebView.navigate(url_for(:action => :index))
+  end
+end
+                   ]]>
+                 </RUBY>
+                <JAVASCRIPT>
+           <![CDATA[
+function take_picture_with_default_camera() {
+  // Capture an image from the default camera on the device, using the default image settings
+  Rho.Camera.take_picture({}, picture_taken_callback);
+}
+
+function picture_taken_callback(params) {
+  // Did we receive an image?
+  if (params["status"]=="ok") {
+  	// Assuming we have an <img id="#captured_image"> tag, we will be able to see the image that was just captured
+    $("#captured_image").attr("src", Rho.Application.expandDatabaseBlobFilePath(params["imageUri"]));
+  }
+}
+                   ]]>
+                 </JAVASCRIPT>
+               </CODE>
+               </SECTION>
+               </SECTIONS>
+           </EXAMPLE>
+       </EXAMPLES>

@@ -1,0 +1,74 @@
+<EXAMPLES >
+           <EXAMPLE title="Control image properties">
+            <SECTIONS>
+               
+              <SECTION>
+               <DESC>
+                   You can tweak multiple options to get an image exactly as you need it 
+               </DESC>
+               <CODE>
+                <RUBY>
+           <![CDATA[
+def control_image_properties
+  # Instead of accepting the defaults, let's set some properties to our liking
+    
+  # We will ask for a PNG file...
+  Rho::Camera.compressionFormat = "png"
+    
+  # ...a particular image size...
+  Rho::Camera.desiredWidth = 1024
+  Rho::Camera.desiredHeight = 768
+    
+  # ...and force the flash to be used
+  Rho::Camera.flashMode = "on"
+    
+  # Now, take the picture
+  Rho::Camera.take_picture({}, :picture_taken_callback)    
+end
+
+def picture_taken_callback
+  # Did we really take a picture?
+  if (@params["status"]=="ok")
+    # If so, show it
+    Rho::WebView.navigate(url_for(:action => :show_picture, :query => {:image => Rho::Application.expandDatabaseBlobFilePath(@params["imageUri"])}))
+  else
+    # Otherwise we are done here
+    Rho::WebView.navigate(url_for(:action => :index))
+  end
+end
+                   ]]>
+                 </RUBY>
+                <JAVASCRIPT>
+           <![CDATA[
+function control_image_properties() {
+  // Instead of accepting the defaults, let's set some properties to our liking
+  
+  // We will ask for a PNG file...
+  Rho.Camera.compressionFormat = "png";
+  
+  // ...a particular image size...
+  Rho.Camera.desiredWidth = 1024;
+  Rho.Camera.desiredHeight = 768;
+  
+  // ...and force the flash to be used
+  Rho.Camera.flashMode = "on";
+  
+  // Now, take the picture
+  Rho.Camera.take_picture({}, picture_taken_callback);      
+}
+
+function picture_taken_callback(params) {
+  // Did we receive an image?
+  if (params["status"]=="ok") {
+  	// show it in our <img id="captured_image"> tag
+    $("#captured_image").attr("src", Rho.Application.expandDatabaseBlobFilePath(params["imageUri"]));
+  }
+
+}
+                   ]]>
+                 </JAVASCRIPT>
+               </CODE>
+               </SECTION>
+               </SECTIONS>
+           </EXAMPLE>
+       </EXAMPLES>

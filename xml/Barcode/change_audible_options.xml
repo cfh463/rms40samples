@@ -1,0 +1,39 @@
+<EXAMPLES >
+           <EXAMPLE title="Change audible options">
+            <SECTIONS>
+               
+              <SECTION>
+               <DESC>
+                   You can customize or eliminate the beep that the device emits when a barcode is recognized. Support and valid ranges for these values depend on the device.
+               </DESC>
+               <CODE>
+                <RUBY>
+           <![CDATA[
+# Maximum volume (default)
+Rho::Barcode.decodeVolume = 5
+# Low-pitched sound
+Rho::Barcode.decodeFrequency = 1000
+# One-second long
+Rho::Barcode.decodeDuration = 1000
+  
+Rho::Barcode.take({}, url_for(:action => :scan_received_callback))
+
+                   ]]>
+                 </RUBY>
+                <JAVASCRIPT>
+           <![CDATA[
+// Maximum volume (default)
+Rho.Barcode.decodeVolume = 5;
+// Low-pitched sound
+Rho.Barcode.decodeFrequency = 1000;
+// One-second long
+Rho.Barcode.decodeDuration = 1000;
+  
+Rho.Barcode.take({}, scan_received_callback);
+                   ]]>
+                 </JAVASCRIPT>
+               </CODE>
+               </SECTION>
+               </SECTIONS>
+           </EXAMPLE>
+       </EXAMPLES>

@@ -1,0 +1,47 @@
+<EXAMPLES >
+           <EXAMPLE title="Saving a picture to the device's gallery">
+            <SECTIONS>
+               
+              <SECTION>
+               <DESC>
+                   Apart from taking new pictures, you can also save images to the built-in gallery. In the following examples, the picture we are adding to the gallery is one that was just taken with the camera, but you can add any other image you can access by filename
+               </DESC>
+               <CODE>
+                <RUBY>
+           <![CDATA[
+def take_picture_and_save_it_to_gallery
+  Rho::Camera.choose_picture({}, url_for(:action => :picture_taken_callback_save_to_gallery))    
+end
+  
+def picture_taken_callback_save_to_gallery
+  # Did we really take a picture?
+  if (@params["status"]=="ok")
+    # If so, save it to the gallery
+    Rho::Camera.saveImageToDeviceGallery(Rho::Application.expandDatabaseBlobFilePath(@params["imageUri"]))
+  end
+
+  Rho::WebView.navigate(url_for(:action => :index))
+
+end  
+                   ]]>
+                 </RUBY>
+                <JAVASCRIPT>
+           <![CDATA[
+function take_picture_and_save_it_to_gallery() {
+  Rho.Camera.choose_picture({}, picture_taken_callback_save_to_gallery);
+}
+
+function picture_taken_callback_save_to_gallery(params) {
+  if (params["status"]=="ok") {
+    Rho.Camera.saveImageToDeviceGallery(Rho.Application.expandDatabaseBlobFilePath(params["imageUri"]));
+      
+    alert("Image saved to gallery");
+  }
+}
+                   ]]>
+                 </JAVASCRIPT>
+               </CODE>
+               </SECTION>
+               </SECTIONS>
+           </EXAMPLE>
+       </EXAMPLES>
