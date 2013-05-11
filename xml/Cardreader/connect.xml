@@ -1,0 +1,37 @@
+<EXAMPLES >
+           <EXAMPLE title="Connect to card reader">
+            <SECTIONS>
+               
+              <SECTION>
+               <DESC>
+                   Enable card reader and receive a callback when a card is swiped
+               </DESC>
+               <CODE>
+                <RUBY>
+           <![CDATA[
+def connect
+  Rho::CardReader.open({}, url_for(:action => :cardreader_callback))
+  redirect :index
+end
+
+def cardreader_callback
+  Alert.show_popup("Received card reader data: #{@params[:data]}")
+end
+                   ]]>
+                 </RUBY>
+                <JAVASCRIPT>
+           <![CDATA[
+function cardreader_callback(params) {
+  alert("Received data from card reader: "+params["data"]);
+}
+
+function connect() {
+  Rho.CardReader.open({}, cardreader_callback);
+}
+                   ]]>
+                 </JAVASCRIPT>
+               </CODE>
+               </SECTION>
+               </SECTIONS>
+           </EXAMPLE>
+       </EXAMPLES>

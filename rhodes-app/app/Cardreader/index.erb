@@ -6,12 +6,41 @@
   </div>
 
   <div data-role="content">
+    <h2>Ruby</h2>
     <ul data-role="listview">
-      <li><a href="#">Connecting to the card reader</a></li>
+      <li><a href="<%= url_for(:action => :connect) %>">Connecting to the card reader</a></li>
       <li><a href="#">Reading card data</a></li>
-      <li><a href="#">Setting card reader properties</a></li>
+      <li><a href="<%= url_for(:action => :set_properties)">Setting card reader properties</a></li>
       <li><a href="#">More - see http://edgedocs.rhomobile.com/rhoelements/cardreader/#htmljavascript-examples for inspiration</a></li>      
     </ul>
+    
+    <h2>Javascript</h2>
+    <ul data-role="listview">
+      <li><a href="#" onclick="connect()">Connecting to the card reader</a></li>
+      <li><a href="#">Reading card data</a></li>
+      <li><a href="#" onclick="setProperties()">Setting card reader properties</a></li>
+      <li><a href="#">More - see http://edgedocs.rhomobile.com/rhoelements/cardreader/#htmljavascript-examples for inspiration</a></li>      
+    </ul>
+    
   </div>
 
+  <script type="text/javascript">
+    function cardreader_callback(params) {
+      alert("Received data from card reader: "+params["data"]);
+    }
+    
+    function connect() {
+      Rho.CardReader.open({}, cardreader_callback);
+    }
+    
+    function setProperties() {
+      // Configure the MSR to output keystrokes instead of calling a function when a card is swiped
+      // Note the absence of a callback parameter
+      // Also, After emitting the keystrokes, automatically send a "Tab" keypress
+
+      Rho.CardReader.open({autoTab : true});
+      
+      Rho.CardReader.open({autoEnter : true});
+    }
+  </script>
 </div>
