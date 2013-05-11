@@ -1,0 +1,28 @@
+<EXAMPLES >
+           <EXAMPLE title="Export database">
+            <SECTIONS>
+               
+              <SECTION>
+               <DESC>
+                   Export all data from a database partition to a zip file
+               </DESC>
+               <CODE>
+                <RUBY>
+           <![CDATA[
+# Export database partition as zip file
+zip_archive = Rho::Orm.databaseExport(:user)
+Alert.show_popup(zip_archive)
+                   ]]>
+                 </RUBY>
+                <JAVASCRIPT>
+           <![CDATA[
+// Export database partition as zip file
+var exported_zip = Rho.Orm.databaseExport("user");
+alert("Exported database to: "+exported_zip);
+                   ]]>
+                 </JAVASCRIPT>
+               </CODE>
+               </SECTION>
+               </SECTIONS>
+           </EXAMPLE>
+       </EXAMPLES>
