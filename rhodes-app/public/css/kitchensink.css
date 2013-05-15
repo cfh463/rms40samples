@@ -1,3 +1,9 @@
+.ui-header .ui-title {
+    text-overflow: clip;
+    white-space: normal;
+    font-size: 14px;
+}
+
 .example_description {
 	display: none;
 }
