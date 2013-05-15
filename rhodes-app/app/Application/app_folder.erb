@@ -1,0 +1,22 @@
+<div data-role="page">
+
+  <%= render :partial => "/shared_ui/page_head" %>
+    
+  <div data-role="content">
+  
+<%= render :partial => "/shared_ui/example_header", :locals => {:title => "Get application folders", :description => "
+  There are times when you need access to files bundled with your application, or to write files to a safe folder. This example shows how to retrieve each of the several important folders available
+" }
+%>
+
+    <ul>
+      <li>App folder: <%= @appFolder %></li>
+      <li>Apps bundle folder: <%= @appsBundleFolder %></li>
+      <li>Database blob folder: <%= @databaseBlobFolder %></li>
+      <li>Public folder: <%= @publicFolder %></li>
+      <li>User folder: <%= @userFolder %></li>
+    </ul>
+  </div>
+
+
+</div>

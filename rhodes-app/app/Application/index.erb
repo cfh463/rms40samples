@@ -1,11 +1,8 @@
 <div data-role="page">
 
-    
-  <div data-role="header" data-position="inline">
-    <h1>Application samples</h1>
-  </div>
+  <%= render :partial => "/shared_ui/page_head", :locals => {:title => "Application"} %>
 
-  <div data-role="content">
+<div data-role="content">
 	  <h2>Ruby</h2>
     <ul data-role="listview">
       <li><a href="<%= url_for :action => :app_folder %>">Get folders where items are stored</a></li>
@@ -23,6 +20,7 @@
       <li><a href="#" onclick="restore_app()">Restoring the application</a></li>      
     </ul>
   </div>
+  
   
 <script type="text/javascript">
    function app_folder() {

@@ -2,23 +2,17 @@
 
     
   <div data-role="header" data-position="inline">
-    <h1>Code samples</h1>
+    <h1>RhoMobile Kitchen Sink</h1>
   </div>
 
   <div data-role="content">
-    <ul data-role="listview">
-      <li><a href="<%= url_for :controller => :Application %>">Application</a></li>
-      <li><a href="<%= url_for :controller => :Barcode %>">Barcode</a></li>
-      <li><a href="<%= url_for :controller => :Camera %>">Camera</a></li>
-      <li><a href="<%= url_for :controller => :Cardreader %>">Cardreader</a></li>
-      <li><a href="<%= url_for :controller => :Database %>">Database</a></li>
-      <li><a href="<%= url_for :controller => :Log %>">Log</a></li>
-      <li><a href="<%= url_for :controller => :Network %>">Network</a></li>
-      <li><a href="<%= url_for :controller => :Signature %>">Signature</a></li>
-      <li><a href="<%= url_for :controller => :System %>">System</a></li>
-      <li><a href="<%= url_for :controller => :Webview %>">Webview</a></li>      
+    <div class="example-description">
+      Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo consequat.
+    </div>
 
-    </ul>
+    <%= render :partial => "/shared_ui/navmenu" %>
+
   </div>
+
 
 </div>
