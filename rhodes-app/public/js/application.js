@@ -9,7 +9,6 @@ var KitchenSink = {
 		
 		function init() {
 			$(document).on("click", "a.ks_toggle_example_description", toggle_example_description);
-			alert("Inited");
 		}
 		return {
 			init: init
