@@ -1,6 +1,6 @@
 <div data-role="page">
 
-  <%= render :partial => "/shared_ui/page_head", :locals => {:title => "Application"} %>
+  <%= render :partial => "/partials/page_head", :locals => {:title => "Application"} %>
 
 <div data-role="content">
 	  <h2>Ruby</h2>
@@ -13,52 +13,13 @@
     </ul>
       <h2>Javascript</h2>
     <ul data-role="listview">
-      <li><a href="#" onclick="app_folder()">Get folders where items are stored</a></li>
-      <li><a href="#" onclick="set_locale()">Set locale</a></li>
-      <li><a href="#" onclick="quit_app()">Quitting the application</a></li>
-      <li><a href="#" onclick="minimize_app()">Minimizing the application</a></li>
-      <li><a href="#" onclick="restore_app()">Restoring the application</a></li>      
+      <li><a href="#" onclick="KitchenSink.Samples.Application.app_folder()">Get folders where items are stored</a></li>
+      <li><a href="#" onclick="KitchenSink.Samples.Application.set_locale()">Set locale</a></li>
+      <li><a href="#" onclick="KitchenSink.Samples.Application.quit_app()">Quitting the application</a></li>
+      <li><a href="#" onclick="KitchenSink.Samples.Application.minimize_app()">Minimizing the application</a></li>
+      <li><a href="#" onclick="KitchenSink.Samples.Application.restore_app()">Restoring the application</a></li>      
     </ul>
   </div>
   
-  
-<script type="text/javascript">
-   function app_folder() {
-     
-     // Get and show the various app folders
-     var appFolder = Rho.Application.appBundleFolder;
-     var appsBundleFolder = Rho.Application.appsBundleFolder;
-     var databaseBlobFolder = Rho.Application.databaseBlobFolder;
-     var publicFolder = Rho.Application.publicFolder;
-     var userFolder = Rho.Application.userFolder;
-     
-     var message = "App bundle folder: "+appFolder+"\n"+
-     "Apps bundle folder: "+appsBundleFolder+"\n"+ 
-     "Database blob folder: "+databaseBlobFolder+"\n"+ 
-     "Public folder: "+publicFolder+"\n"+ 
-     "User folder: "+userFolder;
-     
-     alert(message);
-   }
-
-   function set_locale(){
-     Rho.Application.setLocale('en')
-     var current_locale = Rho.Application.locale();
-     alert(current_locale)
-   }
-   
-   function quit_app() {
-     Rho.Application.quit();  
-   }
-  
-   function minimize_app(){
-     Rho.Application.minimize();
-   }
-
-   function restore_app() {
-    Rho.Application.restore();
-   }
-</script>
-
 </div>
 

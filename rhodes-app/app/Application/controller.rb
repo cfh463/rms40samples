@@ -12,18 +12,17 @@ class ApplicationController < Rho::RhoController
   
   def app_folder 
     # Get and show the various app folders
-    @appFolder = Rho::Application.appBundleFolder
-    @appsBundleFolder = Rho::Application.appsBundleFolder
-    @databaseBlobFolder = Rho::Application.databaseBlobFolder
-    @publicFolder = Rho::Application.publicFolder
-    @userFolder = Rho::Application.userFolder
+    @app_folder = Rho::Application.appBundleFolder
+    @apps_bundle_folder = Rho::Application.appsBundleFolder
+    @database_blob_folder = Rho::Application.databaseBlobFolder
+    @public_folder = Rho::Application.publicFolder
+    @user_folder = Rho::Application.userFolder
   end
 
    def set_locale
-  	Rho::Application.setLocale('en')
-  	current_locale = Rho::Application.locale
-  	Alert.show_popup(current_locale)
-  	redirect :action => :index
+    @previous_locale = Rho::Application.locale
+  	Rho::Application.setLocale('de')
+  	@current_locale = current_locale = Rho::Application.locale
    end
 
    def quit_app 

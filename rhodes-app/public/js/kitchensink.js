@@ -1,7 +1,8 @@
-function helloWorld() {}
 
-var KitchenSink = {
-	UI : function() {
+var KitchenSink = (function() {
+
+	// User interface
+	(function() {
 		
 		function toggle_example_description() {
 			$(".ui-page-active .example_description").fadeToggle();
@@ -10,17 +11,15 @@ var KitchenSink = {
 		function init() {
 			$(document).on("click", "a.ks_toggle_example_description", toggle_example_description);
 		}
-		return {
-			init: init
-		};
-	}(),
+		
+		init();
+	})();
+
+	var Samples = {};
 	
-	init: function() {
-		this.UI.init();
-	}
-};
+	return({
+		Samples: Samples
+	});
+	
+})(jQuery);
 
-
-
-
-KitchenSink.init();
