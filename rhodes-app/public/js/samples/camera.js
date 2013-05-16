@@ -95,6 +95,6 @@ KitchenSink.Samples.Camera = KitchenSink.Samples.Camera || (function($) {
 		determine_camera_capabilities : determine_camera_capabilities,
 		control_image_properties : control_image_properties,
 		take_picture_and_save_it_to_gallery : take_picture_and_save_it_to_gallery
-	}
+	};
 
 })(jQuery);

@@ -18,48 +18,17 @@
 
   <h2>Javascript</h2>
   <ul data-role="listview">
-    <li><a href="#" onclick="log_categories()">Logging categories</a></li>
-    <li><a href="#" onclick="log_memory_usage()">Logging memory usage</a></li>
+    <li><a href="#" onclick="KitchenSink.Samples.Log.log_categories()">Logging categories</a></li>
+    <li><a href="#" onclick="KitchenSink.Samples.Log.log_memory_usage()">Logging memory usage</a></li>
     <li><a href="#">Logging to remote location</a></li>
-    <li><a href="#" onclick="show_log()">Show log</a></li>
-    <li><a href="#" onclick="read_log_file()">Read log file</a></li>
-    <li><a href="#" onclick="clean_log_file()">Clean log file</a></li>
+    <li><a href="#" onclick="KitchenSink.Samples.Log.show_log()">Show log</a></li>
+    <li><a href="#" onclick="KitchenSink.Samples.Log.read_log_file()">Read log file</a></li>
+    <li><a href="#" onclick="KitchenSink.Samples.Log.clean_log_file()">Clean log file</a></li>
   </ul>
 
   </div>
 
 
-<script type="text/javascript">
-  
-  
-  function log_categories() {
-    Rho.Log.info("Consectetuer adipiscing elit", "Lorem Ipsum");
-    Rho.Log.info("Foo acquired value Bar in method Baz", "Miscellaneous");
-  }
-  
-  function log_memory_usage() {
-    // Request that memory usage be logged automatically by the system every second
-    Rho.Log.memoryPeriod = 1000;
-  }
-  
-  function show_log() {
-    Rho.Log.showLog();
-  }
-
-  function read_log_file() {
-    var log_contents = Rho.Log.readLogFile(400);
-    alert('Log file contents: '+log_contents);
-  }
-
-  function clean_log_file() {
-    var log_contents_before = Rho.Log.readLogFile(400);
-    alert('Log file contents before cleaning: '+log_contents_before);
-    Rho.Log.cleanLogFile();
-    var log_contents_after = Rho.Log.readLogFile(400);
-    alert('Log file contents after cleaning: '+log_contents_after);
-  }
-
-</script>
 
 </div>
 

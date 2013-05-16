@@ -37,6 +37,6 @@ KitchenSink.Samples.Application = KitchenSink.Samples.Application || (function()
 		quit_app: quit_app,
 		minimize_app: minimize_app,
 		restore_app: restore_app
-	}
+	};
 
 })();

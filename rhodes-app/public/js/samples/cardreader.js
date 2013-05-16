@@ -20,6 +20,6 @@ KitchenSink.Samples.CardReader = KitchenSink.Samples.CardReader || (function() {
 	return {
 		connect : connect,
 		setProperties : setProperties
-	}
+	};
 
 })();

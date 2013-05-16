@@ -10,6 +10,6 @@ KitchenSink.Samples.Barcode = KitchenSink.Samples.Barcode || (function() {
 
 	return {
 		scan_using_default_scanner : scan_using_default_scanner
-	}
+	};
 
 })();

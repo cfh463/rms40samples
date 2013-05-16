@@ -1,18 +1,27 @@
 <div data-role="collapsible-set" data-inset="false">
   <div data-role="collapsible">
     <h3>Application</h3>
+    <h4>Ruby</h4>
     <ul data-role="listview" data-inset="true">
       <li><a href="<%= url_for :controller => :Application, :action => :app_folder %>">Get folders where items are stored</a></li>
       <li><a href="<%= url_for :controller => :Application, :action => :set_locale %>">Set locale</a></li>
       <li><a href="<%= url_for :controller => :Application, :action => :quit_app %>">Quit the application</a></li>
       <li><a href="<%= url_for :controller => :Application, :action => :minimize_app %>">Minimize the application</a></li>
       <li><a href="<%= url_for :controller => :Application, :action => :restore_app %>">Restore the application</a></li>
-    </ul>      
+    </ul>
+    <h4>Javascript</h4>
+      <ul data-role="listview" data-inset="true">
+        <li><a href="#" onclick="KitchenSink.Samples.Application.app_folder()">Get folders where items are stored</a></li>
+        <li><a href="#" onclick="KitchenSink.Samples.Application.set_locale()">Set locale</a></li>
+        <li><a href="#" onclick="KitchenSink.Samples.Application.quit_app()">Quitting the application</a></li>
+        <li><a href="#" onclick="KitchenSink.Samples.Application.minimize_app()">Minimizing the application</a></li>
+        <li><a href="#" onclick="KitchenSink.Samples.Application.restore_app()">Restoring the application</a></li>      
+      </ul>
   </div>
 
   <div data-role="collapsible">
     <h3>Barcode</h3>
-    <h2>Ruby</h2>
+    <h4>Ruby</h4>
     <ul data-role="listview" data-inset="true">
       <li><a href="<%= url_for :controller => :Barcode, :action => :scan_using_default_scanner %>">Scan using default scanner</a></li>
       <li><a href="<%= url_for :controller => :Barcode, :action => :choose_scanner %>">Select scanner to use</a></li>
@@ -20,13 +29,13 @@
       <li><a href="<%= url_for :controller => :Barcode, :action => :control_properties %>">Control scanner properties</a></li>
       <li><a href="<%= url_for :controller => :Barcode, :action => :change_audible_options %>">Change audible options</a></li>
     </ul>
-    <h2>Javascript</h2>
+    <h4>Javascript</h4>
     <ul data-role="listview" data-inset="true">
-    <li><a href="#" onclick="scan_using_default_scanner()">Scan using default scanner</a></li>
-    <li><a href="#" onclick="choose_scanner()">Select scanner to use</a></li>
-    <li><a href="#" onclick="set_symbology()">Set symbology</a></li>
-    <li><a href="#" onclick="control_properties()">Control scanner properties</a></li>
-    <li><a href="#" onclick="change_audible_options()">Change audible options</a></li>
+      <li><a href="#" onclick="KitchenSink.Samples.Barcode.scan_using_default_scanner()">Scan using default scanner</a></li>
+      <li><a href="#" onclick="KitchenSink.Samples.Barcode.choose_scanner()">Select scanner to use</a></li>
+      <li><a href="#" onclick="KitchenSink.Samples.Barcode.set_symbology()">Set symbology</a></li>
+      <li><a href="#" onclick="KitchenSink.Samples.Barcode.control_properties()">Control scanner properties</a></li>
+      <li><a href="#" onclick="KitchenSink.Samples.Barcode.change_audible_options()">Change audible options</a></li>
     </ul>        
   </div>
 
@@ -60,18 +69,90 @@
         
   <div data-role="collapsible">
     <h3>Card reader</h3>
+    <h4>Ruby</h4>
+    <ul data-role="listview" data-inset="true">
+      <li><a href="<%= url_for(:controller => :Cardreader, :action => :connect) %>">Connecting to the card reader</a></li>
+      <li><a href="#">Reading card data</a></li>
+      <li><a href="<%= url_for(:controller => :Cardreader, :action => :set_properties) %>">Setting card reader properties</a></li>
+      <li><a href="#">More - see http://edgedocs.rhomobile.com/rhoelements/cardreader/#htmljavascript-examples for inspiration</a></li>      
+    </ul>
+    
+    <h4>Javascript</h4>
+    <ul data-role="listview" data-inset="true">
+      <li><a href="#" onclick="KitchenSink.Samples.CardReader.connect()">Connecting to the card reader</a></li>
+      <li><a href="#">Reading card data</a></li>
+      <li><a href="#" onclick="KitchenSink.Samples.CardReader.setProperties()" %>Setting card reader properties</a></li>
+      <li><a href="#">More - see http://edgedocs.rhomobile.com/rhoelements/cardreader/#htmljavascript-examples for inspiration</a></li>      
+    </ul>
+    
   </div>
   
   <div data-role="collapsible">
     <h3>Database</h3>
+    <h4>Ruby</h4>
+    <ul data-role="listview" data-inset="true">
+      <li><a href="<%= url_for :controller => :Database, :action => :initdb %>">Init DB</a></li>    
+      <li><a href="#">Import</a></li>
+      <li><a href="#">Export</a></li>
+      <li><a href="#">Seed</a></li>
+      <li><a href="<%= url_for :controller => :Database, :action => :transactions %>">Transactions</a></li>
+    </ul>
+    
+    <h4>Javascript</h4>
+    <ul data-role="listview" data-inset="true">
+      <li><a href="#">Import</a></li>
+      <li><a href="#">Export</a></li>
+      <li><a href="#">Seed</a></li>
+      <li><a href="#" onclick="KitchenSink.Samples.Database.transactions()">Transactions</a></li>
+    </ul>      
   </div>
   
   <div data-role="collapsible">
     <h3>Log</h3>
+    <h4>Ruby</h4>
+      <ul data-role="listview" data-inset="true">
+        <li><a href="<%= url_for :controller => :Log, :action => :log_categories %>">Logging categories</a></li>
+        <li><a href="<%= url_for :controller => :Log, :action => :log_memory_usage %>">Logging memory usage</a></li>
+        <li><a href="#">Logging to remote location</a></li>
+        <li><a href="<%= url_for :controller => :Log, :action => :show_log %>">Show log</a></li>
+        <li><a href="<%= url_for :controller => :Log, :action => :read_log_file %>">Read log file</a></li>
+        <li><a href="<%= url_for :controller => :Log, :action => :clean_log_file %>">Clean log file</a></li>
+      </ul>
+    
+    <h4>Javascript</h4>
+    <ul data-role="listview" data-inset="true">
+      <li><a href="#" onclick="KitchenSink.Samples.Log.log_categories()">Logging categories</a></li>
+      <li><a href="#" onclick="KitchenSink.Samples.Log.log_memory_usage()">Logging memory usage</a></li>
+      <li><a href="#">Logging to remote location</a></li>
+      <li><a href="#" onclick="KitchenSink.Samples.Log.show_log()">Show log</a></li>
+      <li><a href="#" onclick="KitchenSink.Samples.Log.read_log_file()">Read log file</a></li>
+      <li><a href="#" onclick="KitchenSink.Samples.Log.clean_log_file()">Clean log file</a></li>
+    </ul>
   </div>
   
   <div data-role="collapsible">
     <h3>Network</h3>
+    <h4>Ruby</h4>
+    <ul data-role="listview" data-inset="true">
+      <li><a href="<%= url_for :controller => :Network, :action => :network_availability %>">Detect network availability</a></li>
+      <li><a href="<%= url_for :controller => :Network, :action => :start_status_notify %>">Start detecting network events</a></li>
+      <li><a href="<%= url_for :controller => :Network, :action => :stop_status_notify %>">Stop detecting network events</a></li>
+      <li><a href="<%= url_for :controller => :Network, :action => :upload_file %>">Upload file</a></li>
+      <li><a href="<%= url_for :controller => :Network, :action => :download_file %>">Download file</a></li>
+      <li><a href="#">Using http headers and verbs</a></li>
+      <li><a href="#">Connecting with basic authentication</a></li>      
+    </ul>
+    <h4>Javascript</h4>
+    <ul data-role="listview" data-inset="true">
+      <li><a href="#" onclick="KitchenSink.Samples.Network.network_availability()">Detect network availability</a></li>
+      <li><a href="#" onclick="KitchenSink.Samples.Network.start_status_notify()">Start detecting network events</a></li>
+      <li><a href="#" onclick="KitchenSink.Samples.Network.stop_status_notify()">Stop detecting network events</a></li>
+      <li><a href="#" onclick="KitchenSink.Samples.Network.upload_file()">Upload file</a></li>
+      <li><a href="#" onclick="KitchenSink.Samples.Network.download_file()">Download file</a></li>
+      <li><a href="#">Using http headers and verbs</a></li>
+      <li><a href="#">Connecting with basic authentication</a></li>      
+    </ul>
+    
   </div>
   
   <div data-role="collapsible">
@@ -80,14 +161,60 @@
   
   <div data-role="collapsible">
     <h3>Signature</h3>
+    <h4>Ruby</h4>
+    <ul data-role="listview" data-inset="true">
+      <li><a href="<%= url_for :controller => :Signature, :action => :set_properties %>">Set capture properties</a></li>
+      <li><a href="#">Capture to file</a></li>
+      <li><a href="#">Capture to dataURI</a></li>
+      <li><a href="<%= url_for :controller => :Signature, :action => :capture_fullscreen %>">Capture full-screen</a></li>
+      <li><a href="<%= url_for :controller => :Signature, :action => :capture_inline %>">Capture in a window (responsive)</a></li>
+      <li><a href="#">Display captured signature in a view</a></li>
+      <li><a href="#">Change orientation before / after capture</a></li>
+    </ul>
+    
   </div>
   
   <div data-role="collapsible">
     <h3>System</h3>
+    <h4>Ruby</h4>
+    <ul data-role="listview" data-inset="true">
+      <li><a href="<%= url_for :controller => :System, :action => :capabilities %>">Get device capabilities</a></li>
+      <li><a href="<%= url_for :controller => :System, :action => :install_or_uninstall_app %>">Install / uninstall other applications</a></li>
+      <li><a href="<%= url_for :controller => :System, :action => :get_version_info %>">Detecting version information</a></li>
+      <li><a href="<%= url_for :controller => :System, :action => :local_serverport %>">LocalServerPort for debug purposes</a></li>
+      <li><a href="<%= url_for :controller => :System, :action => :zip %>">Zipping files</a></li>      
+    </ul>
+
+    <h4>Javascript</h4>
+    <ul data-role="listview" data-inset="true">
+      <li><a href="#" onclick="KitchenSink.Samples.System.capabilities()">Get device capabilities</a></li>
+      <li><a href="#" onclick="KitchenSink.Samples.System.install_or_uninstall_app()">Install / uninstall other applications</a></li>
+      <li><a href="#" onclick="KitchenSink.Samples.System.get_version_info()">Detecting version information</a></li>
+      <li><a href="#" onclick="KitchenSink.Samples.System.local_serverport()">LocalServerPort for debug purposes</a></li>
+      <li><a href="#" onclick="KitchenSink.Samples.System.zip()">Zipping files</a></li>      
+    </ul>    
   </div>
   
   <div data-role="collapsible">
     <h3>Webview</h3>
+    <h4>Ruby</h4>
+     <ul data-role="listview" data-inset="true">
+       <li><a href="<%= url_for :controller => :Webview, :action => :properties %>">Controlling Webview properties</a></li>
+       <li><a href="<%= url_for :controller => :Webview, :action => :call_js %>">Interacting with Webview - execute_js</a></li> 
+       <li><a href="<%= url_for :controller => :Webview, :action => :navigate %>">Navigating to pages</a></li>    
+       <li><a href="<%= url_for :controller => :Webview, :action => :refresh %>">Refresh the page</a></li>  
+       <li><a href="<%= url_for :controller => :Webview, :action => :save %>">Save the page</a></li>    
+     </ul>
+    <h4>Javascript</h4>
+    <ul data-role="listview" data-inset="true">
+       <li><a href="#" onclick="KitchenSink.Samples.Webview.activeTab()">Active Tab</a></li>
+       <li><a href="#" onclick="KitchenSink.Samples.Webview.currentLocation()">Current Location</a></li>
+       <li><a href="#" onclick="KitchenSink.Samples.Webview.currentURL()">Current URL</a></li>
+       <li><a href="#" onclick="KitchenSink.Samples.Webview.executeJavascript()">Interacting with Webview - execute_js</a></li>
+       <li><a href="#" onclick="KitchenSink.Samples.Webview.navigate()">Navigating to pages</a></li>
+       <li><a href="#" onclick="KitchenSink.Samples.Webview.refresh()">Refresh the page</a></li>
+     </ul>
+    
   </div>
   
 </div>
