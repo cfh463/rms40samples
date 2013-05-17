@@ -14,9 +14,10 @@ KitchenSink.Samples.Application = KitchenSink.Samples.Application || (function()
 	}
 
 	function set_locale() {
-		Rho.Application.setLocale('en')
-		var current_locale = Rho.Application.locale();
-		alert(current_locale)
+		var previous_locale = Rho.Application.locale;
+		Rho.Application.setLocale('de');
+		var current_locale = Rho.Application.locale;
+		alert("Old locale: "+old_locale+"\nCurrent locale: " + current_locale)
 	}
 
 	function quit_app() {

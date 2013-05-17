@@ -22,7 +22,7 @@ class ApplicationController < Rho::RhoController
    def set_locale
     @previous_locale = Rho::Application.locale
   	Rho::Application.setLocale('de')
-  	@current_locale = current_locale = Rho::Application.locale
+  	@current_locale = Rho::Application.locale
    end
 
    def quit_app 
