@@ -2,10 +2,10 @@ KitchenSink.Samples.Webview = KitchenSink.Samples.Webview || (function() {
 
 	function setProperties() {
 		
-		var fullScreen = Rho::WebView.fullScreen();
+		var fullScreen = Rho.WebView.fullScreen();
 		var currentURL = Rho.WebView.currentURL();
 		var currentLocation =Rho.WebView.currentLocation();
-		var acceptLanguage = Rho::WebView.acceptLanguage();
+		var acceptLanguage = Rho.WebView.acceptLanguage();
 	
 
 		var message = "CurrentURL: " + currentURL + "\n" + "Current Location: " + currentLocation + "\n" + "Full Screen: " + fullScreen + "\n" + "Language: " + acceptLanguage;
@@ -40,6 +40,10 @@ KitchenSink.Samples.Webview = KitchenSink.Samples.Webview || (function() {
 	function refresh() {
 	   Rho.WebView.refresh();
 		
+	}
+	
+	function savePage() {
+		alert("Yet to implement")
 	}
 
 	return {
