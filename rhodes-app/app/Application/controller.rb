@@ -31,6 +31,7 @@ class ApplicationController < Rho::RhoController
 
   def minimize_app
     Rho::Application.minimize
+    render :action => :confirm_minimize_app
   end
   
   def restore_app

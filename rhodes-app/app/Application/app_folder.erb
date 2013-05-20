@@ -9,15 +9,23 @@
     " }
     %>
 
-    <ul>
-      <li>App folder: <%= @app_folder %></li>
-      <li>Apps bundle folder: <%= @apps_bundle_folder %></li>
-      <li>Database blob folder: <%= @database_blob_folder %></li>
-      <li>Public folder: <%= @public_folder %></li>
-      <li>User folder: <%= @user_folder %></li>
-    </ul>
+    <%= render :partial => "/partials/language_tabs" %>
     
-    <a href="#" onclick="KitchenSink.Samples.Application.app_folder()">This sample in Javascript</a>
+    <div class="sample ruby">
+      <ul>
+        <li>App folder: <%= @app_folder %></li>
+        <li>Apps bundle folder: <%= @apps_bundle_folder %></li>
+        <li>Database blob folder: <%= @database_blob_folder %></li>
+        <li>Public folder: <%= @public_folder %></li>
+        <li>User folder: <%= @user_folder %></li>
+      </ul>
+    </div>
+    
+    <div class="sample javascript">
+          <a href="#" data-role="button" onclick="KitchenSink.Samples.Application.app_folder()">Get app folders</a>    
+    </div>
+    
+    
   </div>
 
 
