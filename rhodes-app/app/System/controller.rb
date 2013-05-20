@@ -44,11 +44,22 @@ class SystemController < Rho::RhoController
   	Alert.show_popup(local_port)
   end
 
-  def zip
+  def zip_files
   	# unzip a file 
   	Rho::System.unzipFile("/app/public/sample.zip")
 
   	# zip a file
   	Rho::System.zipFile("/app/public", "/app/public/sample.txt")
   end
+  
+  def get_version
+     @version_info = Rho::System.osVersion
+  #   Alert.show_popup(version_info)
+   end
+   
+  def get_local_serverport
+      # Get port of the local (embedded) HTTP server
+      @local_port = Rho::System.localServerPort()
+      #Alert.show_popup(local_port)
+    end
 end

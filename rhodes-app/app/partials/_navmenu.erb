@@ -171,31 +171,14 @@
     
     <div data-role="collapsible"  data-filter="system capabilities install uninstall version server port local zip unzip">
       <h3>System</h3>
-<ul data-role="listview" data-inset="true">
+     <ul data-role="listview" data-inset="true">
        <li><a href="<%= url_for :controller => :System, :action => :capabilities %>">Get device capabilities</a></li>
-       <li><a href="<%= url_for :controller => :System, :action => :install_or_uninstall_app %>">Install / uninstall other applications</a></li>
-       <li><a href="<%= url_for :controller => :System, :action => :get_version_info %>">Detecting version information</a></li>
-       <li><a href="<%= url_for :controller => :System, :action => :local_serverport %>">LocalServerPort for debug purposes</a></li>
+       <li><a href="<%= url_for :controller => :System, :action => :install_app %>">Install / uninstall other applications</a></li>
+       <li><a href="<%= url_for :controller => :System, :action => :get_version %>">Detecting version information</a></li>
+       <li><a href="<%= url_for :controller => :System, :action => :get_local_serverport %>">LocalServerPort for debug purposes</a></li>
        <li><a href="<%= url_for :controller => :System, :action => :zip %>">Zipping files</a></li>      
      </ul>
-      
-      <h4>Ruby</h4>
-      <ul data-role="listview" data-inset="true">
-        <li><a href="<%= url_for :controller => :System, :action => :capabilities %>">Get device capabilities</a></li>
-        <li><a href="<%= url_for :controller => :System, :action => :install_or_uninstall_app %>">Install / uninstall other applications</a></li>
-        <li><a href="<%= url_for :controller => :System, :action => :get_version_info %>">Detecting version information</a></li>
-        <li><a href="<%= url_for :controller => :System, :action => :local_serverport %>">LocalServerPort for debug purposes</a></li>
-        <li><a href="<%= url_for :controller => :System, :action => :zip %>">Zipping files</a></li>      
-      </ul>
-  
-      <h4>Javascript</h4>
-      <ul data-role="listview" data-inset="true">
-        <li><a href="#" onclick="KitchenSink.Samples.System.capabilities()">Get device capabilities</a></li>
-        <li><a href="#" onclick="KitchenSink.Samples.System.install_or_uninstall_app()">Install / uninstall other applications</a></li>
-        <li><a href="#" onclick="KitchenSink.Samples.System.get_version_info()">Detecting version information</a></li>
-        <li><a href="#" onclick="KitchenSink.Samples.System.local_serverport()">LocalServerPort for debug purposes</a></li>
-        <li><a href="#" onclick="KitchenSink.Samples.System.zip()">Zipping files</a></li>      
-      </ul>    
+        
     </div>
     
     <div data-role="collapsible"  data-filter="webview web view execute javascript navigate refresh save">
