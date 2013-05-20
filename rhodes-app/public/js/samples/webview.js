@@ -1,5 +1,17 @@
 KitchenSink.Samples.Webview = KitchenSink.Samples.Webview || (function() {
 
+	function setProperties() {
+		
+		var fullScreen = Rho::WebView.fullScreen();
+		var currentURL = Rho.WebView.currentURL();
+		var currentLocation =Rho.WebView.currentLocation();
+		var acceptLanguage = Rho::WebView.acceptLanguage();
+	
+
+		var message = "CurrentURL: " + currentURL + "\n" + "Current Location: " + currentLocation + "\n" + "Full Screen: " + fullScreen + "\n" + "Language: " + acceptLanguage;
+
+		alert(message);
+	}
 	function activeTab() {
 		myvar = Rho.WebView.activeTab();
 		alert(myvar);
@@ -31,6 +43,7 @@ KitchenSink.Samples.Webview = KitchenSink.Samples.Webview || (function() {
 	}
 
 	return {
+		setProperties: setProperties,
 		activeTab: activeTab,
 		currentLocation: currentLocation,
 		currentURL: currentURL,

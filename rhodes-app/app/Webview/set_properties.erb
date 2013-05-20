@@ -1,0 +1,28 @@
+<div data-role="page">
+
+  <%= render :partial => "/partials/page_head" %>
+    
+  <div data-role="content">
+  
+    <%= render :partial => "/partials/example_header", :locals => {:title => "Controlling Webview properties", :description => "
+      This example will show you how to control the webview properties
+    " }
+    %>
+
+    <%= render :partial => "/partials/language_tabs" %>
+    
+    <div class="sample ruby">
+      <ul>
+      <li>Language: <%= @acceptLanguage %></li>
+      <li>Fullscreen: <%= @fullScreen %></li>
+      <li>Current URL: <%= @currentURL %></li>
+      <li>Current Location: <%= @currentLocation %></li>
+      </ul>
+    </div>
+    
+    <div class="sample javascript">
+          <a href="#" data-role="button" onclick="KitchenSink.Samples.Webview.setProperties()">Controlling Webview properties</a>    
+    </div>
+    
+    
+  </div>
