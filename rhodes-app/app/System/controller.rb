@@ -13,28 +13,16 @@ class SystemController < Rho::RhoController
   
   def capabilities 
   	# Returns true if device supports Motorola device capabilities, such as Scanner, etc.
-  	is_motorola_device = Rho::System.isMotorolaDevice
-  	
-  	has_calendar = Rho::System.hasCalendar
-  	has_camera = Rho::System.hasCamera
-    has_cell_network = Rho::System.hasCellNetwork
-    has_wifi_network = Rho::System.hasWifiNetwork
-    has_network = Rho::System.hasNetwork
-    has_sqlite = Rho::System.hasSqlite
-    has_touchscreen = Rho::System.hasTouchscreen
-
-    message = "
-    Motorola device: #{is_motorola_device}
-    Calendar: #{has_calendar}
-    Camera: #{has_camera}
-    Cell network: #{has_cell_network}
-    WiFi: #{has_wifi_network}
-    Network: #{has_network}
-    SQLite: #{has_sqlite}
-    Touchscreen: #{has_touchscreen}"
-
-    Alert.show_popup(message)
-    redirect :index
+  	@is_motorola_device = Rho::System.isMotorolaDevice
+  	@has_calendar = Rho::System.hasCalendar
+  	@has_camera = Rho::System.hasCamera
+    @has_cell_network = Rho::System.hasCellNetwork
+    @has_wifi_network = Rho::System.hasWifiNetwork
+    @has_network = Rho::System.hasNetwork
+    @has_sqlite = Rho::System.hasSqlite
+    @has_touchscreen = Rho::System.hasTouchscreen
+    
+   
   end
 
   def install_or_uninstall_app
