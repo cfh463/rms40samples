@@ -192,23 +192,13 @@
     
     <div data-role="collapsible"  data-filter="webview web view execute javascript navigate refresh save">
       <h3>Webview</h3>
-      <h4>Ruby</h4>
-       <ul data-role="listview" data-inset="true">
-         <li><a href="<%= url_for :controller => :Webview, :action => :properties %>">Controlling Webview properties</a></li>
-         <li><a href="<%= url_for :controller => :Webview, :action => :call_js %>">Interacting with Webview - execute_js</a></li> 
-         <li><a href="<%= url_for :controller => :Webview, :action => :navigate %>">Navigating to pages</a></li>    
-         <li><a href="<%= url_for :controller => :Webview, :action => :refresh %>">Refresh the page</a></li>  
-         <li><a href="<%= url_for :controller => :Webview, :action => :save %>">Save the page</a></li>    
-       </ul>
-      <h4>Javascript</h4>
       <ul data-role="listview" data-inset="true">
-         <li><a href="#" onclick="KitchenSink.Samples.Webview.activeTab()">Active Tab</a></li>
-         <li><a href="#" onclick="KitchenSink.Samples.Webview.currentLocation()">Current Location</a></li>
-         <li><a href="#" onclick="KitchenSink.Samples.Webview.currentURL()">Current URL</a></li>
-         <li><a href="#" onclick="KitchenSink.Samples.Webview.executeJavascript()">Interacting with Webview - execute_js</a></li>
-         <li><a href="#" onclick="KitchenSink.Samples.Webview.navigate()">Navigating to pages</a></li>
-         <li><a href="#" onclick="KitchenSink.Samples.Webview.refresh()">Refresh the page</a></li>
-       </ul>
+        <li><a href="<%= url_for :controller => :Webview, :action => :set_properties %>">Controlling Webview properties</a></li>
+        <li><a href="<%= url_for :controller => :Webview, :action => :call_js %>">Interacting with Webview - execute_js</a></li> 
+        <li><a href="<%= url_for :controller => :Webview, :action => :navigate %>">Navigating to pages</a></li>    
+        <li><a href="<%= url_for :controller => :Webview, :action => :refresh %>">Refresh the page</a></li>  
+        <li><a href="<%= url_for :controller => :Webview, :action => :save %>">Save the page</a></li>    
+      </ul>
       
     </div>
     

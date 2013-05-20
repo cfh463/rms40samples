@@ -34,7 +34,7 @@ class WebviewController < Rho::RhoController
     render :action => :showrequest
   end
   
-  def call_js
+  def execute_code
     #call javascript alert on the current page
     Rho::WebView.executeJavascript("alert('This is Webview.executejavascript function');")
   end
@@ -44,7 +44,7 @@ class WebviewController < Rho::RhoController
       Rho::WebView.navigateBack
   end
   
-  def navigate
+  def navigate_page
     #Force WebView to navigate to a URL.
     Rho::WebView.navigate(url_for(:action => :showrequest))
   end
@@ -58,5 +58,13 @@ class WebviewController < Rho::RhoController
     # saves the current page
     # currently not working. Have to check why?
    # Rho::WebView.save('jpeg','/app')
+  end
+  
+  def call_js
+  render
+  end
+  
+  def navigate
+  render
   end
 end
