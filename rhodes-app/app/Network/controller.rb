@@ -96,6 +96,19 @@ class NetworkController < Rho::RhoController
   	end
   end
 
+  def start_statusnotify
+    
+  end
 
-
+  def stop_statusnotify
+    
+  end
+  
+  def upload
+   
+  end
+  
+  def download
+    
+  end
 end
