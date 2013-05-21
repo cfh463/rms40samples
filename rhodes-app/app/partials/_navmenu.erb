@@ -95,6 +95,17 @@
     
     <div data-role="collapsible"  data-filter="log info warning debug memory usage read clean category categories">
       <h3>Log</h3>
+      
+     <ul data-role="listview" data-inset="true">
+         <li><a href="<%= url_for :controller => :Log, :action => :logginig_categories %>">Logging categories</a></li>
+         <li><a href="<%= url_for :controller => :Log, :action => :log_memory_usage %>">Logging memory usage</a></li>
+         <li><a href="#">Logging to remote location</a></li>
+         <li><a href="<%= url_for :controller => :Log, :action => :show_log %>">Show log</a></li>
+         <li><a href="<%= url_for :controller => :Log, :action => :read_log_file %>">Read log file</a></li>
+         <li><a href="<%= url_for :controller => :Log, :action => :clean_log_file %>">Clean log file</a></li>
+       </ul>
+       
+       
       <h4>Ruby</h4>
         <ul data-role="listview" data-inset="true">
           <li><a href="<%= url_for :controller => :Log, :action => :log_categories %>">Logging categories</a></li>
@@ -118,27 +129,15 @@
     
     <div data-role="collapsible"  data-filter="network wifi 3g cdma hsdpa gprs wireless connection upload download http authentication">
       <h3>Network</h3>
-      <h4>Ruby</h4>
-      <ul data-role="listview" data-inset="true">
+       <ul data-role="listview" data-inset="true">
         <li><a href="<%= url_for :controller => :Network, :action => :network_availability %>">Detect network availability</a></li>
-        <li><a href="<%= url_for :controller => :Network, :action => :start_status_notify %>">Start detecting network events</a></li>
-        <li><a href="<%= url_for :controller => :Network, :action => :stop_status_notify %>">Stop detecting network events</a></li>
-        <li><a href="<%= url_for :controller => :Network, :action => :upload_file %>">Upload file</a></li>
-        <li><a href="<%= url_for :controller => :Network, :action => :download_file %>">Download file</a></li>
+        <li><a href="<%= url_for :controller => :Network, :action => :start_statusnotify %>">Start detecting network events</a></li>
+        <li><a href="<%= url_for :controller => :Network, :action => :stop_statusnotify %>">Stop detecting network events</a></li>
+        <li><a href="<%= url_for :controller => :Network, :action => :upload %>">Upload file</a></li>
+        <li><a href="<%= url_for :controller => :Network, :action => :download %>">Download file</a></li>
         <li><a href="#">Using http headers and verbs</a></li>
         <li><a href="#">Connecting with basic authentication</a></li>      
       </ul>
-      <h4>Javascript</h4>
-      <ul data-role="listview" data-inset="true">
-        <li><a href="#" onclick="KitchenSink.Samples.Network.network_availability()">Detect network availability</a></li>
-        <li><a href="#" onclick="KitchenSink.Samples.Network.start_status_notify()">Start detecting network events</a></li>
-        <li><a href="#" onclick="KitchenSink.Samples.Network.stop_status_notify()">Stop detecting network events</a></li>
-        <li><a href="#" onclick="KitchenSink.Samples.Network.upload_file()">Upload file</a></li>
-        <li><a href="#" onclick="KitchenSink.Samples.Network.download_file()">Download file</a></li>
-        <li><a href="#">Using http headers and verbs</a></li>
-        <li><a href="#">Connecting with basic authentication</a></li>      
-      </ul>
-      
     </div>
     
     <div data-role="collapsible">

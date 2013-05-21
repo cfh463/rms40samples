@@ -13,15 +13,18 @@ class LogController < Rho::RhoController
   def log_categories
     Rho::Log.info("Consectetuer adipiscing elit", "Lorem Ipsum")
     Rho::Log.info("Foo acquired value Bar in method Baz", "Miscellaneous")    
-    redirect :index
+    redirect :logginig_categories
+  end
+  
+  def logginig_categories
   end
   
   def log_memory_usage
     # Request that memory usage be logged automatically by the system every second
     Rho::Log.memoryPeriod = 1000
-    redirect :index
+    @memory_period = Rho::Log.memoryPeriod
   end
-  
+ 
   def show_log
     # Show the contents of the log file in a window with controls to refresh, clear and send. Useful for debugging and when asking users to report error messages
     Rho::Log.showLog
