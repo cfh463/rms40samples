@@ -9,7 +9,9 @@ class DatabaseController < Rho::RhoController
   def index
     render
   end
-
+  def init_db
+    render
+  end
   def initdb
     Rho::Log.info("Initializing database", "Sample")
     Rho::Database.initialize(Rho::Application.databaseFilePath,"partition1")
@@ -21,7 +23,7 @@ class DatabaseController < Rho::RhoController
     Rho::Database.executeSQL("Insert into users (user_id,active) values (3,1)")
     Rho::Database.executeSQL("Insert into users (user_id,active) values (4,1)")
     Rho::Database.executeSQL("Insert into users (user_id,active) values (5,1)")
-    redirect :index
+    redirect :init_db
   end  
   
   def transactions
