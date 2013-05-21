@@ -12,31 +12,21 @@ class WebviewController < Rho::RhoController
   
   def set_properties
     Rho::WebView.acceptLanguage = Rho::WebView.acceptLanguage == "en-US" ? "de" : "en-US"
-    Rho::WebView.fullScreen = !Rho::WebView.fullScreen
     @acceptLanguage = @request["headers"]["Accept-Language"]
     @fullScreen = Rho::WebView.fullScreen ? "Yes" : "No"
     @currentURL = Rho::WebView.currentURL
     @currentLocation = Rho::WebView.currentLocation
   end
   
-  def setproperties
-    Rho::WebView.acceptLanguage = Rho::WebView.acceptLanguage == "en-US" ? "de" : "en-US"
+  def toggle_fullscreen
     Rho::WebView.fullScreen = !Rho::WebView.fullScreen
-     
-    redirect(url_for(:action => :showrequest))
-  end
-  
-  def showrequest
-    @acceptLanguage = @request["headers"]["Accept-Language"]
-    @fullScreen = Rho::WebView.fullScreen ? "Yes" : "No"
-    @currentURL = Rho::WebView.currentURL
-    @currentLocation = Rho::WebView.currentLocation
-    render :action => :showrequest
+    redirect :set_properties
   end
   
   def execute_code
     #call javascript alert on the current page
-    Rho::WebView.executeJavascript("alert('This is Webview.executejavascript function');")
+    Rho::WebView.executeJavascript("alert('This javascript alert was called from ruby code');")
+    redirect :call_js
   end
   
   def go_back
@@ -49,7 +39,7 @@ class WebviewController < Rho::RhoController
     Rho::WebView.navigate(url_for(:action => :showrequest))
   end
   
-  def refresh
+  def refresh_page
     # call to refresh the current page.
     Rho::WebView.refresh()
   end
@@ -61,10 +51,10 @@ class WebviewController < Rho::RhoController
   end
   
   def call_js
-  render
+    render
   end
   
   def navigate
-  render
+    render
   end
 end

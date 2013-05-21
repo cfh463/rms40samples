@@ -13,21 +13,31 @@ class LogController < Rho::RhoController
   def log_categories
     Rho::Log.info("Consectetuer adipiscing elit", "Lorem Ipsum")
     Rho::Log.info("Foo acquired value Bar in method Baz", "Miscellaneous")    
-    redirect :logginig_categories
+    redirect :logging_categories
   end
   
+
   def logginig_categories
     render
   end
   
-  def log_memory_usage
+  def start_logging_memory_usage
     # Request that memory usage be logged automatically by the system every second
     Rho::Log.memoryPeriod = 1000
-    @memory_period = Rho::Log.memoryPeriod
+    redirect :action => :log_memory_usage
+  end
+  
+  def stop_logging_memory_usage
+    Rho::Log.memoryPeriod = 0
+    redirect :action => :log_memory_usage
   end
   
   def show_log_info
     render
+  end
+ 
+  def log_memory_usage
+    @memory_period = Rho::Log.memoryPeriod
   end
   
   def show_log
