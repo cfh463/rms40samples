@@ -6,9 +6,16 @@ KitchenSink.Samples.Log = KitchenSink.Samples.Log || (function() {
 	    Rho.Log.info("Foo acquired value Bar in method Baz", "Miscellaneous");
 	  }
 	  
-	  function log_memory_usage() {
+	  function start_logging_memory_usage() {
 	    // Request that memory usage be logged automatically by the system every second
 	    Rho.Log.memoryPeriod = 1000;
+	    $(".memory_usage_log_status").text("Enabled");
+	  }
+
+	  function stop_logging_memory_usage() {
+	    // Stop automatic memory-usage logging
+	    Rho.Log.memoryPeriod = 0;
+	    $(".memory_usage_log_status").text("Disabled");
 	  }
 	  
 	  function show_log() {
@@ -30,7 +37,8 @@ KitchenSink.Samples.Log = KitchenSink.Samples.Log || (function() {
 	
 	return {
 		log_categories : log_categories,
-		log_memory_usage : log_memory_usage,
+		start_logging_memory_usage : start_logging_memory_usage,
+		stop_logging_memory_usage : stop_logging_memory_usage,
 		show_log : show_log,
 		read_log_file : read_log_file,
 		clean_log_file : clean_log_file
