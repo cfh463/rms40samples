@@ -21,15 +21,8 @@
         <li><a href="<%= url_for :controller => :Barcode, :action => :choose_scanner %>">Select scanner to use</a></li>
         <li><a href="<%= url_for :controller => :Barcode, :action => :confirm_set_symbology %>">Set symbology</a></li>
         <li><a href="<%= url_for :controller => :Barcode, :action => :edit_properties %>">Control scanner properties</a></li>
-        <li><a href="<%= url_for :controller => :Barcode, :action => :confirm_change_audible_options %>">Change audible options</a></li>
+        <li><a href="<%= url_for :controller => :Barcode, :action => :edit_audible_options %>">Change audible options</a></li>
       </ul>
-
-      <ul data-role="listview" data-inset="true">
-        <li><a href="#" onclick="KitchenSink.Samples.Barcode.choose_scanner()">Select scanner to use</a></li>
-        <li><a href="#" onclick="KitchenSink.Samples.Barcode.set_symbology()">Set symbology</a></li>
-        <li><a href="#" onclick="KitchenSink.Samples.Barcode.control_properties()">Control scanner properties</a></li>
-        <li><a href="#" onclick="KitchenSink.Samples.Barcode.change_audible_options()">Change audible options</a></li>
-      </ul>        
     </div>
   
     <div data-role="collapsible" data-filter="camera picture image gallery">
