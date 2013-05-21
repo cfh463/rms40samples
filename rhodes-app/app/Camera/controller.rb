@@ -47,7 +47,7 @@ class CameraController < Rho::RhoController
     render
   end
 
-  def control_image_properties
+  def sample_control_image_properties
     # Instead of accepting the defaults, let's set some properties to our liking
     
     # We will ask for a PNG file...
@@ -62,6 +62,19 @@ class CameraController < Rho::RhoController
     
     # Now, take the picture
     Rho::Camera.take_picture({}, :picture_taken_callback)    
+  end
+  
+  def edit_image_properties
+    @valid_sizes = Rho::Camera.supportedSizeList
+    Rho::Log.info(@valid_sizes.inspect,"VALID SIZES")
+  end
+  
+  def set_image_properties
+    Rho::Camera.compressionFormat = @params[:compressionFormat]
+    Rho::Camera.desiredWidth = @params[:desiredWidth]
+    Rho::Camera.desiredHeight = @params[:desiredHeight]
+      
+    Rho::Camera.take_picture({}, :picture_taken_callback)      
   end
   
   def select_picture_from_gallery 

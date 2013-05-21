@@ -18,7 +18,7 @@
       <h3>Barcode</h3>
       <ul data-role="listview" data-inset="true">
         <li><a href="<%= url_for :controller => :Barcode, :action => :confirm_scan_using_default_scanner %>">Scan using default scanner</a></li>
-        <li><a href="<%= url_for :controller => :Barcode, :action => :choose_scanner %>">Select scanner to use</a></li>
+        <li><a href="<%= url_for :controller => :Barcode, :action => :choose_scanner %>">Choose scanner to use</a></li>
         <li><a href="<%= url_for :controller => :Barcode, :action => :confirm_set_symbology %>">Set symbology</a></li>
         <li><a href="<%= url_for :controller => :Barcode, :action => :edit_properties %>">Control scanner properties</a></li>
         <li><a href="<%= url_for :controller => :Barcode, :action => :edit_audible_options %>">Change audible options</a></li>
@@ -27,30 +27,14 @@
   
     <div data-role="collapsible" data-filter="camera picture image gallery">
       <h3>Camera</h3>
-      <h4>Ruby</h4>
       <ul data-role="listview" data-inset="true">
         <li><a href="<%= url_for :controller => :Camera, :action => :take_picture_with_default_camera %>">Take a picture with default camera/settings</a></li>
-        <li><a href="<%= url_for :controller => :Camera, :action => :choose_camera %>">Allow user to choose camera</a></li>
+        <li><a href="<%= url_for :controller => :Camera, :action => :choose_camera %>">Choose camera to use</a></li>
         <li><a href="<%= url_for :controller => :Camera, :action => :determine_camera_capabilities %>">Determine camera capabilities</a></li>
-        <li><a href="<%= url_for :controller => :Camera, :action => :control_image_properties %>">Control image properties (size, resolution, etc)</a></li>
+        <li><a href="<%= url_for :controller => :Camera, :action => :edit_image_properties %>">Control image properties (size, resolution, etc)</a></li>
         <li><a href="<%= url_for :controller => :Camera, :action => :select_picture_from_gallery %>">Select picture from gallery</a></li>
         <li><a href="<%= url_for :controller => :Camera, :action => :take_picture_and_save_it_to_gallery %>">Take picture and save it to the gallery</a></li>
       </ul>
-      
-      <h4>Javascript</h4>
-      <ul data-role="listview" data-inset="true">
-        <li><a href="#" onclick="KitchenSink.Samples.Camera.take_picture_with_default_camera()">Take a picture with default camera/settings</a></li>
-        <li><a href="#" onclick="KitchenSink.Samples.Camera.choose_camera()">Allow user to choose camera</a>
-          <div id="camera_list">
-          </div>
-        </li>
-        <li><a href="#" onclick="KitchenSink.Samples.Camera.determine_camera_capabilities()">Determine camera capabilities</a>
-          <div id="camera_capabilities">
-          </div>
-        </li>
-        <li><a href="#" onclick="KitchenSink.Samples.Camera.control_image_properties()">Control image properties (size, resolution, etc)</a></li>
-        <li><a href="#" onclick="KitchenSink.Samples.Camera.take_picture_and_save_it_to_gallery()">Interaction with Gallery</a></li>
-      </ul>    
     </div>
           
     <div data-role="collapsible"  data-filter="cardreader card reader msr magnetic stripe credit identification">
@@ -97,7 +81,7 @@
       <h3>Log</h3>
       
      <ul data-role="listview" data-inset="true">
-         <li><a href="<%= url_for :controller => :Log, :action => :logginig_categories %>">Logging categories</a></li>
+         <li><a href="<%= url_for :controller => :Log, :action => :logging_categories %>">Logging categories</a></li>
          <li><a href="<%= url_for :controller => :Log, :action => :log_memory_usage %>">Logging memory usage</a></li>
          <li><a href="#">Logging to remote location</a></li>
          <li><a href="<%= url_for :controller => :Log, :action => :show_log %>">Show log</a></li>
@@ -175,10 +159,10 @@
       <h3>Webview</h3>
       <ul data-role="listview" data-inset="true">
         <li><a href="<%= url_for :controller => :Webview, :action => :set_properties %>">Controlling Webview properties</a></li>
-        <li><a href="<%= url_for :controller => :Webview, :action => :call_js %>">Interacting with Webview - execute_js</a></li> 
+        <li><a href="<%= url_for :controller => :Webview, :action => :call_js %>">Executing javascript</a></li> 
         <li><a href="<%= url_for :controller => :Webview, :action => :navigate %>">Navigating to pages</a></li>    
-        <li><a href="<%= url_for :controller => :Webview, :action => :refresh_app %>">Refresh the page</a></li>  
-        <li><a href="<%= url_for :controller => :Webview, :action => :save_page %>">Save the page - yet to implement</a></li>    
+        <li><a href="<%= url_for :controller => :Webview, :action => :refresh_page %>">Refreshing the page</a></li>  
+        <li><a href="<%= url_for :controller => :Webview, :action => :save_page %>">Saving the page - yet to implement</a></li>    
       </ul>
       
     </div>

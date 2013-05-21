@@ -30,13 +30,13 @@ KitchenSink.Samples.Camera = KitchenSink.Samples.Camera || (function($) {
       for (var cameraIndex=0; cameraIndex<cameras.length; cameraIndex++) {
         var camera = cameras[cameraIndex];
         // Create a link for each camera with an onclick handler
-        cameraList = cameraList +'<li><a href="#" class="take_picture_with_selected_camera" onclick="take_picture_with_camera('+cameraIndex+')">'+camera.cameraType+'</a></li>';
+        cameraList = cameraList +'<li><a href="#" class="take_picture_with_selected_camera" onclick="take_picture_with_camera('+cameraIndex+')" data-role="button">'+camera.cameraType+'</a></li>';
       }
       
       cameraList = cameraList+"</ul>";
       
       // make camera list visible to the user
-      $("#camera_list").html(cameraList);
+      $(this).closest(".sample.javascript").find(".camera_list").html(cameraList).trigger("create");
     }
     
     function determine_camera_capabilities() {

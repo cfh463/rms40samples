@@ -1,16 +1,29 @@
 <div data-role="page">
 
-    
-  <div data-role="header" data-position="inline">
-    <h1>Select a scanner</h1>
-  </div>
+<%= render :partial => "/partials/page_head" %>
+  
+<div data-role="content">
+
+  <%= render :partial => "/partials/example_header", :locals => {:title => "Choose camera", :description => "
+    On devices with more than one camera, you can select which camera to use for taking pictures
+  " }
+  %>
+
+  <%= render :partial => "/partials/language_tabs" %>
 
   <div data-role="content">
-    <ul data-role="listview">
-    <% $cameras.each_with_index do |camera, index| %>
-      <li><a href="<%= url_for(:action => :take_picture_using_chosen_camera, :query => {:camera_index => index}) %>"><%= camera.cameraType %></li> 
-    <% end %>
-    </ul>
+    <div class="sample ruby">
+      <ul data-role="listview">
+        <% $cameras.each_with_index do |camera, index| %>
+          <li><a href="<%= url_for(:action => :take_picture_using_chosen_camera, :query => {:camera_index => index}) %>" data-role="button"><%= camera.cameraType %></a></li> 
+        <% end %>
+      </ul>
+    </div>
+    <div class="sample javascript">
+      <a href="#" onclick="KitchenSink.Samples.Camera.choose_camera()" data-role="button">Choose camera</a>
+      <div id="camera_list">
+      </div>
+    </div>    
   </div>
 
 </div>
