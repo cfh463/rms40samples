@@ -1,14 +1,20 @@
 <div data-role="page">
 
+<%= render :partial => "/partials/page_head" %>
+  
+<div data-role="content">
+
+  <%= render :partial => "/partials/example_header", :locals => {:title => "Choose scanner", :description => "
     
-  <div data-role="header" data-position="inline">
-    <h1>Select a scanner</h1>
-  </div>
+  " }
+  %>
+
+  <%= render :partial => "/partials/language_tabs" %>
 
   <div data-role="content">
     <ul data-role="listview">
     <% $scanners.each_with_index do |scanner, index| %>
-      <li><a href="<%= url_for(:action => :scan_using_chosen_scanner, :query => {:scanner_index => index}) %>"><%= scanner.friendlyName %></li> 
+      <li><a href="<%= url_for(:action => :scan_using_chosen_scanner, :query => {:scanner_index => index}) %>" data-role="button"><%= scanner.friendlyName %></li> 
     <% end %>
     </ul>
   </div>

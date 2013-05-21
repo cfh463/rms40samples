@@ -46,7 +46,7 @@ class BarcodeController < Rho::RhoController
     Rho::Barcode.take({}, url_for(:action => :scan_received_callback))
   end
   
-  def control_properties
+  def control_properties_sample
     # There are over 200 properties to fine-tune the barcode scanner functionality and adapt it to suit your application.
     # Almost all properties depend on the scanner hardware for support, please check the documentation to see if your device
     # supports a particular setting
@@ -76,7 +76,15 @@ class BarcodeController < Rho::RhoController
     Rho::Barcode.beamWidth = "wide"
   end
   
-  def change_audible_options
+  def set_properties
+    Rho::Barcode.aimMode = @params["aimMode"]
+    Rho::Barcode.aimType = @params["aimType"]
+    Rho::Barcode.beamWidth = @params["beamWidth"]
+
+    redirect :action => scan_using_default_scanner
+  end
+  
+  def sample_change_audible_options
     # Maximum volume (default)
     Rho::Barcode.decodeVolume = 5
     # Low-pitched sound
@@ -85,5 +93,13 @@ class BarcodeController < Rho::RhoController
     Rho::Barcode.decodeDuration = 1000
     
     Rho::Barcode.take({}, url_for(:action => :scan_received_callback))
+  end
+  
+  def set_audible_options
+    Rho::Barcode.decodeVolume = @params[:decodeVolume]
+    Rho::Barcode.decodeFrequency = @params[:decodeFrequency]
+    Rho::Barcode.decodeDuration = @params[:decodeDuration]
+      
+    scan_using_default_scanner
   end
 end

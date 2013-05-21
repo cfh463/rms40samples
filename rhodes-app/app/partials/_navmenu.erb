@@ -16,17 +16,15 @@
   
     <div data-role="collapsible" data-filter="barcode scanner symbology ean qr beep sound">
       <h3>Barcode</h3>
-      <h4>Ruby</h4>
       <ul data-role="listview" data-inset="true">
-        <li><a href="<%= url_for :controller => :Barcode, :action => :scan_using_default_scanner %>">Scan using default scanner</a></li>
+        <li><a href="<%= url_for :controller => :Barcode, :action => :confirm_scan_using_default_scanner %>">Scan using default scanner</a></li>
         <li><a href="<%= url_for :controller => :Barcode, :action => :choose_scanner %>">Select scanner to use</a></li>
-        <li><a href="<%= url_for :controller => :Barcode, :action => :set_symbology %>">Set symbology</a></li>
-        <li><a href="<%= url_for :controller => :Barcode, :action => :control_properties %>">Control scanner properties</a></li>
-        <li><a href="<%= url_for :controller => :Barcode, :action => :change_audible_options %>">Change audible options</a></li>
+        <li><a href="<%= url_for :controller => :Barcode, :action => :confirm_set_symbology %>">Set symbology</a></li>
+        <li><a href="<%= url_for :controller => :Barcode, :action => :edit_properties %>">Control scanner properties</a></li>
+        <li><a href="<%= url_for :controller => :Barcode, :action => :confirm_change_audible_options %>">Change audible options</a></li>
       </ul>
-      <h4>Javascript</h4>
+
       <ul data-role="listview" data-inset="true">
-        <li><a href="#" onclick="KitchenSink.Samples.Barcode.scan_using_default_scanner()">Scan using default scanner</a></li>
         <li><a href="#" onclick="KitchenSink.Samples.Barcode.choose_scanner()">Select scanner to use</a></li>
         <li><a href="#" onclick="KitchenSink.Samples.Barcode.set_symbology()">Set symbology</a></li>
         <li><a href="#" onclick="KitchenSink.Samples.Barcode.control_properties()">Control scanner properties</a></li>
