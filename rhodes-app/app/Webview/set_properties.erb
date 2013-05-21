@@ -13,15 +13,17 @@
     
     <div class="sample ruby">
       <ul>
-      <li>Language: <%= @acceptLanguage %></li>
-      <li>Fullscreen: <%= @fullScreen %></li>
-      <li>Current URL: <%= @currentURL %></li>
-      <li>Current Location: <%= @currentLocation %></li>
+        <li>Language: <%= @acceptLanguage %></li>
+        <li>Fullscreen: <%= @fullScreen %></li>
+        <li>Current URL: <%= @currentURL %></li>
+        <li>Current Location: <%= @currentLocation %></li>
       </ul>
+      <a href="<%= url_for(:action => :toggle_fullscreen) %>" data-role="button">Toggle fullscreen</a>
     </div>
     
     <div class="sample javascript">
-          <a href="#" data-role="button" onclick="KitchenSink.Samples.Webview.setProperties()">Controlling Webview properties</a>    
+          <a href="#" data-role="button" onclick="KitchenSink.Samples.Webview.getProperties()">Get Webview properties</a>
+          <a href="#" data-role="button" onclick="KitchenSink.Samples.Webview.toggleFullscreen()">Toggle fullscreen</a>
     </div>
     
     
