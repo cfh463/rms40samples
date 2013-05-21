@@ -14,7 +14,7 @@
   <div data-role="content">
     <ul data-role="listview">
     <% $scanners.each_with_index do |scanner, index| %>
-      <li><a href="<%= url_for(:action => :scan_using_chosen_scanner, :query => {:scanner_index => index}) %>" data-role="button"><%= scanner.friendlyName %></li> 
+      <li><a href="<%= url_for(:action => :scan_using_chosen_scanner, :query => {:scanner_index => index}) %>" data-role="button"><%= scanner.friendlyName %></a></li> 
     <% end %>
     </ul>
   </div>
