@@ -1,0 +1,30 @@
+<div data-role="page">
+
+  <%= render :partial => "/partials/page_head" %>
+    
+  <div data-role="content">
+  
+    <%= render :partial => "/partials/example_header", :locals => {:title => "Clean log file", :description => "
+      This example will clear your Log information
+      
+      
+    " }
+    %>
+
+    <%= render :partial => "/partials/language_tabs" %>
+    
+    <div class="sample ruby">
+      <ul>
+<li>Log File Contents Before : <%= @logFileContentBefore %> </li>
+<li>Log File Contents After : <%= @logFileContentAfter %> </li>
+
+ 
+      </ul>
+    </div>
+    
+    <div class="sample javascript">
+          <a href="#" data-role="button" onclick="KitchenSink.Samples.Log.clean_log_file()">Clean log file</a>
+    </div>
+    
+    
+  </div>
