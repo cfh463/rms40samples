@@ -55,21 +55,12 @@
           
     <div data-role="collapsible"  data-filter="cardreader card reader msr magnetic stripe credit identification">
       <h3>Card reader</h3>
-      <h4>Ruby</h4>
       <ul data-role="listview" data-inset="true">
-        <li><a href="<%= url_for(:controller => :Cardreader, :action => :connect) %>">Connecting to the card reader</a></li>
-        <li><a href="#">Reading card data</a></li>
-        <li><a href="<%= url_for(:controller => :Cardreader, :action => :set_properties) %>">Setting card reader properties</a></li>
-        <li><a href="#">More - see http://edgedocs.rhomobile.com/rhoelements/cardreader/#htmljavascript-examples for inspiration</a></li>      
-      </ul>
-      
-      <h4>Javascript</h4>
-      <ul data-role="listview" data-inset="true">
-        <li><a href="#" onclick="KitchenSink.Samples.CardReader.connect()">Connecting to the card reader</a></li>
-        <li><a href="#">Reading card data</a></li>
-        <li><a href="#" onclick="KitchenSink.Samples.CardReader.setProperties()" %>Setting card reader properties</a></li>
-        <li><a href="#">More - see http://edgedocs.rhomobile.com/rhoelements/cardreader/#htmljavascript-examples for inspiration</a></li>      
-      </ul>
+       <li><a href="<%= url_for(:controller => :Cardreader, :action => :open_cardreader) %>">Connecting to the card reader</a></li>
+       <li><a href="#">Reading card data</a></li>
+       <li><a href="<%= url_for(:controller => :Cardreader, :action => :properties) %>">Setting card reader properties</a></li>
+       <li><a href="#">More - see http://edgedocs.rhomobile.com/rhoelements/cardreader/#htmljavascript-examples for inspiration</a></li>      
+     </ul>
       
     </div>
     
