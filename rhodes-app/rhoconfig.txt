@@ -49,6 +49,9 @@ LastVisitedPage = ''
 # for example: 'http://localhost:9292/application'
 syncserver = ''
 
+# 0 will disable auto sync 
+sync_poll_interval=0
+
 # geo location inactivity timeout (in seconds)
 #geo_location_inactivity_timeout = 30
 
