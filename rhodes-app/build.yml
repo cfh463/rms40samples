@@ -6,8 +6,8 @@ build: "debug"
 bbver: 6.0
 applog: "rholog.txt"
 iphone:
-  configuration: "Release"
-  sdk: "iphonesimulator6.0"
+  configuration: Release
+  sdk: iphonesimulator6.1
   provisionprofile: 
   codesignidentity: 
   entitlements: 
@@ -24,3 +24,4 @@ extensions:
   - rhoconnect-client
   - rho-javascript
   - barcode
+  - signature
