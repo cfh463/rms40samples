@@ -32,7 +32,7 @@ class BarcodeController < Rho::RhoController
   end
     
   def scan_using_chosen_scanner
-    scanner = $scanners[@params["scannerIndex"].to_i]
+    scanner = $scanners[@params[:scanner_index].to_i]
     scanner.take({}, url_for(:action => :scan_received_callback))
   end
   
