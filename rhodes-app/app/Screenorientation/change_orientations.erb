@@ -1,0 +1,35 @@
+<div data-role="page">
+
+  <%= render :partial => "/partials/page_head" %>
+    
+  <div data-role="content">
+  
+    <%= render :partial => "/partials/example_header", :locals => {:title => "ScreenOrientation - change orientations ", :description => "
+      This example will change the orientation
+       " }
+    %>
+
+    <%= render :partial => "/partials/language_tabs" %>
+    
+    <div class="sample ruby">
+      <ul>
+		<li><a href="<%= url_for :action => :left_handed_position
+		 %>">ScreenOrientation - lefthanded orientation</a></li>
+        	<li><a href="<%= url_for :action => :right_handed_position
+			 %>">ScreenOrientation - righthanded orientation</a></li>
+				<li><a href="<%= url_for :action => :normal_position
+				 %>">ScreenOrientation - normal default orientation</a></li>
+					<li><a href="<%= url_for :action => :upside_down_position
+					 %>">ScreenOrientation - upsideDown orientation</a></li>
+      </ul>
+    </div>
+    
+    <div class="sample javascript">
+          <a href="#" data-role="button" onclick="KitchenSink.Samples.Screenorientation.leftHanded()">ScreenOrientation - lefthanded orientation</a>
+ <a href="#" data-role="button" onclick="KitchenSink.Samples.Screenorientation.rightHanded()">ScreenOrientation - righthanded orientation</a>
+ <a href="#" data-role="button" onclick="KitchenSink.Samples.Screenorientation.normal()">ScreenOrientation - normal default orientation</a>
+ <a href="#" data-role="button" onclick="KitchenSink.Samples.Screenorientation.upsideDown()">ScreenOrientation - upsideDown orientation</a>
+    </div>
+    
+    
+  </div>

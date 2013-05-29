@@ -23,4 +23,20 @@ class ScreenorientationController < Rho::RhoController
   def orientation_callback
     Alert.show_popup("Screen Orientation upside down is called")
   end
+  
+  def left_handed_position
+    Rho::ScreenOrientation.leftHanded()
+  end
+  
+  def right_handed_position
+    Rho::ScreenOrientation.rightHanded()
+  end
+  
+  def upside_down_position
+    Rho::ScreenOrientation.upsideDown()
+  end
+  
+  def normal_position
+    Rho::ScreenOrientation.normal()
+  end
 end

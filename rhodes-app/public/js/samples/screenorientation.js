@@ -11,10 +11,29 @@ KitchenSink.Samples.Screenorientation = KitchenSink.Samples.Screenorientation ||
 	    Rho.ScreenOrientation.upsideDown();
 		ScreenOrientation.setScreenOrientationEvent('/app/Screenorientation/orientation_callback');
 	}
-
+	
+	function leftHanded() {
+		Rho.ScreenOrientation.leftHanded();
+	}
+	
+    function rightHanded() {
+		Rho.ScreenOrientation.rightHanded();
+	}
+	
+	function normal() {
+		Rho.ScreenOrientation.normal();
+	}
+	
+	function upsideDown() {
+		Rho.ScreenOrientation.upsideDown();
+	}
 	return {
 		autoRotate: autoRotate,
-		setCallback: setCallback
+		setCallback: setCallback,
+		upsideDown: upsideDown,
+		leftHanded: leftHanded,
+		rightHanded: rightHanded,
+		normal: normal
 	};
 
 })();
