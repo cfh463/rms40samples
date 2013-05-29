@@ -78,13 +78,13 @@ var Rho = Rho || (function ($) {
         for (var prop in value) {
             if (!value.hasOwnProperty(prop)) continue;
             if ('object' == typeof value[prop]) {
-                value[prop] = createInstance(value[prop]);
+                value[prop] = createInstances(value[prop]);
             }
         }
         return value;
     }
 
-    function createInstance(value) {
+    function createInstances(value) {
         if ('object' == typeof value) {
             if (value[RHO_ID_PARAM] && value[RHO_CLASS_PARAM]) {
                 return objectForClass(value[RHO_CLASS_PARAM], value[RHO_ID_PARAM]);
@@ -105,7 +105,7 @@ var Rho = Rho || (function ($) {
 
         var value = $.extend(result instanceof Array ? [] : {}, result);
 
-        return scanForInstances(value);
+        return createInstances(value);
     }
 
     function namesToProps(names) {
@@ -143,14 +143,13 @@ var Rho = Rho || (function ($) {
         var persistentCallbackOptParams = null;
 
         if ("number" == typeof params.persistentCallbackIndex) {
-            if (params.persistentCallbackIndex < params.args.length - 2
-                || params.persistentCallbackIndex >= params.args.length)
+            if (params.persistentCallbackIndex < params.args.length - 2)
                 throw 'Generated API method error: wrong position for persistent callback argument!';
 
             if (params.persistentCallbackIndex == params.args.length - 2) {
                 persistentCallbackOptParams = params.args.pop();
                 persistentCallback = params.args.pop();
-            } else {
+            } else if (params.persistentCallbackIndex == params.args.length - 1) {
                 persistentCallback = params.args.pop();
             }
 
@@ -162,7 +161,8 @@ var Rho = Rho || (function ($) {
 
             var persistentCallbackOptParams = persistentCallbackOptParams || null;
 
-            persistentCallback = prepareCallback(persistentCallback, true);
+            if (persistentCallback)
+                persistentCallback = prepareCallback(persistentCallback, true);
         }
 
         var cmd = { 'method': params.method, 'params': params.args };
@@ -185,31 +185,27 @@ var Rho = Rho || (function ($) {
 
         var result = null;
         var deferred = new $.Deferred(function (dfr) {
+
+            function handleResult(rawResult) {
+                result = jsValue(rawResult);
+                dfr.resolve(result);
+                if (valueCallback) {
+                    valueCallback(result);
+                }
+            }
+
             function handleError(errObject) {
                 dfr.reject(errObject.message, errObject.code);
                 throw errObject.message;
             }
 
-            $.ajax({
-                async: (null != valueCallback),
-                type: 'post',
-                url: API_CONTROLLER_URL,
-                data: cmdText,
-                dataType: 'json',
-                headers: {'Accept': 'text/plain'}
-            }).done(function (data) {
-                    if (data['error']) {
-                        handleError(data['error']);
-                    } else {
-                        result = jsValue(data['result']);
-                        dfr.resolve(result);
-                        if (valueCallback) {
-                            valueCallback(result);
-                        }
-                    }
-                }).fail(function (xhr, status, message) {
-                    handleError({message: message, code: xhr.statusCode()});
-                });
+            Rho.platform.nativeApiCall(cmdText, null != valueCallback, function (result) {
+                if (result['error'])
+                    handleError(result['error']);
+                else
+                    handleResult(result['result']);
+            });
+
         }).promise();
 
         return (null != valueCallback) ? deferred : result;
@@ -351,13 +347,31 @@ var Rho = Rho || (function ($) {
     // at this point we have property support level already detected
 
 
-    function propAccessReqFunc(apiReqFunc, propName, rw) {
+    function propAccessReqFunc(apiReqFunc, propName, rw, idFunc, customFunc) {
         var isSet = ('w' == rw);
+
+        var propNameParts = propName.split(':');
+
+        propName = propNameParts[0];
+        var methodGet = propName;
+        var methodSet = propName + '=';
+
+        if (2 < propNameParts.length)
+            methodSet = propNameParts[2];
+
+        if (1 < propNameParts.length)
+            methodGet = propNameParts[1];
+
         return function () {
+            try {
+                if ('function' == typeof customFunc)
+                    customFunc.apply(this, arguments);
+            } catch(ex) {}
+
             return apiReqFunc({
-                instanceId: ('function' == typeof this.getId) ? this.getId() : NOT_INSTANCE_ID,
+                instanceId: ('function' == typeof idFunc) ? idFunc.apply(this, []) : NOT_INSTANCE_ID,
                 args: arguments,
-                method: propName + (isSet ? '=' : ''),
+                method: isSet ? methodSet : methodGet,
                 valueCallbackIndex: (isSet ? 1 : 0)
             });
         };
@@ -367,16 +381,18 @@ var Rho = Rho || (function ($) {
     // It will be used in case we have no any support for natural props syntax in a browser.
     // Usage sample: obj.setSomething(123), var abc = obj.getSomething()
     // ====================================================================================
-    var createPropProxy_fallback = function (obj, propName, propAccess, apiReqFunc) {
+    var createPropProxy_fallback = function (obj, propDescr, propAccess, apiReqFunc, idFunc, customGet, customSet) {
+        var propName = propDescr.split(':')[0];
+
         function accessorName(accessor, name) {
             return accessor + name.charAt(0).toUpperCase() + name.slice(1);
         }
 
         if (0 <= propAccess.indexOf('w')) {
-            obj[accessorName('set', propName)] = propAccessReqFunc(apiReqFunc, propName, 'w');
+            obj[accessorName('set', propName)] = propAccessReqFunc(apiReqFunc, propDescr, 'w', idFunc, customSet);
         }
         if (0 <= propAccess.indexOf('r')) {
-            obj[accessorName('get', propName)] = propAccessReqFunc(apiReqFunc, propName, 'r');
+            obj[accessorName('get', propName)] = propAccessReqFunc(apiReqFunc, propDescr, 'r', idFunc, customGet);
         }
     };
 
@@ -384,21 +400,25 @@ var Rho = Rho || (function ($) {
 
     if (propsSupport.js185) {
         // the best case, js185 props are supported
-        createPropProxy = function (obj, propName, propAccess, apiReqFunc) {
+        createPropProxy = function (obj, propDescr, propAccess, apiReqFunc, idFunc, customGet, customSet) {
+            var propName = propDescr.split(':')[0];
+
             var propDef = {};
             if (0 <= propAccess.indexOf('r')) {
-                propDef['get'] = propAccessReqFunc(apiReqFunc, propName, 'r');
+                propDef['get'] = propAccessReqFunc(apiReqFunc, propDescr, 'r', idFunc, customGet);
             }
             if (0 <= propAccess.indexOf('w')) {
-                propDef['set'] = propAccessReqFunc(apiReqFunc, propName, 'w');
+                propDef['set'] = propAccessReqFunc(apiReqFunc, propDescr, 'w', idFunc, customSet);
             }
             Object.defineProperty(obj, propName, propDef);
         };
     } else if (propsSupport.ffHackMethod) {
         // backup option, props are supported with firefox hack
-        createPropProxy = function (obj, propName, propAccess, apiReqFunc) {
-            obj.__defineGetter__(propName, propAccessReqFunc(apiReqFunc, propName, 'r'));
-            obj.__defineSetter__(propName, propAccessReqFunc(apiReqFunc, propName, 'w'));
+        createPropProxy = function (obj, propDescr, propAccess, apiReqFunc, idFunc, customGet, customSet) {
+            var propName = propDescr.split(':')[0];
+
+            obj.__defineGetter__(propName, propAccessReqFunc(apiReqFunc, propDescr, 'r', idFunc, customGet));
+            obj.__defineSetter__(propName, propAccessReqFunc(apiReqFunc, propDescr, 'w', idFunc, customSet));
         };
     } else {
         // Sorry, no luck. We can provide just a default implementation with explicit accessors.
@@ -417,19 +437,52 @@ var Rho = Rho || (function ($) {
     //        'title': 'rw'
     //    }, apiReq);
     //
-    function createPropsProxy(obj, propDefs, apiReq) {
-        if (!(propDefs instanceof Object))
+    function createPropsProxy(obj, propDefs, apiReq, idFunc) {
+        if (!(propDefs instanceof Array))
             throw 'Property definitions list should be Array instance';
 
-        for (var name in propDefs) {
-            if (!propDefs.hasOwnProperty(name)) continue;
+        for (var i=0; i<propDefs.length; i++) {
+            var propDef = propDefs[i];
+
             try {
-                createPropProxy(obj, name, propDefs[name], apiReq);
+                createPropProxy(obj, propDef['propName'], propDef['propAccess'], apiReq, idFunc, propDef['customGet'], propDef['customSet']);
+            } catch (ex) {
+                // we unable to create property with this name, so log it
+                incompatibleProps.push(name);
+            }
+            // create explicit accessors
+            createPropProxy_fallback(obj, propDef['propName'], propDef['propAccess'], apiReq, idFunc, propDef['customGet'], propDef['customSet']);
+        }
+    }
+
+    function methodAccessReqFunc(nativeName, persistentCallbackIndex, valueCallbackIndex, apiReq, idFunc) {
+        return function() {
+            return apiReq({
+                instanceId: ('function' == typeof idFunc) ? idFunc.apply(this, []) : NOT_INSTANCE_ID,
+                args: arguments,
+                method: nativeName,
+                persistentCallbackIndex: persistentCallbackIndex,
+                valueCallbackIndex: valueCallbackIndex
+            });
+        }
+    }
+
+    function createMethodsProxy(obj, methodDefs, apiReq, idFunc) {
+        if (!(methodDefs instanceof Array))
+            throw 'Property definitions list should be Array instance';
+        
+        for (var i=0; i<methodDefs.length; i++) {
+            var methodDef = methodDefs[i];
+            try {
+                obj[methodDef['methodName']] = methodAccessReqFunc(
+                    methodDef['nativeName'],
+                    methodDef['persistentCallbackIndex'],
+                    methodDef['valueCallbackIndex'],
+                    apiReq, idFunc
+                );
             } catch (ex) {
                 // we unable to create property with this name, so log it..
-                incompatibleProps.push(name);
-                // ..and create explicit accessors
-                createPropProxy_fallback(obj, name, propDefs[name], apiReq);
+                incompatibleProps.push(methodDef['methodName']);
             }
         }
     }
@@ -493,28 +546,50 @@ var Rho = Rho || (function ($) {
         }
     };
 
+    // === Native API call ===========================================================
+
+    function nativeApiCall_ajax(cmdText, async, resultHandler) {
+        $.ajax({
+            async: async,
+            type: 'post',
+            url: API_CONTROLLER_URL,
+            data: cmdText,
+            dataType: 'json',
+            headers: {'Accept': 'text/plain'}
+        }).done(function (data) {
+            resultHandler(data);
+        }).fail(function (xhr, status, message) {
+            resultHandler({error: {message: message, code: xhr.statusCode()}});
+        });
+    }
+
+
+
     // === Utility internal methods ==================================================
 
     var util = {
+        loadApiModules: loadApiModules,
         namespace: namespace,
         apiReqFor: apiReqFor,
         namesToProps: namesToProps,
         createPropsProxy: createPropsProxy,
+        createMethodsProxy: createMethodsProxy,
         incompatibleProps: incompatibleProps,
-        rhoIdParam: function () {
-            return RHO_ID_PARAM
-        },
-        rhoClassParam: function () {
-            return RHO_CLASS_PARAM
-        },
+        rhoIdParam: function () { return RHO_ID_PARAM },
+        rhoClassParam: function () { return RHO_CLASS_PARAM },
         nextId: nextId
     };
+
+    var platform = {
+        nativeApiCall: nativeApiCall_ajax,
+        nativeApiResult: function(){/* intentionally empty stub function */}
+    }
 
     // === Public interface ==========================================================
 
     return {
-        loadApiModules: loadApiModules,
         util: util,
+        platform: platform,
         callbackHandler: callbackHandler
     };
 
@@ -5569,22 +5644,35 @@ var Rho = Rho || (function ($) {
                 return console.log(text);
             };
 
-            var makeWhereParams = function(condition, op) {
-              var conds = [];
-              var values = [];
+            var makeSetParams = function(map) {
+                var sets = [];
+                var values = [];
 
-              for (var key in condition) {
-                  if (condition.hasOwnProperty(key)) {
-                      var value = condition[key];
-                      if (value === null) {
-                          conds.push('"' + key + '" IS NULL');
-                      } else {
-                          conds.push('"' + key + '"=?');
-                          values.push(value);
-                      }
-                  }
-              }
-              return {clause: 'where ' + conds.join(' ' + op + ' '), values: values};
+                for (var key in map) {
+                    if (map.hasOwnProperty(key)) {
+                        sets.push('"' + key + '"=?');
+                        values.push(map[key]);
+                    }
+                }
+                return {clause: 'set ' + sets.join(', '), values: values};
+            };
+
+            var makeWhereParams = function(condition, op) {
+                var conds = [];
+                var values = [];
+             
+                for (var key in condition) {
+                    if (condition.hasOwnProperty(key)) {
+                        var value = condition[key];
+                        if (value === null) {
+                            conds.push('"' + key + '" IS NULL');
+                        } else {
+                            conds.push('"' + key + '"=?');
+                            values.push(value);
+                        }
+                    }
+                }
+                return {clause: 'where ' + conds.join(' ' + op + ' '), values: values};
             };
 
             var newDb = function(dbfile, partition) {
@@ -5600,6 +5688,14 @@ var Rho = Rho || (function ($) {
 
                 var rollback = function() {
                     db.rollbackTransaction();
+                };
+
+                var lock_db = function() {
+                    db.lockDb();
+                };
+
+                var unlock_db = function() {
+                    db.unlockDb();
                 };
 
                 var execute_sql = function(sql, args) {
@@ -5634,7 +5730,7 @@ var Rho = Rho || (function ($) {
                 };
 
                 var delete_from_table = function(table, condition) {
-                    var where = makeWhereParams(condition.map, 'AND');
+                    var where = makeWhereParams(condition.map, 'and');
                     execute_sql('delete from "' + table + '" ' + where.clause, where.values);
                 };
 
@@ -5650,7 +5746,7 @@ var Rho = Rho || (function ($) {
                     query.push('from "' + table + '"');
 
                     if (condition !== undefined) {
-                        var where = makeWhereParams(condition.map, 'AND');
+                        var where = makeWhereParams(condition.map, 'and');
                         values = where.values;
                         query.push(where.clause);
                     }
@@ -5662,16 +5758,33 @@ var Rho = Rho || (function ($) {
                     return execute_sql(query.join(' '), values);
                 };
 
+                var update_into_table = function(table, values, condition) {
+                    var columns = makeSetParams(values.map);
 
-                execute_sql(initDbSchemaSQL, null);
+                    var query = ['update "' + table + '"', columns.clause];
+                    var values = columns.values;
+
+                    if (condition !== undefined) {
+                        var where = makeWhereParams(condition.map, 'and');
+                        query.push(where.clause);
+                        values = values.concat(where.values);
+                    }
+                    return execute_sql(query.join(' '), values);
+                };
+
+
+                execute_sql(initDbSchemaSQL, []);
 
                 return {
                     $start_transaction: start_transaction,
                     $commit: commit,
                     $rollback: rollback,
+                    $lock_db: lock_db,
+                    $unlock_db: unlock_db,
                     $insert_into_table: insert_into_table,
                     $delete_from_table: delete_from_table,
                     $select_from_table: select_from_table,
+                    $update_into_table: update_into_table,
                     $execute_sql: execute_sql
                 };
             };
@@ -5679,188 +5792,6 @@ var Rho = Rho || (function ($) {
             return {$new: newDb};
         })();
 
-        // rhom/rhom_model.rb
-        (function() {
-          var __opal = Opal, self = __opal.top, __scope = __opal, nil = __opal.nil, __breaker = __opal.breaker, __slice = __opal.slice, __module = __opal.module, __hash2 = __opal.hash2, __hash = __opal.hash;
-          return (function(__base){
-            function Rhom() {};
-            Rhom = __module(__base, "Rhom", Rhom);
-            var def = Rhom.prototype, __scope = Rhom._scope;
-
-            (function(__base){
-              function BaseModel() {};
-              BaseModel = __module(__base, "BaseModel", BaseModel);
-              var def = BaseModel.prototype, __scope = BaseModel._scope;
-
-              (function(){var __scope = self._scope;return this.$attr_accessor("model_params")}).call(BaseModel.$singleton_class());
-
-              def.$get_model_params = function() {
-                
-                this.$init_defaults();
-                return __scope.BaseModel.$model_params();
-              };
-
-              def.$reset_model_params = function() {
-                
-                return __scope.BaseModel['$model_params='](__hash2({}));
-              };
-
-              def['$fixed_schema?'] = function() {
-                
-                return false;
-              };
-
-              def.$init_defaults = function() {
-                var _a;
-                if ((_a = this['$fixed_schema?']()) !== false && _a !== nil) {
-                  if ((_a = __scope.BaseModel.$model_params()) === false || _a === nil) {
-                    __scope.BaseModel['$model_params='](__hash2({}))
-                  };
-                  if ((_a = __scope.BaseModel.$model_params()['$[]']("schema")) === false || _a === nil) {
-                    __scope.BaseModel.$model_params()['$[]=']("schema", __hash2({}))
-                  };
-                  if ((_a = __scope.BaseModel.$model_params()['$[]']("schema")['$[]']("property")) !== false && _a !== nil) {
-                    return nil
-                    } else {
-                    return __scope.BaseModel.$model_params()['$[]']("schema")['$[]=']("property", __hash2({}))
-                  };
-                  } else {
-                  if ((_a = __scope.BaseModel.$model_params()) === false || _a === nil) {
-                    __scope.BaseModel['$model_params='](__hash2({}))
-                  };
-                  if ((_a = __scope.BaseModel.$model_params()['$[]']("property")) !== false && _a !== nil) {
-                    return nil
-                    } else {
-                    return __scope.BaseModel.$model_params()['$[]=']("property", __hash2({}))
-                  };
-                };
-              };
-
-              def.$property = function(name, type, option) {
-                var _a;if (type == null) {
-                  type = "string"
-                }if (option == null) {
-                  option = nil
-                }
-                this.$init_defaults();
-                if ((_a = this['$fixed_schema?']()) !== false && _a !== nil) {
-                  return __scope.BaseModel.$model_params()['$[]']("schema")['$[]']("property")['$[]='](name.$to_s(), [type, option])
-                  } else {
-                  return __scope.BaseModel.$model_params()['$[]']("property")['$[]='](name.$to_s(), [type, option])
-                };
-              };
-
-              def.$set = function(name, value) {
-                var _a;
-                if ((_a = __scope.BaseModel.$model_params()) === false || _a === nil) {
-                  __scope.BaseModel['$model_params='](__hash2({}))
-                };
-                if (name['$==']("sync")) {
-                  if (value !== false && value !== nil) {
-                    if ((_a = __scope.BaseModel.$model_params()['$[]']("sync_type")) !== false && _a !== nil) {
-                      return nil
-                      } else {
-                      return __scope.BaseModel.$model_params()['$[]=']("sync_type", "incremental")
-                    }
-                    } else {
-                    return __scope.BaseModel.$model_params().$delete("sync_type")
-                  }
-                  } else {
-                  return __scope.BaseModel.$model_params()['$[]='](name.$to_s(), value)
-                };
-              };
-
-              def.$enable = function(name) {
-                
-                return this.$set(name, true);
-              };
-
-              def.$belongs_to = function(name, owner) {
-                var _a, TMP_1;
-                if ((_a = __scope.BaseModel.$model_params()) === false || _a === nil) {
-                  __scope.BaseModel['$model_params='](__hash2({}))
-                };
-                if ((_a = __scope.BaseModel.$model_params()['$[]']("belongs_to")) === false || _a === nil) {
-                  __scope.BaseModel.$model_params()['$[]=']("belongs_to", [])
-                };
-                if ((_a = owner['$is_a?'](__scope.Array)) !== false && _a !== nil) {
-                  return owner.$each((TMP_1 = function(src) {
-
-                    var self = TMP_1._s || this;
-                    if (src == null) src = nil;
-
-                    return __scope.BaseModel.$model_params()['$[]']("belongs_to")['$<<'](__hash(name.$to_s(), src.$to_s()))
-                  }, TMP_1._s = this, TMP_1))
-                  } else {
-                  return __scope.BaseModel.$model_params()['$[]']("belongs_to")['$<<'](__hash(name.$to_s(), owner.$to_s()))
-                };
-              };
-
-              def.$index = function(name, cols) {
-                var _a;
-                if ((_a = this['$fixed_schema?']()) === false || _a === nil) {
-                  return nil
-                };
-                if ((_a = __scope.BaseModel.$model_params()['$[]']("schema")) === false || _a === nil) {
-                  __scope.BaseModel.$model_params()['$[]=']("schema", __hash2({}))
-                };
-                if ((_a = __scope.BaseModel.$model_params()['$[]']("schema")['$[]']("index")) === false || _a === nil) {
-                  __scope.BaseModel.$model_params()['$[]']("schema")['$[]=']("index", __hash2({}))
-                };
-                return __scope.BaseModel.$model_params()['$[]']("schema")['$[]']("index")['$[]='](name.$to_s(), cols);
-              };
-
-              def.$unique_index = function(name, cols) {
-                var _a;
-                if ((_a = this['$fixed_schema?']()) === false || _a === nil) {
-                  return nil
-                };
-                if ((_a = __scope.BaseModel.$model_params()['$[]']("schema")) === false || _a === nil) {
-                  __scope.BaseModel.$model_params()['$[]=']("schema", __hash2({}))
-                };
-                if ((_a = __scope.BaseModel.$model_params()['$[]']("schema")['$[]']("unique_index")) === false || _a === nil) {
-                  __scope.BaseModel.$model_params()['$[]']("schema")['$[]=']("unique_index", __hash2({}))
-                };
-                return __scope.BaseModel.$model_params()['$[]']("schema")['$[]']("unique_index")['$[]='](name.$to_s(), cols);
-              };
-                    ;BaseModel._donate(["$get_model_params", "$reset_model_params", "$fixed_schema?", "$init_defaults", "$property", "$set", "$enable", "$belongs_to", "$index", "$unique_index"]);
-            })(Rhom);
-
-            (function(__base){
-              function FixedSchema() {};
-              FixedSchema = __module(__base, "FixedSchema", FixedSchema);
-              var def = FixedSchema.prototype, __scope = FixedSchema._scope;
-
-              FixedSchema.$include(__scope.BaseModel);
-
-              FixedSchema.$included = function(model) {
-                
-                return model.$extend(__scope.FixedSchema)
-              };
-
-              def['$fixed_schema?'] = function() {
-                
-                return true;
-              };
-                    ;FixedSchema._donate(["$fixed_schema?"]);      ;FixedSchema._sdonate(["$included"]);
-            })(Rhom);
-
-            (function(__base){
-              function PropertyBag() {};
-              PropertyBag = __module(__base, "PropertyBag", PropertyBag);
-              var def = PropertyBag.prototype, __scope = PropertyBag._scope;
-
-              PropertyBag.$include(__scope.BaseModel);
-
-              PropertyBag.$included = function(model) {
-                
-                return model.$extend(__scope.PropertyBag)
-              };
-                    ;PropertyBag._sdonate(["$included"]);
-            })(Rhom);
-            
-          })(self)
-        })();
         // rhom/rhom_object.rb
         (function() {
           var __opal = Opal, self = __opal.top, __scope = __opal, nil = __opal.nil, __breaker = __opal.breaker, __slice = __opal.slice, __module = __opal.module, __range = __opal.range, __hash2 = __opal.hash2;
@@ -5934,7 +5865,7 @@ var Rho = Rho || (function ($) {
                 var result = nil, self = TMP_1._s || this, _a, _b;
                 if (db == null) db = nil;
 
-                result = db.$execute_sql("SELECT object FROM changed_values LIMIT 1 OFFSET 0");
+                result = db.$execute_sql("SELECT object FROM changed_values LIMIT 1 OFFSET 0", []);
                 if ((_a = ((_b = result !== false && result !== nil) ? result.$length()['$>'](0) : _b)) !== false && _a !== nil) {
                   return true
                   } else {
@@ -6049,16 +5980,17 @@ var Rho = Rho || (function ($) {
                       };
                     };
                     def.$check_freezing_model = function(obj) {
-                      var is_schema_src = nil, hash_props = nil, _a, _b, _c, TMP_4;
+                      var is_schema_src, hash_props = nil, _a, _b, _c, TMP_4;
                       is_schema_src = this.$is_inst_schema_source();
-                      if ((_a = ((_b = obj !== false && obj !== nil) ? ((_c = is_schema_src), _c !== false && _c !== nil ? _c : (__scope.Rho)._scope.RhoConfig.$sources()['$[]'](this.$get_inst_source_name())['$[]']("freezed")) : _b)) === false || _a === nil) {
-                        return nil
-                      };
-                      hash_props = (function() { if (is_schema_src !== false && is_schema_src !== nil) {
-                        return (__scope.Rho)._scope.RhoConfig.$sources()['$[]'](this.$get_inst_source_name())['$[]']("schema")['$[]']("property")
-                        } else {
-                        return (__scope.Rho)._scope.RhoConfig.$sources()['$[]'](this.$get_inst_source_name())['$[]']("property")
-                      }; return nil; }).call(this);
+                      var source = (__scope.Rho)._scope.RhoConfig.$sources()['$[]'](this.$get_inst_source_name());
+                      // return unless obj && (isSchemaSrc || Rho::RhoConfig.sources[get_inst_source_name()]['freezed'])
+                      if ((obj !== false && obj !== nil) && !is_schema_src) {
+                          _a = source['freezed'];
+                          if (_a === undefined || !_a) {
+                              return nil;
+                          }
+                      }
+                      hash_props = (is_schema_src) ? source['schema']['property'] : source['property'];
                       if ((_a = obj['$is_a?'](__scope.Hash)) !== false && _a !== nil) {
                         return obj.$each((TMP_4 = function(key, value) {
 
@@ -6106,13 +6038,13 @@ var Rho = Rho || (function ($) {
                       var src_name = nil, db = nil;
                       src_name = this.$get_source_name();
                       db = (__opal.Object._scope.Rho)._scope.RHO.$get_src_db(src_name);
-                      return db.$execute_sql("UPDATE sources set metadata=? where name=?", metadata_doc, src_name);
+                      return db.$execute_sql("UPDATE sources set metadata=? where name=?", [metadata_doc, src_name]);
                     };
                     def.$count = function() {
                       var db = nil, db_res = nil, res = nil, _a, _b;
                       db = (__opal.Object._scope.Rho)._scope.RHO.$get_src_db(this.$get_source_name());
                       if ((_a = this.$is_schema_source()) !== false && _a !== nil) {
-                        db_res = db.$execute_sql("SELECT COUNT(*) FROM "['$+'](this.$get_schema_table_name()));
+                        db_res = db.$execute_sql("SELECT COUNT(*) FROM "['$+'](this.$get_schema_table_name()), []);
                         if ((_a = ((_b = db_res !== false && db_res !== nil) ? db_res.$length()['$>'](0) : _b)) !== false && _a !== nil) {
                           res = db_res['$[]'](0).$values()['$[]'](0)
                           } else {
@@ -6138,12 +6070,12 @@ var Rho = Rho || (function ($) {
                       return this.$name().$to_s();
                     };
                     def.$is_sync_source = function() {
-                      var _a;
-                      return (_a = (__scope.Rho)._scope.RhoConfig.$sources()['$[]'](this.$get_source_name())['$[]']("sync_type")['$==']("none"), (_a === nil || _a === false));
+                        var source = (__scope.Rho)._scope.RhoConfig.$sources()['$[]'](this.$get_source_name());
+                        return source['sync_type'] !== 'none';
                     };
                     def.$is_schema_source = function() {
-                      var _a;
-                      return (_a = (__scope.Rho)._scope.RhoConfig.$sources()['$[]'](this.$get_source_name())['$[]']("schema")['$nil?'](), (_a === nil || _a === false));
+                        var source = (__scope.Rho)._scope.RhoConfig.$sources()['$[]'](this.$get_source_name());
+                        return source.hasOwnProperty('schema');
                     };
                     def.$get_schema_table_name = function() {
                       
@@ -6158,8 +6090,8 @@ var Rho = Rho || (function ($) {
                       };
                     };
                     def.$get_source_id = function() {
-                      
-                      return (__scope.Rho)._scope.RhoConfig.$sources()['$[]'](this.$get_source_name())['$[]']("source_id").$to_i();
+                      var source = (__scope.Rho)._scope.RhoConfig.$sources()['$[]'](this.$get_source_name());
+                      return source['source_id'];
                     };
                     def.$convertOpToStr = function(val_op, value) {
                       var res = nil, svalue = nil, _a, _b, TMP_5, TMP_6;
@@ -6349,33 +6281,36 @@ var Rho = Rho || (function ($) {
                         attrib_name = key
                       };
                       if ((_a = srcid_value['$nil?']()) !== false && _a !== nil) {
-                        sql['$<<']((function() { if (val_func.$length()['$>'](0)) {
-                          return val_func['$+']("(" + (attrib_name) + ")")
-                          } else {
-                          return "" + (attrib_name)
-                        }; return nil; }).call(this)['$+'](" "))
+                        sql += (function() {
+                            if (val_func.$length()['$>'](0)) {
+                                return val_func['$+']("(" + (attrib_name) + ")");
+                            } else {
+                                return "" + attrib_name;
+                            }
+                        }).call(this)['$+'](" ");
                         } else {
                         if ((_a = (_b = attrib_name['$is_a?'](__scope.String), _b !== false && _b !== nil ? attrib_name['$==']("object") : _b)) !== false && _a !== nil) {
-                          sql['$<<'](" source_id=?");
+                          sql += " source_id=?";
                           vals['$<<'](srcid_value);
-                          sql['$<<'](" AND object ");
-                          } else {
-                          sql['$<<']("attrib=?");
+                          sql += " AND object ";
+                        } else {
+                          sql += "attrib=?";
                           vals['$<<']((function() { if (val_func.$upcase()['$==']("CAST")) {
                             return attrib_name.$split(" ")['$[]'](0)
                             } else {
                             return attrib_name
                           }; return nil; }).call(this));
-                          sql['$<<'](" AND source_id=?");
+                          sql += " AND source_id=?";
                           vals['$<<'](srcid_value);
                           if (val_func.$upcase()['$==']("CAST")) {
-                            sql['$<<'](" AND "['$+'](val_func)['$+']("(value ")['$+'](attrib_name.$split(" ")['$[]'](1))['$+'](" ")['$+'](attrib_name.$split(" ")['$[]'](2))['$+'](" ) "))
+                            sql += " AND "['$+'](val_func)['$+']("(value ")['$+'](attrib_name.$split(" ")['$[]'](1))['$+'](" ")['$+'](attrib_name.$split(" ")['$[]'](2))['$+'](" ) ");
                             } else {
-                            sql['$<<'](" AND "['$+']((function() { if (val_func.$length()['$>'](0)) {
-                              return val_func['$+']("(value)")
-                              } else {
-                              return "value"
-                            }; return nil; }).call(this))['$+'](" "))
+                            sql += " AND " + (function() {
+                                if (val_func.$length()['$>'](0)) {
+                                    return val_func['$+']("(value)");
+                                }
+                                return "value";
+                            }).call(this) + " ";
                           };
                         }
                       };
@@ -6397,48 +6332,59 @@ var Rho = Rho || (function ($) {
                           }, TMP_10._s = this, TMP_10));
                         };
                         if ((_a = value['$is_a?'](__scope.Array)) !== false && _a !== nil) {
-                          sql['$<<'](val_op['$+'](" ( " + (__scope.Array.$new(value.$length(), "?").$join(",")) + " )"));
+                          sql += val_op['$+'](" ( " + (__scope.Array.$new(value.$length(), "?").$join(",")) + " )");
                           vals.$concat(value);
                           } else {
                           this.$raise(__scope.ArgumentError, "IN parameters should be String or Array")
                         };
                         } else {
-                        sql['$<<'](val_op['$+'](" ?"));
+                        sql += val_op['$+'](" ?");
                         vals['$<<'](value);
                       };
                       return [sql, vals];
                     };
                     def.$find_objects = function(condition_hash, op, limit, offset, order_attr, block) {
-                      var nulls_cond = nil, str_limit = nil, db = nil, list_objs = nil, srcid_value = nil, map_objs = nil, b_stop = nil, sql = nil, vals = nil, n_index = nil, res = nil, TMP_11, _a, _b, _c, TMP_12, TMP_14, TMP_15;if (typeof(block) !== 'function') { block = nil }
-                      nulls_cond = __hash2({});
-                      if (op['$==']("AND")) {
-                        condition_hash.$each((TMP_11 = function(key, value) {
 
-                          var self = TMP_11._s || this, _a;
-                          if (key == null) key = nil;
-        if (value == null) value = nil;
-
-                          if ((_a = value['$nil?']()) !== false && _a !== nil) {
-                            nulls_cond['$[]='](key, value);
-                            return condition_hash.$delete(key);
-                            } else {
-                            return nil
+                      var size = function(object) {
+                          var size = 0;
+                          for (var key in object) {
+                              if (object.hasOwnProperty(key)) {
+                                  ++size;
+                              }
                           }
-                        }, TMP_11._s = this, TMP_11))
+                          return size;
+                      };
+
+                      var each = function(object, f) {
+                          for (var key in object) {
+                              if (object.hasOwnProperty(key)) {
+                                  f(key, object[key]);
+                              }
+                          }
+                      };
+
+                      var nulls_cond = {}, str_limit = nil, db = nil, list_objs = nil, srcid_value = nil, map_objs = nil, b_stop = nil, sql = nil, vals = nil, n_index = nil, res = nil, TMP_11, _a, _b, _c, TMP_12, TMP_14, TMP_15;if (typeof(block) !== 'function') { block = nil }
+                      if (op === 'AND') {
+                          each(condition_hash, function(key, value) {
+                              if (value === null) {
+                                  nulls_cond[key] = value;
+                                  delete condition_hash[key];
+                              }
+                          });
                       };
                       str_limit = nil;
-                      if ((_a = (_b = ((_c = (block !== nil)), _c !== false && _c !== nil ? _c : order_attr), (_b === nil || _b === false))) !== false && _a !== nil) {
-                        if ((_a = (_b = (_b = ((_b = limit !== false && limit !== nil) ? offset : _b), _b !== false && _b !== nil ? condition_hash.$length()['$<='](1) : _b), _b !== false && _b !== nil ? nulls_cond.$length()['$=='](0) : _b)) !== false && _a !== nil) {
-                          str_limit = " LIMIT "['$+'](limit.$to_s())['$+'](" OFFSET ")['$+'](offset.$to_s())
-                        }
-                      };
+                      if (block === nil && order_attr === undefined) {
+                          if (limit !== undefined && offset !== undefined && size(condition_hash) <= 1 && size(nulls_cond) === 0) {
+                              str_limit = " LIMIT "['$+'](limit.$to_s())['$+'](" OFFSET ")['$+'](offset.$to_s())
+                          }
+                      }
                       db = (__opal.Object._scope.Rho)._scope.RHO.$get_src_db(this.$get_source_name());
                       list_objs = [];
-                      if ((_a = ((_b = op['$==']("OR")) ? condition_hash.$length()['$>'](1) : _b)) !== false && _a !== nil) {
+                      if ((_a = ((_b = op['$==']("OR")) ? size(condition_hash) > 1 : _b)) !== false && _a !== nil) {
                         srcid_value = (__opal.Object._scope.Rhom)._scope.RhomDbAdapter.$get_value_for_sql_stmt(this.$get_source_id());
                         map_objs = __hash2({});
                         b_stop = false;
-                        condition_hash.$each((TMP_12 = function(key, value) {
+                        each(condition_hash, (TMP_12 = function(key, value) {
 
                           var sql = nil, res_objs = nil, self = TMP_12._s || this, TMP_13;
                           if (key == null) key = nil;
@@ -6447,7 +6393,7 @@ var Rho = Rho || (function ($) {
                           sql = "";
                           sql['$<<']("SELECT object,attrib,value FROM object_values WHERE \n");
                           sql['$<<'](self.$makeCondWhere(key, value, srcid_value));
-                          res_objs = db.$execute_sql(sql);
+                          res_objs = db.$execute_sql(sql, []);
                           res_objs.$each((TMP_13 = function(rec) {
 
                             var self = TMP_13._s || this, _a, _b;
@@ -6458,12 +6404,11 @@ var Rho = Rho || (function ($) {
                             };
                             map_objs['$[]='](rec['$[]']("object"), 1);
                             list_objs['$<<'](rec);
-                            b_stop = (_a = (_a = (_a = (_a = (_a = ((_b = false), _b !== false && _b !== nil ? _b : order_attr), (_a === nil || _a === false)), _a !== false && _a !== nil ? limit : _a), _a !== false && _a !== nil ? offset : _a), _a !== false && _a !== nil ? nulls_cond.$length()['$=='](0) : _a), _a !== false && _a !== nil ? list_objs.$length()['$>='](offset['$+'](limit)) : _a);
-                            if (b_stop !== false && b_stop !== nil) {
-                              return (__breaker.$v = nil, __breaker)
-                              } else {
-                              return nil
-                            };
+                            if (order_attr === undefined && limit !== undefined && offset !== undefined && size(nulls_cond) === 0 && list_objs.length >= offset + limit) {
+                                return (__breaker.$v = nil, __breaker);
+                            }
+                            return nil;
+
                           }, TMP_13._s = self, TMP_13));
                           if (b_stop !== false && b_stop !== nil) {
                             return (__breaker.$v = nil, __breaker)
@@ -6472,42 +6417,40 @@ var Rho = Rho || (function ($) {
                           };
                         }, TMP_12._s = this, TMP_12));
                         } else {
-                        if (condition_hash.$length()['$>'](0)) {
+                        if (size(condition_hash) > 0) {
                           sql = "";
                           vals = [];
-                          condition_hash.$each((TMP_14 = function(key, value) {
+                          each(condition_hash, (TMP_14 = function(key, value) {
 
                             var attrib_name = nil, sql_cond = nil, val_cond = nil, self = TMP_14._s || this, _a, _b;
                             if (key == null) key = nil;
-        if (value == null) value = nil;
+                            if (value == null) value = nil;
 
-                            if (sql.$length()['$>'](0)) {
-                              sql['$<<']("\nINTERSECT\n")
+                            if (sql.length > 0) {
+                              sql += "\nINTERSECT\n";
                             };
                             attrib_name = self.$getCondAttribName(key);
                             if ((_a = (_b = ((_b = attrib_name !== false && attrib_name !== nil) ? attrib_name['$is_a?'](__scope.String) : _b), _b !== false && _b !== nil ? attrib_name['$==']("object") : _b)) !== false && _a !== nil) {
-                              sql['$<<']("SELECT DISTINCT(object) FROM object_values WHERE \n")
+                              sql += "SELECT DISTINCT(object) FROM object_values WHERE \n";
                               } else {
-                              sql['$<<']("SELECT object FROM object_values WHERE \n")
+                              sql += "SELECT object FROM object_values WHERE \n";
                             };
                             ((_a = self.$makeCondWhereEx(key, value, self.$get_source_id()))._isArray ? _a : (_a = [_a])), sql_cond = (_a[0] == null ? nil : _a[0]), val_cond = (_a[1] == null ? nil : _a[1]);
-                            sql['$<<'](sql_cond);
+                            sql += sql_cond;
                             vals = vals['$+'](val_cond);
                             if (str_limit !== false && str_limit !== nil) {
-                              return sql += (str_limit)
-                              } else {
-                              return nil
+                              sql += str_limit;
                             };
                           }, TMP_14._s = this, TMP_14));
                           list_objs = db.$execute_sql(sql, vals);
-                          } else {
+                        } else {
                           sql = "";
                           vals = [];
-                          sql['$<<']("SELECT distinct( object ) FROM object_values WHERE \n");
-                          sql['$<<']("source_id=?");
+                          sql += "SELECT distinct( object ) FROM object_values WHERE \n";
+                          sql += "source_id=?";
                           vals['$<<'](this.$get_source_id());
                           if (str_limit !== false && str_limit !== nil) {
-                            sql += (str_limit)
+                            sql += str_limit;
                           };
                           list_objs = db.$execute_sql(sql, vals);
                         }
@@ -6520,11 +6463,11 @@ var Rho = Rho || (function ($) {
                         if (obj == null) obj = nil;
 
                         n_index = n_index['$+'](1);
-                        if ((_a = (_b = (_b = (_b = (_b = ((_c = false), _c !== false && _c !== nil ? _c : order_attr), (_b === nil || _b === false)), _b !== false && _b !== nil ? offset : _b), _b !== false && _b !== nil ? n_index['$<'](offset) : _b), _b !== false && _b !== nil ? (_b = str_limit, (_b === nil || _b === false)) : _b)) !== false && _a !== nil) {
-                          return nil;
-                        };
+                        if (order_attr === undefined && offset !== undefined && n_index < offset && (str_limit === nil || str_limit === false)) {
+                            return nil;
+                        }
                         b_skip = false;
-                        nulls_cond.$each((TMP_16 = function(key, value) {
+                        each(nulls_cond, (TMP_16 = function(key, value) {
 
                           var attr_val = nil, self = TMP_16._s || this, _a, _b;
                           if (key == null) key = nil;
@@ -6535,7 +6478,7 @@ var Rho = Rho || (function ($) {
                           sql['$<<']("object=?");
                           sql['$<<'](" AND attrib=?");
                           sql['$<<'](" AND source_id=?");
-                          attr_val = db.$execute_sql(sql, obj['$[]']("object"), key, self.$get_source_id());
+                          attr_val = db.$execute_sql(sql, [obj['$[]']("object"), key, self.$get_source_id()]);
                           if ((_a = (_b = ((_b = attr_val !== false && attr_val !== nil) ? attr_val.$length()['$>'](0) : _b), _b !== false && _b !== nil ? attr_val['$[]'](0)['$[]']("value") : _b)) !== false && _a !== nil) {
                             b_skip = true;
                             return (__breaker.$v = nil, __breaker);
@@ -6607,51 +6550,51 @@ var Rho = Rho || (function ($) {
                       return list_objs;
                     };
                     def.$find_bycondhash = function(args, block) {
-                      var condition_hash = nil, select_arr = nil, limit = nil, offset = nil, order_dir = nil, ret_list = nil, op = nil, n_src_id = nil, order_attr = nil, attribs = nil, order_attr_arr = nil, db = nil, list_objs = nil, n_count = nil, _a, TMP_21, _b;if (typeof(block) !== 'function') { block = nil }
-                      condition_hash = __hash2({});
-                      select_arr = nil;
-                      limit = nil;
+                      var condition_hash = undefined, select_arr = undefined, limit = undefined, offset = undefined, order_dir = undefined, ret_list = nil, op = nil, n_src_id = nil, order_attr = undefined, attribs = nil, order_attr_arr = nil, db = nil, list_objs = nil, n_count = nil, _a, TMP_21, _b;if (typeof(block) !== 'function') { block = nil }
+                      condition_hash = {};
+                      select_arr = undefined;
+                      limit = undefined;
                       offset = 0;
                       order_dir = "";
                       ret_list = [];
                       op = "AND";
                       n_src_id = this.$get_source_id().$to_i();
-                      if ((_a = args['$[]'](1)) !== false && _a !== nil) {
-                        if ((_a = args['$[]'](1)['$[]']("conditions")) !== false && _a !== nil) {
-                          condition_hash = args['$[]'](1)['$[]']("conditions")
+
+                      var what = args[0];
+                      var options = args[1];
+
+                      if (options !== undefined) {
+                        if (options['conditions'] !== undefined) {
+                            condition_hash = options['conditions']
                         };
-                        if ((_a = args['$[]'](1)['$[]']("per_page")) !== false && _a !== nil) {
-                          limit = args['$[]'](1)['$[]']("per_page").$to_i();
-                          offset = (function() { if ((_a = args['$[]'](1)['$[]']("offset")) !== false && _a !== nil) {
-                            return args['$[]'](1)['$[]']("offset").$to_i()
-                            } else {
-                            return 0
-                          }; return nil; }).call(this);
+                        if (options['per_page'] !== undefined) {
+                            limit = options['per_page'].$to_i();
+                            offset = (options['offset'] === undefined) ? 0 : options['offset'].$to_i();
                         };
-                        if ((_a = args['$[]'](1)['$[]']("select")) !== false && _a !== nil) {
-                          select_arr = args['$[]'](1)['$[]']("select")
+                        if (options['select'] !== undefined) {
+                            select_arr = options['select'];
                         };
-                        order_dir = args['$[]'](1)['$[]']("orderdir");
-                        order_attr = args['$[]'](1)['$[]']("order");
-                        if ((_a = args['$[]'](1)['$[]']("op")) !== false && _a !== nil) {
-                          op = args['$[]'](1)['$[]']("op").$upcase()
+                        order_dir = options['orderdir'];
+                        order_attr = options['order'];
+                        if (options['op'] !== undefined) {
+                            op = options['op'].$upcase()
                         };
                       };
-                      if (args.$first()['$==']("first")) {
+                      if (what === 'first') {
                         limit = 1;
-                        if ((_a = offset) === false || _a === nil) {
-                          offset = 0
-                        };
-                      };
+                        if (offset === undefined) {
+                            offset = 0;
+                        }
+                      }
                       attribs = nil;
-                      if (select_arr !== false && select_arr !== nil) {
+                      if (select_arr !== undefined) {
                         attribs = select_arr;
-                        if (order_attr !== false && order_attr !== nil) {
+                        if (order_attr !== undefined) {
                           order_attr_arr = [];
                           if ((_a = order_attr['$is_a?'](__scope.Array)) !== false && _a !== nil) {
-                            order_attr_arr = order_attr
-                            } else {
-                            order_attr_arr.$push(order_attr)
+                              order_attr_arr = order_attr;
+                          } else {
+                              order_attr_arr.$push(order_attr);
                           };
                           attribs = attribs['$|'](order_attr_arr);
                         };
@@ -6660,31 +6603,24 @@ var Rho = Rho || (function ($) {
                       db.$lock_db();
                       try {
         list_objs = [];
-                      if ((_a = condition_hash['$is_a?'](__scope.Hash)) !== false && _a !== nil) {
-                        list_objs = this.$find_objects(condition_hash, op, limit, offset, order_attr, block.$to_proc())
-                        } else {
+                      if (condition_hash instanceof Array) {
                         list_objs = this.$find_objects_ex(condition_hash, op, limit, offset, order_attr, block.$to_proc())
+                      } else {
+                        list_objs = this.$find_objects(condition_hash, op, limit, offset, order_attr, block.$to_proc())
                       };
                       n_count = 0;
-                      if (args.$first()['$==']("count")) {
+                      if (what === 'count') {
                         n_count = list_objs.$length()
-                        } else {
+                      } else {
                         list_objs.$each((TMP_21 = function(obj) {
 
-                          var sql = nil, values = nil, list_attrs = nil, new_obj = nil, self = TMP_21._s || this, TMP_22, _a, _b, _c;
+                          var values = nil, list_attrs = nil, new_obj = nil, self = TMP_21._s || this, TMP_22, _a, _b, _c;
                           if (obj == null) obj = nil;
 
-                          sql = "";
-                          values = [];
-                          sql['$<<']("SELECT attrib,value FROM object_values WHERE \n");
-                          sql['$<<']("object=? AND source_id=?");
-                          values['$<<'](obj['$[]']("object"));
-                          values['$<<'](self.$get_source_id());
-                          list_attrs = (function() { if (sql.$length()['$>'](0)) {
-                            return db.$execute_sql(sql, values)
-                            } else {
-                            return []
-                          }; return nil; }).call(self);
+                          list_attrs = db.$execute_sql(
+                              'SELECT attrib,value FROM object_values WHERE object=? AND source_id=?',
+                              [obj['$[]']("object"), self.$get_source_id()]
+                          );
                           new_obj = self.$new(__hash2({"object": "" + (obj['$[]']("object"))}));
                           list_attrs.$each((TMP_22 = function(attr_val_hash) {
 
@@ -6705,23 +6641,24 @@ var Rho = Rho || (function ($) {
                             };
                           }, TMP_22._s = self, TMP_22));
                           ret_list['$<<'](new_obj);
-                          if ((_a = (_b = (_b = (_b = ((_c = false), _c !== false && _c !== nil ? _c : order_attr), (_b === nil || _b === false)), _b !== false && _b !== nil ? limit : _b), _b !== false && _b !== nil ? ret_list.$length()['$>='](limit) : _b)) !== false && _a !== nil) {
-                            return (__breaker.$v = nil, __breaker)
-                            } else {
-                            return nil
-                          };
+
+                          if (order_attr === undefined && limit !== undefined && ret_list.length >= limit) {
+                              return (__breaker.$v = nil, __breaker);
+                          }
+                          return nil;
+
                         }, TMP_21._s = this, TMP_21))
                       };}
                       finally {
                       db.$unlock_db()};
                       this.$order_array(ret_list, order_attr, order_dir, block.$to_proc());
-                      if ((_a = (_b = ((_b = (block !== nil)), _b !== false && _b !== nil ? _b : order_attr), _b !== false && _b !== nil ? limit : _b)) !== false && _a !== nil) {
-                        ret_list = ret_list.$slice(offset, limit)
-                      };
-                      if (args.$first()['$==']("count")) {
+                      if ((block !== nil || order_attr !== undefined) && limit !== undefined) {
+                          ret_list = ret_list.$slice(offset, limit);
+                      }
+                      if (what === 'count') {
                         return n_count
                       };
-                      if (args.$first()['$==']("first")) {
+                      if (what === 'first') {
                         return (function() { if (ret_list.$length()['$>'](0)) {
                           return ret_list['$[]'](0)
                           } else {
@@ -6732,7 +6669,7 @@ var Rho = Rho || (function ($) {
                     };
                     def.$order_array = function(ret_list, order_attr, order_dir, block) {
                       var TMP_23, TMP_25;if (typeof(block) !== 'function') { block = nil }
-                      if (order_attr !== false && order_attr !== nil) {
+                      if (order_attr !== undefined) {
                         return ret_list['$sort!']((TMP_23 = function(x, y) {
 
                           var res = nil, vx = nil, vy = nil, self = TMP_23._s || this, _a, TMP_24, _b;
@@ -6748,20 +6685,12 @@ var Rho = Rho || (function ($) {
 
                               vx = x.$vars()['$[]'](order_attr['$[]'](i).$to_sym());
                               vy = y.$vars()['$[]'](order_attr['$[]'](i).$to_sym());
-                              res = (function() { if ((_a = ((_b = vx !== false && vx !== nil) ? vy : _b)) !== false && _a !== nil) {
-                                if (false) {
-                                  return _a = __yield(vx, vy), _a === __breaker ? _a : _a
-                                  } else {
-                                  return vx['$<=>'](vy)
-                                }
-                                } else {
-                                return 0
-                              }; return nil; }).call(self);
+                              res = ((vx !== false && vx !== nil) && (vy !== false && vy !== nil)) ? vx['$<=>'](vy) : 0;
                               dir = "ASC";
-                              if ((_a = (_b = ((_b = order_dir !== false && order_dir !== nil) ? order_dir['$is_a?'](__scope.Array) : _b), _b !== false && _b !== nil ? i['$<'](order_dir.$length()) : _b)) !== false && _a !== nil) {
+                              if ((_a = (_b = (order_dir !== undefined && order_dir['$is_a?'](__scope.Array)), _b ? i['$<'](order_dir.$length()) : _b)) !== false && _a !== nil) {
                                 dir = order_dir['$[]'](i).$upcase()
                                 } else {
-                                if ((_a = ((_b = order_dir !== false && order_dir !== nil) ? order_dir['$is_a?'](__scope.String) : _b)) !== false && _a !== nil) {
+                                if (order_dir !== undefined && order_dir['$is_a?'](__scope.String)) {
                                   dir = order_dir.$upcase()
                                 }
                               };
@@ -6777,17 +6706,9 @@ var Rho = Rho || (function ($) {
                             } else {
                             vx = x.$vars()['$[]'](order_attr.$to_sym());
                             vy = y.$vars()['$[]'](order_attr.$to_sym());
-                            res = (function() { if ((_a = ((_b = vx !== false && vx !== nil) ? vy : _b)) !== false && _a !== nil) {
-                              if (false) {
-                                return _a = __yield(vx, vy), _a === __breaker ? _a : _a
-                                } else {
-                                return vx['$<=>'](vy)
-                              }
-                              } else {
-                              return 0
-                            }; return nil; }).call(self);
-                            if ((_a = ((_b = order_dir !== false && order_dir !== nil) ? order_dir.$upcase()['$==']("DESC") : _b)) !== false && _a !== nil) {
-                              res = res['$*'](-1)
+                            res = ((vx !== false && vx !== nil) && (vy !== false && vy !== nil)) ? vx['$<=>'](vy) : 0;
+                            if (order_dir !== undefined && order_dir.$upcase()['$==']("DESC")) {
+                                res = res['$*'](-1);
                             };
                           };
                           return res;
@@ -6801,7 +6722,7 @@ var Rho = Rho || (function ($) {
         if (y == null) y = nil;
 
                             res = (((_a = __yield(x, y)) === __breaker) ? __breaker.$v : _a);
-                            if ((_a = ((_b = order_dir !== false && order_dir !== nil) ? order_dir.$upcase()['$==']("DESC") : _b)) !== false && _a !== nil) {
+                            if (order_dir !== undefined && order_dir.$upcase()['$==']("DESC")) {
                               res = res['$*'](-1)
                             };
                             return res;
@@ -6846,25 +6767,30 @@ var Rho = Rho || (function ($) {
                       return res;
                     };
                     def.$find = function(args, block) {
-                      var ret_list = nil, conditions = nil, where_cond = nil, limit = nil, offset = nil, select_arr = nil, condition_str = nil, order_dir = nil, n_src_id = nil, order_attr = nil, str_limit = nil, attribs = nil, order_manually = nil, sql = nil, list = nil, db = nil, objects = nil, values = nil, new_item = nil, vals = nil, sql_cond = nil, _a, _b, _c, _d, TMP_27, TMP_29, TMP_30, TMP_31, block;args = __slice.call(arguments, 0);
+                      var ret_list = nil, where_cond = nil, limit = undefined, offset = undefined, select_arr = undefined, condition_str = nil, order_dir = undefined, n_src_id = nil, order_attr = undefined, str_limit = nil, attribs = nil, order_manually = nil, sql = nil, list = nil, db = nil, objects = nil, values = nil, new_item = nil, vals = nil, sql_cond = nil, _a, _b, _c, _d, TMP_27, TMP_29, TMP_30, TMP_31, block;args = __slice.call(arguments, 0);
                       if (typeof(args[args.length - 1]) === 'function') { block = args.pop(); } else { block = nil; }
                       
                       if ((_a = ((_b = args['$[]'](0)['$nil?']()), _b !== false && _b !== nil ? _b : args.$length()['$=='](0))) !== false && _a !== nil) {
                         ((this.$raise())._scope.Rhom)._scope.RecordNotFound
                       };
                       ret_list = [];
-                      conditions = __hash2({});
                       where_cond = nil;
-                      limit = nil;
-                      offset = nil;
-                      if ((_a = ((_b = ((_c = args.$first()['$==']("all")), _c !== false && _c !== nil ? _c : args.$first()['$==']("first"))), _b !== false && _b !== nil ? _b : args.$first()['$==']("count"))) !== false && _a !== nil) {
+                      limit = undefined;
+                      offset = undefined;
+
+                      var what = args['$[]'](0);
+                      var options = args['$[]'](1);
+
+                      if (what === 'all' || what === 'first' || what === 'count') {
                         if ((_a = (_b = this.$is_schema_source(), (_b === nil || _b === false))) !== false && _a !== nil) {
-                          if ((_a = (_b = (_b = args['$[]'](1), _b !== false && _b !== nil ? args['$[]'](1)['$[]']("conditions") : _b), _b !== false && _b !== nil ? args['$[]'](1)['$[]']("conditions")['$is_a?'](__scope.Hash) : _b)) !== false && _a !== nil) {
-                            return this.$find_bycondhash(args, block.$to_proc())
-                          };
-                          if ((_a = (_b = (_b = (_b = args['$[]'](1), _b !== false && _b !== nil ? args['$[]'](1)['$[]']("op") : _b), _b !== false && _b !== nil ? args['$[]'](1)['$[]']("conditions") : _b), _b !== false && _b !== nil ? args['$[]'](1)['$[]']("conditions")['$is_a?'](__scope.Array) : _b)) !== false && _a !== nil) {
-                            return this.$find_bycondhash(args, block.$to_proc())
-                          };
+                          if (options !== undefined && options['conditions'] !== undefined) {
+                              if (options['conditions'] instanceof Object) {
+                                return this.$find_bycondhash(args, block.$to_proc())
+                              }
+                              if ((options['conditions'] instanceof Array) && options['op'] !== undefined) {
+                                return this.$find_bycondhash(args, block.$to_proc())
+                              }
+                          }
                           where_cond = __hash2({"source_id": this.$get_source_id()});
                         }
                         } else {
@@ -6881,43 +6807,39 @@ var Rho = Rho || (function ($) {
                       if ((_a = ((_b = args.$first()['$==']("count")) ? (_c = args['$[]'](1), (_c === nil || _c === false)) : _b)) !== false && _a !== nil) {
                         return this.$count()
                       };
-                      select_arr = nil;
+                      select_arr = undefined;
                       condition_str = nil;
                       order_dir = "";
                       n_src_id = this.$get_source_id().$to_i();
-                      if ((_a = args['$[]'](1)) !== false && _a !== nil) {
-                        if ((_a = args['$[]'](1)['$[]']("conditions")) !== false && _a !== nil) {
-                          condition_str = this.$convertSqlConditionToStr(args['$[]'](1)['$[]']("conditions"), args['$[]'](1)['$[]']("op"))
-                        };
-                        if ((_a = args['$[]'](1)['$[]']("per_page")) !== false && _a !== nil) {
-                          limit = args['$[]'](1)['$[]']("per_page").$to_i();
-                          offset = (function() { if ((_a = args['$[]'](1)['$[]']("offset")) !== false && _a !== nil) {
-                            return args['$[]'](1)['$[]']("offset").$to_i()
-                            } else {
-                            return 0
-                          }; return nil; }).call(this);
-                        };
-                        if ((_a = args['$[]'](1)['$[]']("select")) !== false && _a !== nil) {
-                          select_arr = args['$[]'](1)['$[]']("select")
-                        };
-                        order_dir = args['$[]'](1)['$[]']("orderdir");
-                        order_attr = args['$[]'](1)['$[]']("order");
+                      if (options !== undefined) {
+                          if (options['conditions'] !== undefined) {
+                              condition_str = this.$convertSqlConditionToStr(options['conditions'], options['op']);
+                          };
+                          if (options['per_page'] !== undefined) {
+                              limit = options['per_page'].$to_i();
+                              offset = (options['offset'] === undefined) ? 0 : options['offset'].$to_i();
+                          };
+                          if (options['select'] !== undefined) {
+                              select_arr = options['select'];
+                          };
+                          order_dir = options['orderdir'];
+                          order_attr = options['order'];
                       };
                       if (args.$first()['$==']("first")) {
                         limit = 1;
-                        if ((_a = offset) === false || _a === nil) {
-                          offset = 0
-                        };
-                      };
+                        if (offset === undefined) {
+                            offset = 0;
+                        }
+                      }
                       str_limit = nil;
                       if ((_a = (_b = (block !== nil), (_b === nil || _b === false))) !== false && _a !== nil) {
-                        if ((_a = ((_b = limit !== false && limit !== nil) ? offset : _b)) !== false && _a !== nil) {
-                          str_limit = " LIMIT "['$+'](limit.$to_s())['$+'](" OFFSET ")['$+'](offset.$to_s())
-                        }
+                          if (limit !== undefined && offset !== undefined) {
+                              str_limit = " LIMIT "['$+'](limit.$to_s())['$+'](" OFFSET ")['$+'](offset.$to_s());
+                          }
                       };
-                      if (select_arr !== false && select_arr !== nil) {
+                      if (select_arr !== undefined) {
                         attribs = select_arr
-                        } else {
+                      } else {
                         attribs = "*"
                       };
                       order_manually = false;
@@ -6931,35 +6853,31 @@ var Rho = Rho || (function ($) {
                             values = [];
                             if ((_a = (_b = args.$first()['$is_a?'](__scope.String), _b !== false && _b !== nil ? (_b = ((_c = ((_d = args.$first()['$==']("all")), _d !== false && _d !== nil ? _d : args.$first()['$==']("first"))), _c !== false && _c !== nil ? _c : args.$first()['$==']("count")), (_b === nil || _b === false)) : _b)) !== false && _a !== nil) {
                               objects = [__hash2({"object": this.$strip_braces(args.$first().$to_s())})]
-                              } else {
-                              if ((_a = (_b = (_b = (_b = (block !== nil), (_b === nil || _b === false)), _b !== false && _b !== nil ? order_attr : _b), _b !== false && _b !== nil ? order_attr['$is_a?'](__scope.String) : _b)) !== false && _a !== nil) {
+                            } else {
+                              if (block === nil && order_attr !== undefined && typeof order_attr == 'string') {
                                 if ((_a = (_b = args['$[]'](1)['$[]']("dont_ignore_missed_attribs"), (_b === nil || _b === false))) !== false && _a !== nil) {
-                                  sql += ("SELECT object FROM object_values WHERE source_id=? ");
-                                  sql += (" AND attrib=? ORDER BY \"value\" "['$+']((function() { if (order_dir !== false && order_dir !== nil) {
-                                    return order_dir
-                                    } else {
-                                    return ""
-                                  }; return nil; }).call(this)));
+                                  sql += "SELECT object FROM object_values WHERE source_id=? ";
+                                  sql += " AND attrib=? ORDER BY \"value\" " + ((order_dir !== undefined) ? order_dir : '');
                                   values['$<<'](n_src_id);
                                   values['$<<'](order_attr);
                                 }
-                                } else {
+                              } else {
                                 if ((_a = (_b = (_b = ((_b = attribs !== false && attribs !== nil) ? (_c = attribs['$==']("*"), (_c === nil || _c === false)) : _b), _b !== false && _b !== nil ? (_b = attribs.$length()['$=='](0), (_b === nil || _b === false)) : _b), _b !== false && _b !== nil ? (_b = args['$[]'](1)['$[]']("dont_ignore_missed_attribs"), (_b === nil || _b === false)) : _b)) !== false && _a !== nil) {
                                   sql += ("SELECT object FROM object_values WHERE attrib=? AND source_id=?");
                                   values['$<<'](attribs['$[]'](0));
                                   values['$<<'](n_src_id);
                                   } else {
-                                  if ((_a = ((_b = limit['$=='](1)) ? offset['$=='](0) : _b)) !== false && _a !== nil) {
+                                  if (limit === 1 && offset === 0) {
                                     sql = "SELECT object FROM object_values WHERE source_id=?";
                                     values['$<<'](n_src_id);
-                                    } else {
+                                  } else {
                                     if (str_limit !== false && str_limit !== nil) {
                                       sql = "SELECT distinct(object) FROM object_values WHERE source_id=?";
                                       values['$<<'](n_src_id);
                                     }
                                   }
                                 };
-                                order_manually = (_a = order_attr['$nil?'](), (_a === nil || _a === false));
+                                order_manually = order_attr !== undefined;
                               };
                               if (sql.$length()['$>'](0)) {
                                 if (str_limit !== false && str_limit !== nil) {
@@ -7002,7 +6920,7 @@ var Rho = Rho || (function ($) {
                             };
                           };
                           if ((_a = objects['$nil?']()) !== false && _a !== nil) {
-                            if ((_a = (_b = (_b = condition_str, (_b === nil || _b === false)), _b !== false && _b !== nil ? (_b = (_c = args['$[]'](1), _c !== false && _c !== nil ? args['$[]'](1)['$[]']("dont_ignore_missed_attribs") : _c), (_b === nil || _b === false)) : _b)) !== false && _a !== nil) {
+                            if ((condition_str === nil || condition_str === false) && (options === undefined || options['dont_ignore_missed_attribs'] === undefined)) {
                               sql = "SELECT object, attrib, value FROM object_values WHERE source_id=? order by object";
                               values = [n_src_id];
                               objects = db.$execute_sql(sql, values);
@@ -7027,8 +6945,8 @@ var Rho = Rho || (function ($) {
                               if (new_item !== false && new_item !== nil) {
                                 list['$<<'](new_item)
                               };
-                              order_manually = (_a = order_attr['$nil?'](), (_a === nil || _a === false));
-                              } else {
+                              order_manually = order_attr !== undefined;
+                            } else {
                               if (attribs['$==']("*")) {
                                 this.$raise(__scope.ArgumentError, "Use Rhom advanced find syntax or specify :select parameter when use sql queries!")
                               };
@@ -7055,16 +6973,16 @@ var Rho = Rho || (function ($) {
                                   sql += ("where "['$+']((__opal.Object._scope.Rhom)._scope.RhomDbAdapter.$where_str(where_cond))['$+']("\n"))
                                 };
                                 sql += ("group by object\n");
-                                if ((_a = (_b = (_b = (block !== nil), (_b === nil || _b === false)), _b !== false && _b !== nil ? order_attr : _b)) !== false && _a !== nil) {
-                                  sql += ("order by "['$+'](this.$make_sql_order(args['$[]'](1))))
-                                };
+                                if (block === nil && order_attr !== undefined) {
+                                    sql += ("order by "['$+'](this.$make_sql_order(args['$[]'](1))))
+                                }
                                 if (condition_str !== false && condition_str !== nil) {
                                   sql += (") WHERE "['$+'](condition_str))
                                 };
                                 if (str_limit !== false && str_limit !== nil) {
                                   sql += (str_limit)
                                 };
-                                list = db.$execute_sql(sql);
+                                list = db.$execute_sql(sql, []);
                               };
                             }
                           };
@@ -7089,9 +7007,9 @@ var Rho = Rho || (function ($) {
                               }
                             }
                           };
-                          if ((_a = (_b = (_b = (block !== nil), (_b === nil || _b === false)), _b !== false && _b !== nil ? order_attr : _b)) !== false && _a !== nil) {
-                            sql += (" order by "['$+'](this.$make_sql_order(args['$[]'](1))))
-                          };
+                          if (block === nil && order_attr !== undefined) {
+                              sql += " order by "['$+'](this.$make_sql_order(args['$[]'](1)));
+                          }
                           if (str_limit !== false && str_limit !== nil) {
                             sql += (str_limit)
                           };
@@ -7124,7 +7042,7 @@ var Rho = Rho || (function ($) {
                       };
                       if ((_a = ((_b = (block !== nil)), _b !== false && _b !== nil ? _b : order_manually)) !== false && _a !== nil) {
                         this.$order_array(ret_list, order_attr, order_dir, block.$to_proc());
-                        if (limit !== false && limit !== nil) {
+                        if (limit !== undefined) {
                           ret_list = ret_list.$slice(offset, limit)
                         };
                       };
@@ -7149,7 +7067,7 @@ var Rho = Rho || (function ($) {
                         this.$raise(__scope.ArgumentError, "find_by_sql only works with FixedSchema models")
                       };
                       db = (__opal.Object._scope.Rho)._scope.RHO.$get_src_db(this.$get_source_name());
-                      list = db.$execute_sql(sql_query);
+                      list = db.$execute_sql(sql_query, []);
                       ret_list = [];
                       list.$each((TMP_33 = function(rowhash) {
 
@@ -7182,29 +7100,18 @@ var Rho = Rho || (function ($) {
                         return nil
                       };
                     };
-                    def.$sync = function(callback, callback_data, show_status_popup, query_params) {
-                      var src_id = nil, _a, _b;if (callback == null) {
-                        callback = nil
-                      }if (callback_data == null) {
-                        callback_data = ""
-                      }if (show_status_popup == null) {
-                        show_status_popup = nil
-                      }if (query_params == null) {
-                        query_params = ""
+                    def.$sync = function(callback, show_status_popup, query_params) {
+                      // if defined?(RHOCONNECT_CLIENT_PRESENT)
+                      if (typeof RRho !== 'undefined' && typeof RRho.RhoConnectClient !== 'undefined') {
+                          if (callback !== undefined) {
+                              RRho.RhoConnectClient.setNotification(this.$get_source_name(), callback);
+                          }
+                          return RRho.RhoConnectClient.doSyncSource(
+                              this.$get_source_id().$to_i(),
+                              (show_status_popup === undefined) || show_status_popup,
+                              (query_params === undefined) ? '' :  query_params
+                          );
                       }
-                      if ((_a = true) !== false && _a !== nil) {
-                        src_id = this.$get_source_id().$to_i();
-                        if (callback !== false && callback !== nil) {
-                          __scope.SyncEngine.$set_notification(src_id, callback, callback_data)
-                        };
-                        if ((_a = (_b = show_status_popup['$nil?'](), (_b === nil || _b === false))) !== false && _a !== nil) {
-                          return __scope.SyncEngine.$dosync_source(src_id, show_status_popup, query_params)
-                          } else {
-                          return __scope.SyncEngine.$dosync_source(src_id, 1, query_params)
-                        };
-                        } else {
-                        return nil
-                      };
                     };
                     def.$find_all = function(args) {
                       if (args == null) {
@@ -7239,19 +7146,20 @@ var Rho = Rho || (function ($) {
                     };
                     def.$is_blob_attrib = function(db_partition, n_src_id, attrib_name) {
                       
-                      return __scope.System.$is_blob_attr(db_partition, n_src_id.$to_i(), attrib_name);
+                      return RRho.Database.SQLite3.isBlobAttr(db_partition, n_src_id.$to_i(), attrib_name);
                     };
                     def.$on_sync_delete_error = function(objects, action) {
                       var n_src_id = nil, db_partition = nil, db = nil, e = nil, _a, TMP_35;
                       if ((_a = true) !== false && _a !== nil) {
                         if ((_a = action['$==']("retry")) === false || _a === nil) {
                           this.$raise(__scope.ArgumentError, "on_sync_delete_error action should be :retry")
-                        };
-                        if ((_a = this.$is_sync_source()) === false || _a === nil) {
-                          return nil
-                        };
+                        }
+                        if (!this.$is_sync_source()) {
+                            return nil;
+                        }
                         n_src_id = this.$get_source_id();
-                        db_partition = (__scope.Rho)._scope.RhoConfig.$sources()['$[]'](this.$get_source_name())['$[]']("partition").$to_s();
+                        var source = (__scope.Rho)._scope.RhoConfig.$sources()['$[]'](this.$get_source_name());
+                        db_partition = source['partition'];
                         db = (__opal.Object._scope.Rho)._scope.RHO.$get_src_db(this.$get_source_name());
                         db.$start_transaction();
                         return (function() { try {
@@ -7292,7 +7200,7 @@ var Rho = Rho || (function ($) {
                       };
                     };
                     def.$on_sync_update_error = function(objects, action, rollback_data) {
-                      var n_src_id = nil, db_partition = nil, table_name = nil, is_full_update = nil, db = nil, e = nil, _a, _b, TMP_37, TMP_39;if (rollback_data == null) {
+                      var n_src_id = nil, db_partition = nil, table_name = nil, db = nil, e = nil, _a, _b, TMP_37, TMP_39;if (rollback_data == null) {
                         rollback_data = nil
                       }
                       if ((_a = true) !== false && _a !== nil) {
@@ -7303,13 +7211,13 @@ var Rho = Rho || (function ($) {
                           return nil
                         };
                         n_src_id = this.$get_source_id();
-                        db_partition = (__scope.Rho)._scope.RhoConfig.$sources()['$[]'](this.$get_source_name())['$[]']("partition").$to_s();
+                        var source = (__scope.Rho)._scope.RhoConfig.$sources()['$[]'](this.$get_source_name());
+                        db_partition = source['partition'];
                         table_name = (function() { if ((_a = this.$is_schema_source()) !== false && _a !== nil) {
                           return this.$get_schema_table_name()
                           } else {
                           return "object_values"
                         }; return nil; }).call(this);
-                        is_full_update = (__scope.Rho)._scope.RhoConfig.$sources()['$[]'](this.$get_source_name())['$[]']("full_update");
                         db = (__opal.Object._scope.Rho)._scope.RHO.$get_src_db(this.$get_source_name());
                         db.$start_transaction();
                         return (function() { try {
@@ -7498,7 +7406,7 @@ var Rho = Rho || (function ($) {
                           list_objs = [];
                           if ((_a = (_b = conditions, (_b === nil || _b === false))) !== false && _a !== nil) {
                             if ((_a = this.$is_sync_source()) !== false && _a !== nil) {
-                              list_objs = db.$execute_sql("SELECT DISTINCT(object) FROM " + (table_name) + " WHERE source_id=?", this.$get_source_id())
+                              list_objs = db.$execute_sql("SELECT DISTINCT(object) FROM " + (table_name) + " WHERE source_id=?", [this.$get_source_id()])
                               } else {
                               db.$delete_from_table(table_name, __hash2({"source_id": this.$get_source_id()}))
                             }
@@ -7552,20 +7460,20 @@ var Rho = Rho || (function ($) {
                       var db = nil, obj = nil, result = nil, _a, _b;
                       db = (__opal.Object._scope.Rho)._scope.RHO.$get_src_db(this.$get_inst_source_name());
                       obj = this.$object();
-                      result = db.$execute_sql("SELECT object FROM changed_values WHERE source_id=? and object=? and sent>1 LIMIT 1 OFFSET 0", this.$get_inst_source_id().$to_i(), obj);
+                      result = db.$execute_sql("SELECT object FROM changed_values WHERE source_id=? and object=? and sent>1 LIMIT 1 OFFSET 0", [this.$get_inst_source_id().$to_i(), obj]);
                       return (_a = ((_b = result !== false && result !== nil) ? result.$length()['$>'](0) : _b), (_a === nil || _a === false));
                     };
                     self['$changed?'] = function() {
                       var db = nil, result = nil, _a;
                       db = (__opal.Object._scope.Rho)._scope.RHO.$get_src_db(this.$get_source_name());
-                      result = db.$execute_sql("SELECT object FROM changed_values WHERE source_id=? LIMIT 1 OFFSET 0", this.$get_source_id().$to_i());
+                      result = db.$execute_sql("SELECT object FROM changed_values WHERE source_id=? LIMIT 1 OFFSET 0", [this.$get_source_id().$to_i()]);
                       return ((_a = result !== false && result !== nil) ? result.$length()['$>'](0) : _a);
                     };
                     def['$changed?'] = function() {
                       var db = nil, obj = nil, result = nil, _a;
                       db = (__opal.Object._scope.Rho)._scope.RHO.$get_src_db(this.$get_inst_source_name());
                       obj = this.$object();
-                      result = db.$execute_sql("SELECT object FROM changed_values WHERE source_id=?  and object=? LIMIT 1 OFFSET 0", this.$get_inst_source_id().$to_i(), obj);
+                      result = db.$execute_sql("SELECT object FROM changed_values WHERE source_id=?  and object=? LIMIT 1 OFFSET 0", [this.$get_inst_source_id().$to_i(), obj]);
                       return ((_a = result !== false && result !== nil) ? result.$length()['$>'](0) : _a);
                     };
                     def.$destroy = function() {
@@ -7575,17 +7483,13 @@ var Rho = Rho || (function ($) {
                       if (obj !== false && obj !== nil) {
                         db = (__opal.Object._scope.Rho)._scope.RHO.$get_src_db(this.$get_inst_source_name());
                         try {
-                          table_name = (function() { if ((_a = this.$is_inst_schema_source()) !== false && _a !== nil) {
-                            return this.$get_inst_schema_table_name()
-                            } else {
-                            return "object_values"
-                          }; return nil; }).call(this);
+                          table_name = (this.$is_inst_schema_source()) ? this.$get_inst_schema_table_name() : "object_values";
                           db.$start_transaction();
                           attrs_list = nil;
-                          if ((_a = this.$is_inst_schema_source()) !== false && _a !== nil) {
+                          if (this.$is_inst_schema_source()) {
                             attrs_list = db.$select_from_table(table_name, "*", __hash2({"object": obj}));
                             db.$delete_from_table(table_name, __hash2({"object": obj}));
-                            } else {
+                          } else {
                             attrs_list = db.$select_from_table(table_name, "*", __hash2({"object": obj, "source_id": this.$get_inst_source_id()}));
                             db.$delete_from_table(table_name, __hash2({"object": obj, "source_id": this.$get_inst_source_id()}));
                           };
@@ -7601,7 +7505,7 @@ var Rho = Rho || (function ($) {
                             db.$delete_from_table("changed_values", __hash2({"object": obj, "source_id": this.$get_inst_source_id(), "sent": 0}))
                           };
                           if ((_a = (_b = (_b = (_b = this.$is_inst_sync_source(), _b !== false && _b !== nil ? update_type : _b), _b !== false && _b !== nil ? attrs_list : _b), _b !== false && _b !== nil ? attrs_list.$length()['$>'](0) : _b)) !== false && _a !== nil) {
-                            if ((_a = this.$is_inst_schema_source()) !== false && _a !== nil) {
+                            if (this.$is_inst_schema_source()) {
                               attrs_list['$[]'](0).$each((TMP_46 = function(attr_name, attr_value) {
 
                                 var self = TMP_46._s || this;
@@ -7635,15 +7539,11 @@ var Rho = Rho || (function ($) {
                       return true;
                     };
                     def.$create = function() {
-                      var n_src_id = nil, obj = nil, src_name = nil, table_name = nil, is_schema_src = nil, db = nil, e = nil, _a, TMP_48;
+                      var n_src_id = nil, obj = nil, src_name = nil, table_name = nil, is_schema_src, db = nil, e = nil, _a, TMP_48;
                       n_src_id = this.$get_inst_source_id();
                       obj = this.$object();
                       src_name = this.$get_inst_source_name();
-                      table_name = (function() { if ((_a = this.$is_inst_schema_source()) !== false && _a !== nil) {
-                        return this.$get_inst_schema_table_name()
-                        } else {
-                        return "object_values"
-                      }; return nil; }).call(this);
+                      table_name = (this.$is_inst_schema_source()) ? this.$get_inst_schema_table_name() : "object_values";
                       is_schema_src = this.$is_inst_schema_source();
                       db = (__opal.Object._scope.Rho)._scope.RHO.$get_src_db(src_name);
                       return (function() { try {
@@ -7653,8 +7553,9 @@ var Rho = Rho || (function ($) {
                           } else {
                           return nil
                         }; return nil; }).call(this);
-                        (function() { if (is_schema_src !== false && is_schema_src !== nil) {
-                          return db.$insert_into_table(table_name, this.$vars(), __hash2({"source_id": true}))
+                        (function() {
+                          if (is_schema_src) {
+                              return db.$insert_into_table(table_name, this.$vars(), __hash2({"source_id": true}));
                           } else {
                           return this.$vars().$each((TMP_48 = function(key_a, value) {
 
@@ -7684,20 +7585,17 @@ var Rho = Rho || (function ($) {
                       obj = this.$object();
                       n_src_id = this.$get_inst_source_id();
                       db = (__opal.Object._scope.Rho)._scope.RHO.$get_src_db(this.$get_inst_source_name());
-                      db_partition = (__scope.Rho)._scope.RhoConfig.$sources()['$[]'](this.$get_inst_source_name())['$[]']("partition").$to_s();
-                      table_name = (function() { if ((_a = this.$is_inst_schema_source()) !== false && _a !== nil) {
-                        return this.$get_inst_schema_table_name()
-                        } else {
-                        return "object_values"
-                      }; return nil; }).call(this);
+                      var source = (__scope.Rho)._scope.RhoConfig.$sources()['$[]'](this.$get_inst_source_name());
+                      db_partition = source['partition'];
+                      table_name = (this.$is_inst_schema_source()) ? this.$get_inst_schema_table_name() : 'object_values';
                       is_schema_src = this.$is_inst_schema_source();
                       is_new_item = false;
                       try {
                         db.$lock_db();
                         if (is_schema_src !== false && is_schema_src !== nil) {
-                          existing_attribs = db.$execute_sql("SELECT object FROM " + (table_name) + " WHERE object=? LIMIT 1 OFFSET 0", obj)
+                          existing_attribs = db.$execute_sql("SELECT object FROM " + (table_name) + " WHERE object=? LIMIT 1 OFFSET 0", [obj])
                           } else {
-                          existing_attribs = db.$execute_sql("SELECT object FROM " + (table_name) + " WHERE object=? AND source_id=? LIMIT 1 OFFSET 0", obj, n_src_id)
+                          existing_attribs = db.$execute_sql("SELECT object FROM " + (table_name) + " WHERE object=? AND source_id=? LIMIT 1 OFFSET 0", [obj, n_src_id])
                         };
                         if ((_a = ((_b = existing_attribs !== false && existing_attribs !== nil) ? existing_attribs.$length()['$>'](0) : _b)) === false || _a === nil) {
                           is_new_item = true;
@@ -7738,7 +7636,7 @@ var Rho = Rho || (function ($) {
                           };
                           val = value.$to_s();
                           fields = __hash2({"source_id": n_src_id, "object": obj, "attrib": key, "value": val, "update_type": update_type});
-                          fields = (function() { if ((_a = self.$is_blob_attrib(db_partition, n_src_id, key)) !== false && _a !== nil) {
+                          fields = (function() { if ((_a = self.constructor.$is_blob_attrib(db_partition, n_src_id, key)) !== false && _a !== nil) {
                             return fields['$merge!'](__hash2({"attrib_type": "blob.file"}))
                             } else {
                             return fields
@@ -7828,12 +7726,9 @@ var Rho = Rho || (function ($) {
                       update_type = "update";
                       n_src_id = this.$get_inst_source_id();
                       db = (__opal.Object._scope.Rho)._scope.RHO.$get_src_db(this.$get_inst_source_name());
-                      db_partition = (__scope.Rho)._scope.RhoConfig.$sources()['$[]'](this.$get_inst_source_name())['$[]']("partition").$to_s();
-                      table_name = (function() { if ((_a = this.$is_inst_schema_source()) !== false && _a !== nil) {
-                        return this.$get_inst_schema_table_name()
-                        } else {
-                        return "object_values"
-                      }; return nil; }).call(this);
+                      var source = (__scope.Rho)._scope.RhoConfig.$sources()['$[]'](this.$get_inst_source_name());
+                      db_partition = source['partition'];
+                      table_name = (this.$is_inst_schema_source()) ? this.$get_inst_schema_table_name() : 'object_values';
                       try {
                         db.$start_transaction();
                         ignore_changed_values = true;
@@ -7857,7 +7752,8 @@ var Rho = Rho || (function ($) {
                           new_val = val.$to_s();
                           is_modified = false;
                           if ((_a = (__opal.Object._scope.Rhom)._scope.RhomObject['$method_name_reserved?'](attrib)) === false || _a === nil) {
-                            old_val = self.$send(attrib.$to_sym())
+                            // old_val = self.$send(attrib.$to_sym())
+                            old_val = self.$vars()['$[]'](attrib);
                           };
                           is_modified = (_a = old_val['$=='](new_val), (_a === nil || _a === false));
                           if ((_a = (_b = (_b = ((_b = is_modified !== false && is_modified !== nil) ? new_val : _b), _b !== false && _b !== nil ? old_val['$nil?']() : _b), _b !== false && _b !== nil ? new_val.$to_s().$length()['$=='](0) : _b)) !== false && _a !== nil) {
@@ -7867,7 +7763,7 @@ var Rho = Rho || (function ($) {
                             is_modified = false
                           };
                           if (is_modified !== false && is_modified !== nil) {
-                            self.$class().$_insert_or_update_attr(db, self.$is_inst_schema_source(), table_name, n_src_id, obj, attrib, new_val);
+                            self.constructor.$_insert_or_update_attr(db, self.$is_inst_schema_source(), table_name, n_src_id, obj, attrib, new_val);
                             if ((_a = ignore_changed_values) === false || _a === nil) {
                               if ((_a = ((_b = res_update_type !== false && res_update_type !== nil) ? res_update_type.$length()['$>'](0) : _b)) !== false && _a !== nil) {
                                 db.$delete_from_table("changed_values", __hash2({"object": obj, "attrib": attrib, "source_id": n_src_id, "sent": 0}))
@@ -7899,24 +7795,20 @@ var Rho = Rho || (function ($) {
                       return this.$class().$name().$to_s();
                     };
                     def.$get_inst_source_id = function() {
-                      
-                      return (__scope.Rho)._scope.RhoConfig.$sources()['$[]'](this.$get_inst_source_name())['$[]']("source_id").$to_i();
+                      var source = (__scope.Rho)._scope.RhoConfig.$sources()['$[]'](this.$get_inst_source_name());
+                      return source['source_id'];
                     };
                     def.$is_inst_sync_source = function() {
-                      var _a;
-                      return (_a = (__scope.Rho)._scope.RhoConfig.$sources()['$[]'](this.$get_inst_source_name())['$[]']("sync_type")['$==']("none"), (_a === nil || _a === false));
+                        var source = (__scope.Rho)._scope.RhoConfig.$sources()['$[]'](this.$get_inst_source_name());
+                        return source['sync_type'] !== 'none';
                     };
                     def.$is_inst_schema_source = function() {
-                      var _a;
-                      return (_a = (__scope.Rho)._scope.RhoConfig.$sources()['$[]'](this.$get_inst_source_name())['$[]']("schema")['$nil?'](), (_a === nil || _a === false));
-                    };
+                        var source = (__scope.Rho)._scope.RhoConfig.$sources()['$[]'](this.$get_inst_source_name());
+                        return source.hasOwnProperty('schema');
+                    }
                     def.$get_inst_schema_table_name = function() {
                       
                       return this.$get_inst_source_name();
-                    };
-                    def.$is_inst_full_update = function() {
-                      
-                      return (__scope.Rho)._scope.RhoConfig.$sources()['$[]'](this.$get_inst_source_name())['$[]']("full_update");
                     };
                     return def.$inst_strip_braces = function(str) {
                       if (str == null) {
@@ -8005,9 +7897,15 @@ var Rho = Rho || (function ($) {
         'app'  : 20001,
         'local': 40001
     };
-    var allocateSourceId = function(partition) {
-        return freeSourceIds[partition]++;
+    var getSourceId = function(partition) {
+        return freeSourceIds[partition];
     };
+    var accountSourceId = function(partition, sourceId) {
+        if (freeSourceIds[partition] <= sourceId) {
+            freeSourceIds[partition] = sourceId + 1;
+        }
+    };
+
 
     var opalHash = function(values) {
         return Opal.hash2((values === undefined) ? {} : values);
@@ -8030,6 +7928,15 @@ var Rho = Rho || (function ($) {
             },
             vars: function() {
                 return opalObject.$vars().map;
+            },
+            save: function() {
+                opalObject.$save();
+            },
+            updateAttributes: function(attributes) {
+                opalObject.$update_attributes(opalHash(attributes));
+            },
+            destroy: function() {
+                opalObject.$destroy();
             }
         };
     };
@@ -8042,16 +7949,114 @@ var Rho = Rho || (function ($) {
         return list;
     };
 
-    var makeModel = function(modelClass) {
+    var makeModelBuilder = function(fixedSchema) {
+        var params = (fixedSchema) ? {'schema': {'property': {}}} : {'property': {}};
+
+        var set = function(name, value) {
+            if (name === 'sync') {
+                if (value) {
+                    if (!params.hasOwnProperty('sync_type')) {
+                        params['sync_type'] = 'incremental';
+                    }
+                } else {
+                    delete params['sync_type'];
+                }
+            } else {
+                params[name] = value;
+            }
+        };
+
+        var model = {
+            property: function(name, type, option) {
+                if (type === undefined) {
+                    type = 'string';
+                }
+                if (fixedschema) {
+                    params['schema']['property'][name] = [type, option];
+                } else {
+                    params['property'][name] = [type, option];
+                }
+            },
+            set: set,
+            enable: function(name) {
+                set(name, true);
+            },
+            belongs_to: function(name, owner) {
+                if (!params.hasOwnProperty('belongs_to')) {
+                    params['belongs_to'] = [];
+                }
+                if (owner instanceof Array) {
+                    for (var i = 0; i < owner.length; ++i) {
+                        params['belongs_to'].push(owner[i]);
+                    }
+                } else {
+                    params['belongs_to'].push(owner);
+                }
+            }
+        };
+        if (fixedSchema) {
+            var addIndex = function(index) {
+                model[index] = function(name, cols) {
+                    if (!params.hasOwnProperty(index)) {
+                        params[index] = {};
+                    }
+                    params[index][name] = cols;
+                };
+            };
+            addIndex('index');
+            addIndex('unique_index');
+        }
+
+        return {params: params, model: model};
+    };
+
+    var clone = function(original) {
+        var clone = {};
+        for (var key in original) {
+            if (original.hasOwnProperty(key)) {
+                clone[key] = original[key];
+            }
+        }
+        return clone;
+    };
+
+    var addLoadedSource = function(modelName, newSource) {
         var sources = Opal.Rho._scope.RhoConfig.$sources();
+        if (sources.map.hasOwnProperty(modelName)) {
+            return;
+        }
 
-        var sync_type = 'none';
-        var partition = (sync_type == 'none') ? 'user' : 'local';
-        var sourceId = allocateSourceId(partition);
-        sources['$[]='](modelClass, opalHash({'sync_type': sync_type, 'partition': partition, 'source_id': sourceId}));
+        var source = clone(newSource);
 
-        Opal.Rhom._scope.RhomObjectFactory.$init_object(modelClass);
-        var opalModel = Opal.Object._scope[modelClass];
+        var setDefault = function(key, value) {
+            if (!source.hasOwnProperty(key)) {
+                source[key] = value;
+            }
+        };
+
+        source['loaded'] = true;
+        source['name'] = modelName;
+        setDefault('sync_priority', 1000);
+        setDefault('sync_type', 'none');
+        setDefault('partition', (source['sync_type'] !== 'none') ? 'user' : 'local');
+        setDefault('source_id', getSourceId(source['partition']));
+
+        accountSourceId(source['partition'], source['source_id']);
+
+        sources['$[]='](modelName, source);
+    };
+      
+    var makeModel = function(modelName, initialize) {
+        Opal.Rhom._scope.RhomObjectFactory.$init_object(modelName);
+
+        var builder = makeModelBuilder(false);
+        if (initialize !== undefined) {
+            initialize(builder.model);
+        }
+
+        addLoadedSource(modelName, builder.params);
+
+        var opalModel = Opal.Object._scope[modelName];
         return {
             make: function(values) {
                 return wrapOpalObject(opalModel.$new(opalHash(values)));
@@ -8062,11 +8067,17 @@ var Rho = Rho || (function ($) {
             count: function() {
                 return opalModel.$count();
             },
-            find: function(arg) {
-                if (arg == 'all') {
-                    return wrapOpalObjects(opalModel.$find(arg));
+            find: function(what, options) {
+                var found = opalModel.$find(what, options);
+                switch (what) {
+                    case 'all'  : return wrapOpalObjects(found);
+                    case 'count': return                 found ;
+                    case 'first':
+                    default     : return wrapOpalObject (found);
                 }
-                return wrapOpalObject(opalModel.$find(arg));
+            },
+            sync: function(callback, show_status_popup, query_params) {
+                opalModel.$sync(callback, show_status_popup, query_params);
             },
             deleteAll: function() {
                 opalModel.$delete_all();
@@ -8080,12 +8091,12 @@ var Rho = Rho || (function ($) {
         clear: function() {
             models = {};
         },
-        addModel: function(modelClass) {
-            models[modelClass] = makeModel(modelClass);
-            return models[modelClass];
+        addModel: function(modelName) {
+            models[modelName] = makeModel(modelName);
+            return models[modelName];
         },
-        getModel: function(modelClass) {
-            return models[modelClass];
+        getModel: function(modelName) {
+            return models[modelName];
         }
     };
 
@@ -8101,6 +8112,7 @@ var Rho = Rho || (function ($) {
 
     var moduleNS = 'Rho.Application';
     var apiReq = rhoUtil.apiReqFor(moduleNS);
+    var currentDefaultID = null;
 
     // === Application class definition ===
 
@@ -8120,126 +8132,103 @@ var Rho = Rho || (function ($) {
         }
     };
 
+    Application.getId = function() { return currentDefaultID; }
+
     // === Application instance properties ===
 
-    rhoUtil.createPropsProxy(Application.prototype, {
-    }, apiReq);
+    rhoUtil.createPropsProxy(Application.prototype, [
+    ], apiReq, function(){ return this.getId(); });
 
     // === Application instance methods ===
 
+    rhoUtil.createMethodsProxy(Application.prototype, [
     
+    ], apiReq, function(){ return this.getId(); });
 
     // === Application constants ===
 
     
+            Application.APP_EVENT_ACTIVATED = 'Activated';
+        
+    
+            Application.APP_EVENT_DEACTIVATED = 'Deactivated';
+        
+    
+            Application.APP_EVENT_UICREATED = 'UICreated';
+        
+    
+            Application.APP_EVENT_UIDESTROYED = 'UIDestroyed';
+        
+    
+            Application.APP_EVENT_SYNCUSERCHANGED = 'SyncUserChanged';
+        
+    
+            Application.APP_EVENT_CONFIGCONFLICT = 'ConfigConflict';
+        
+    
+            Application.APP_EVENT_DBMIGRATESOURCE = 'DBMigrateSource';
+        
+    
 
     // === Application static properties ===
 
-    rhoUtil.createPropsProxy(Application, {
-       'appBundleFolder': 'r'
-      , 'appsBundleFolder': 'r'
-      , 'userFolder': 'r'
-      , 'configPath': 'r'
-      , 'modelsManifestPath': 'r'
-      , 'databaseBlobFolder': 'r'
-      , 'publicFolder': 'r'
-      , 'startURI': 'rw'
-      , 'settingsPageURI': 'rw'
-      , 'splash': 'r'
-      , 'version': 'r'
-      , 'title': 'rw'
-      , 'name': 'r'
-      , 'locale': 'r'
-      , 'country': 'r'
-      , 'badLinkURI': 'rw'
-    }, apiReq);
+    rhoUtil.createPropsProxy(Application, [
+        { propName: 'appBundleFolder', propAccess: 'r' }
+      , { propName: 'appsBundleFolder', propAccess: 'r' }
+      , { propName: 'userFolder', propAccess: 'r' }
+      , { propName: 'configPath', propAccess: 'r' }
+      , { propName: 'modelsManifestPath', propAccess: 'r' }
+      , { propName: 'databaseBlobFolder', propAccess: 'r' }
+      , { propName: 'publicFolder', propAccess: 'r' }
+      , { propName: 'startURI', propAccess: 'rw' }
+      , { propName: 'settingsPageURI', propAccess: 'rw' }
+      , { propName: 'splash', propAccess: 'r' }
+      , { propName: 'version', propAccess: 'r' }
+      , { propName: 'title', propAccess: 'rw' }
+      , { propName: 'name', propAccess: 'r' }
+      , { propName: 'locale', propAccess: 'r' }
+      , { propName: 'country', propAccess: 'r' }
+      , { propName: 'nativeMenu', propAccess: 'rw' }
+      , { propName: 'defaultNativeMenu', propAccess: 'r' }
+      , { propName: 'securityTokenNotPassed', propAccess: 'r' }
+      , { propName: 'invalidSecurityTokenStartPath', propAccess: 'rw' }
+      , { propName: 'badLinkURI', propAccess: 'rw' }
+    ], apiReq);
 
     // === Application static methods ===
 
+    rhoUtil.createMethodsProxy(Application, [
     
-        Application['modelFolderPath'] = function(/* const rho::String& */ name, /* optional function */ oResult) {
-            return apiReq({
-                instanceId: '0',
-                args: arguments,
-                method: 'modelFolderPath',
-                
-                valueCallbackIndex: 1
-            });
-        };
+          // function(/* const rho::String& */ name, /* optional function */ oResult)
+          { methodName: 'modelFolderPath', nativeName: 'modelFolderPath', valueCallbackIndex: 1 }
     
-        Application['databaseFilePath'] = function(/* const rho::String& */ partitionName, /* optional function */ oResult) {
-            return apiReq({
-                instanceId: '0',
-                args: arguments,
-                method: 'databaseFilePath',
-                
-                valueCallbackIndex: 1
-            });
-        };
+          // function(/* const rho::String& */ partitionName, /* optional function */ oResult)
+        , { methodName: 'databaseFilePath', nativeName: 'databaseFilePath', valueCallbackIndex: 1 }
     
-        Application['expandDatabaseBlobFilePath'] = function(/* const rho::String& */ relativePath, /* optional function */ oResult) {
-            return apiReq({
-                instanceId: '0',
-                args: arguments,
-                method: 'expandDatabaseBlobFilePath',
-                
-                valueCallbackIndex: 1
-            });
-        };
+          // function(/* const rho::String& */ relativePath, /* optional function */ oResult)
+        , { methodName: 'expandDatabaseBlobFilePath', nativeName: 'expandDatabaseBlobFilePath', valueCallbackIndex: 1 }
     
-        Application['quit'] = function(/* optional function */ oResult) {
-            return apiReq({
-                instanceId: '0',
-                args: arguments,
-                method: 'quit',
-                
-                valueCallbackIndex: 0
-            });
-        };
+          // function(/* const rho::String& */ absolutePath, /* optional function */ oResult)
+        , { methodName: 'relativeDatabaseBlobFilePath', nativeName: 'relativeDatabaseBlobFilePath', valueCallbackIndex: 1 }
     
-        Application['minimize'] = function(/* optional function */ oResult) {
-            return apiReq({
-                instanceId: '0',
-                args: arguments,
-                method: 'minimize',
-                
-                valueCallbackIndex: 0
-            });
-        };
+          // function(/* optional function */ oResult)
+        , { methodName: 'quit', nativeName: 'quit', valueCallbackIndex: 0 }
     
-        Application['restore'] = function(/* optional function */ oResult) {
-            return apiReq({
-                instanceId: '0',
-                args: arguments,
-                method: 'restore',
-                
-                valueCallbackIndex: 0
-            });
-        };
+          // function(/* optional function */ oResult)
+        , { methodName: 'minimize', nativeName: 'minimize', valueCallbackIndex: 0 }
     
-        Application['setActivationNotify'] = function(/* optional function */ oResult) {
-            return apiReq({
-                instanceId: '0',
-                args: arguments,
-                method: 'setActivationNotify',
-                persistentCallbackIndex: 0,
-                valueCallbackIndex: 2
-            });
-        };
+          // function(/* optional function */ oResult)
+        , { methodName: 'restore', nativeName: 'restore', valueCallbackIndex: 0 }
     
-        Application['getRhoPlatformVersion'] = function(/* optional function */ oResult) {
-            return apiReq({
-                instanceId: '0',
-                args: arguments,
-                method: 'getRhoPlatformVersion',
-                persistentCallbackIndex: 0,
-                valueCallbackIndex: 2
-            });
-        };
+          // function(/* optional function */ oResult)
+        , { methodName: 'setApplicationNotify', nativeName: 'setApplicationNotify', persistentCallbackIndex: 0, valueCallbackIndex: 2 }
     
+          // function(/* optional function */ oResult)
+        , { methodName: 'getRhoPlatformVersion', nativeName: 'getRhoPlatformVersion', persistentCallbackIndex: 0, valueCallbackIndex: 2 }
+    
+    ], apiReq);
 
     // === Application default instance support ===
-
     
 
     rhoUtil.namespace(moduleNS, Application);
@@ -8253,6 +8242,7 @@ var Rho = Rho || (function ($) {
 
     var moduleNS = 'Rho.Database';
     var apiReq = rhoUtil.apiReqFor(moduleNS);
+    var currentDefaultID = null;
 
     // === Database class definition ===
 
@@ -8272,14 +8262,18 @@ var Rho = Rho || (function ($) {
         }
     };
 
+    Database.getId = function() { return currentDefaultID; }
+
     // === Database instance properties ===
 
-    rhoUtil.createPropsProxy(Database.prototype, {
-    }, apiReq);
+    rhoUtil.createPropsProxy(Database.prototype, [
+    ], apiReq, function(){ return this.getId(); });
 
     // === Database instance methods ===
 
+    rhoUtil.createMethodsProxy(Database.prototype, [
     
+    ], apiReq, function(){ return this.getId(); });
 
     // === Database constants ===
 
@@ -8287,15 +8281,16 @@ var Rho = Rho || (function ($) {
 
     // === Database static properties ===
 
-    rhoUtil.createPropsProxy(Database, {
-    }, apiReq);
+    rhoUtil.createPropsProxy(Database, [
+    ], apiReq);
 
     // === Database static methods ===
 
+    rhoUtil.createMethodsProxy(Database, [
     
+    ], apiReq);
 
     // === Database default instance support ===
-
     
 
     rhoUtil.namespace(moduleNS, Database);
@@ -8309,6 +8304,7 @@ var Rho = Rho || (function ($) {
 
     var moduleNS = 'Rho.Database.SQLite3';
     var apiReq = rhoUtil.apiReqFor(moduleNS);
+    var currentDefaultID = null;
 
     // === SQLite3 class definition ===
 
@@ -8330,135 +8326,51 @@ var Rho = Rho || (function ($) {
         }
     };
 
+    SQLite3.getId = function() { return currentDefaultID; }
+
     // === SQLite3 instance properties ===
 
-    rhoUtil.createPropsProxy(SQLite3.prototype, {
-    }, apiReq);
+    rhoUtil.createPropsProxy(SQLite3.prototype, [
+    ], apiReq, function(){ return this.getId(); });
 
     // === SQLite3 instance methods ===
 
+    rhoUtil.createMethodsProxy(SQLite3.prototype, [
     
-        SQLite3.prototype['open'] = function(/* const rho::String& */ dbPath, /* const rho::String& */ dbPartition, /* optional function */ oResult) {
-            return apiReq({
-                instanceId: this.getId(),
-                args: arguments,
-                method: 'open',
-                
-                valueCallbackIndex: 2
-            });
-        };
-
+          // function(/* const rho::String& */ dbPath, /* const rho::String& */ dbPartition, /* optional function */ oResult)
+          { methodName: 'open', nativeName: 'open', valueCallbackIndex: 2 }
     
-        SQLite3.prototype['close'] = function(/* optional function */ oResult) {
-            return apiReq({
-                instanceId: this.getId(),
-                args: arguments,
-                method: 'close',
-                
-                valueCallbackIndex: 0
-            });
-        };
-
+          // function(/* optional function */ oResult)
+        , { methodName: 'close', nativeName: 'close', valueCallbackIndex: 0 }
     
-        SQLite3.prototype['startTransaction'] = function(/* optional function */ oResult) {
-            return apiReq({
-                instanceId: this.getId(),
-                args: arguments,
-                method: 'startTransaction',
-                
-                valueCallbackIndex: 0
-            });
-        };
-
+          // function(/* optional function */ oResult)
+        , { methodName: 'startTransaction', nativeName: 'startTransaction', valueCallbackIndex: 0 }
     
-        SQLite3.prototype['commitTransaction'] = function(/* optional function */ oResult) {
-            return apiReq({
-                instanceId: this.getId(),
-                args: arguments,
-                method: 'commitTransaction',
-                
-                valueCallbackIndex: 0
-            });
-        };
-
+          // function(/* optional function */ oResult)
+        , { methodName: 'commitTransaction', nativeName: 'commitTransaction', valueCallbackIndex: 0 }
     
-        SQLite3.prototype['rollbackTransaction'] = function(/* optional function */ oResult) {
-            return apiReq({
-                instanceId: this.getId(),
-                args: arguments,
-                method: 'rollbackTransaction',
-                
-                valueCallbackIndex: 0
-            });
-        };
-
+          // function(/* optional function */ oResult)
+        , { methodName: 'rollbackTransaction', nativeName: 'rollbackTransaction', valueCallbackIndex: 0 }
     
-        SQLite3.prototype['lockDb'] = function(/* optional function */ oResult) {
-            return apiReq({
-                instanceId: this.getId(),
-                args: arguments,
-                method: 'lockDb',
-                
-                valueCallbackIndex: 0
-            });
-        };
-
+          // function(/* optional function */ oResult)
+        , { methodName: 'lockDb', nativeName: 'lockDb', valueCallbackIndex: 0 }
     
-        SQLite3.prototype['unlockDb'] = function(/* optional function */ oResult) {
-            return apiReq({
-                instanceId: this.getId(),
-                args: arguments,
-                method: 'unlockDb',
-                
-                valueCallbackIndex: 0
-            });
-        };
-
+          // function(/* optional function */ oResult)
+        , { methodName: 'unlockDb', nativeName: 'unlockDb', valueCallbackIndex: 0 }
     
-        SQLite3.prototype['destroyTables'] = function(/* const rho::Vector<rho::String>& */ include, /* const rho::Vector<rho::String>& */ exclude, /* optional function */ oResult) {
-            return apiReq({
-                instanceId: this.getId(),
-                args: arguments,
-                method: 'destroyTables',
-                
-                valueCallbackIndex: 2
-            });
-        };
-
+          // function(/* const rho::Vector<rho::String>& */ include, /* const rho::Vector<rho::String>& */ exclude, /* optional function */ oResult)
+        , { methodName: 'destroyTables', nativeName: 'destroyTables', valueCallbackIndex: 2 }
     
-        SQLite3.prototype['isTableExist'] = function(/* const rho::String& */ tableName, /* optional function */ oResult) {
-            return apiReq({
-                instanceId: this.getId(),
-                args: arguments,
-                method: 'isTableExist',
-                
-                valueCallbackIndex: 1
-            });
-        };
-
+          // function(/* const rho::String& */ tableName, /* optional function */ oResult)
+        , { methodName: 'isTableExist', nativeName: 'isTableExist', valueCallbackIndex: 1 }
     
-        SQLite3.prototype['isUiWaitForDb'] = function(/* optional function */ oResult) {
-            return apiReq({
-                instanceId: this.getId(),
-                args: arguments,
-                method: 'isUiWaitForDb',
-                
-                valueCallbackIndex: 0
-            });
-        };
-
+          // function(/* optional function */ oResult)
+        , { methodName: 'isUiWaitForDb', nativeName: 'isUiWaitForDb', valueCallbackIndex: 0 }
     
-        SQLite3.prototype['execute'] = function(/* const rho::String& */ sqlStmt, /* bool */ isBatch, /* const rho::Vector<rho::String>& */ args, /* optional function */ oResult) {
-            return apiReq({
-                instanceId: this.getId(),
-                args: arguments,
-                method: 'execute',
-                
-                valueCallbackIndex: 3
-            });
-        };
-
+          // function(/* const rho::String& */ sqlStmt, /* bool */ isBatch, /* const rho::Vector<rho::String>& */ args, /* optional function */ oResult)
+        , { methodName: 'execute', nativeName: 'execute', valueCallbackIndex: 3 }
     
+    ], apiReq, function(){ return this.getId(); });
 
     // === SQLite3 constants ===
 
@@ -8466,15 +8378,19 @@ var Rho = Rho || (function ($) {
 
     // === SQLite3 static properties ===
 
-    rhoUtil.createPropsProxy(SQLite3, {
-    }, apiReq);
+    rhoUtil.createPropsProxy(SQLite3, [
+    ], apiReq);
 
     // === SQLite3 static methods ===
 
+    rhoUtil.createMethodsProxy(SQLite3, [
     
+          // function(/* const rho::String& */ partition, /* int */ sourceID, /* const rho::String& */ attrName, /* optional function */ oResult)
+          { methodName: 'isBlobAttr', nativeName: 'isBlobAttr', valueCallbackIndex: 3 }
+    
+    ], apiReq);
 
     // === SQLite3 default instance support ===
-
     
 
     rhoUtil.namespace(moduleNS, SQLite3);
@@ -8488,6 +8404,7 @@ var Rho = Rho || (function ($) {
 
     var moduleNS = 'Rho.Log';
     var apiReq = rhoUtil.apiReqFor(moduleNS);
+    var currentDefaultID = null;
 
     // === Log class definition ===
 
@@ -8507,14 +8424,18 @@ var Rho = Rho || (function ($) {
         }
     };
 
+    Log.getId = function() { return currentDefaultID; }
+
     // === Log instance properties ===
 
-    rhoUtil.createPropsProxy(Log.prototype, {
-    }, apiReq);
+    rhoUtil.createPropsProxy(Log.prototype, [
+    ], apiReq, function(){ return this.getId(); });
 
     // === Log instance methods ===
 
+    rhoUtil.createMethodsProxy(Log.prototype, [
     
+    ], apiReq, function(){ return this.getId(); });
 
     // === Log constants ===
 
@@ -8546,119 +8467,208 @@ var Rho = Rho || (function ($) {
 
     // === Log static properties ===
 
-    rhoUtil.createPropsProxy(Log, {
-       'level': 'rw'
-      , 'destination': 'rw'
-      , 'includeCategories': 'rw'
-      , 'excludeCategories': 'rw'
-      , 'fileSize': 'rw'
-      , 'filePath': 'rw'
-      , 'memoryPeriod': 'rw'
-      , 'netTrace': 'rw'
-      , 'skipPost': 'rw'
-      , 'excludeFilter': 'rw'
-      , 'destinationURI': 'rw'
-    }, apiReq);
+    rhoUtil.createPropsProxy(Log, [
+        { propName: 'level', propAccess: 'rw' }
+      , { propName: 'destination', propAccess: 'rw' }
+      , { propName: 'includeCategories', propAccess: 'rw' }
+      , { propName: 'excludeCategories', propAccess: 'rw' }
+      , { propName: 'fileSize', propAccess: 'rw' }
+      , { propName: 'filePath', propAccess: 'rw' }
+      , { propName: 'memoryPeriod', propAccess: 'rw' }
+      , { propName: 'netTrace', propAccess: 'rw' }
+      , { propName: 'skipPost', propAccess: 'rw' }
+      , { propName: 'excludeFilter', propAccess: 'rw' }
+      , { propName: 'destinationURI', propAccess: 'rw' }
+    ], apiReq);
 
     // === Log static methods ===
 
+    rhoUtil.createMethodsProxy(Log, [
     
-        Log['trace'] = function(/* const rho::String& */ message, /* const rho::String& */ category, /* optional function */ oResult) {
-            return apiReq({
-                instanceId: '0',
-                args: arguments,
-                method: 'trace',
-                
-                valueCallbackIndex: 2
-            });
-        };
+          // function(/* const rho::String& */ message, /* const rho::String& */ category, /* optional function */ oResult)
+          { methodName: 'trace', nativeName: 'trace', valueCallbackIndex: 2 }
     
-        Log['info'] = function(/* const rho::String& */ message, /* const rho::String& */ category, /* optional function */ oResult) {
-            return apiReq({
-                instanceId: '0',
-                args: arguments,
-                method: 'info',
-                
-                valueCallbackIndex: 2
-            });
-        };
+          // function(/* const rho::String& */ message, /* const rho::String& */ category, /* optional function */ oResult)
+        , { methodName: 'info', nativeName: 'info', valueCallbackIndex: 2 }
     
-        Log['warning'] = function(/* const rho::String& */ message, /* const rho::String& */ category, /* optional function */ oResult) {
-            return apiReq({
-                instanceId: '0',
-                args: arguments,
-                method: 'warning',
-                
-                valueCallbackIndex: 2
-            });
-        };
+          // function(/* const rho::String& */ message, /* const rho::String& */ category, /* optional function */ oResult)
+        , { methodName: 'warning', nativeName: 'warning', valueCallbackIndex: 2 }
     
-        Log['error'] = function(/* const rho::String& */ message, /* const rho::String& */ category, /* optional function */ oResult) {
-            return apiReq({
-                instanceId: '0',
-                args: arguments,
-                method: 'error',
-                
-                valueCallbackIndex: 2
-            });
-        };
+          // function(/* const rho::String& */ message, /* const rho::String& */ category, /* optional function */ oResult)
+        , { methodName: 'error', nativeName: 'error', valueCallbackIndex: 2 }
     
-        Log['fatalError'] = function(/* const rho::String& */ message, /* const rho::String& */ category, /* optional function */ oResult) {
-            return apiReq({
-                instanceId: '0',
-                args: arguments,
-                method: 'fatalError',
-                
-                valueCallbackIndex: 2
-            });
-        };
+          // function(/* const rho::String& */ message, /* const rho::String& */ category, /* optional function */ oResult)
+        , { methodName: 'fatalError', nativeName: 'fatalError', valueCallbackIndex: 2 }
     
-        Log['sendLogFile'] = function(/* optional function */ oResult) {
-            return apiReq({
-                instanceId: '0',
-                args: arguments,
-                method: 'sendLogFile',
-                persistentCallbackIndex: 0,
-                valueCallbackIndex: 2
-            });
-        };
+          // function(/* optional function */ oResult)
+        , { methodName: 'sendLogFile', nativeName: 'sendLogFile', persistentCallbackIndex: 0, valueCallbackIndex: 2 }
     
-        Log['showLog'] = function(/* optional function */ oResult) {
-            return apiReq({
-                instanceId: '0',
-                args: arguments,
-                method: 'showLog',
-                
-                valueCallbackIndex: 0
-            });
-        };
+          // function(/* optional function */ oResult)
+        , { methodName: 'showLog', nativeName: 'showLog', valueCallbackIndex: 0 }
     
-        Log['cleanLogFile'] = function(/* optional function */ oResult) {
-            return apiReq({
-                instanceId: '0',
-                args: arguments,
-                method: 'cleanLogFile',
-                
-                valueCallbackIndex: 0
-            });
-        };
+          // function(/* optional function */ oResult)
+        , { methodName: 'cleanLogFile', nativeName: 'cleanLogFile', valueCallbackIndex: 0 }
     
-        Log['readLogFile'] = function(/* int */ limit, /* optional function */ oResult) {
-            return apiReq({
-                instanceId: '0',
-                args: arguments,
-                method: 'readLogFile',
-                
-                valueCallbackIndex: 1
-            });
-        };
+          // function(/* int */ limit, /* optional function */ oResult)
+        , { methodName: 'readLogFile', nativeName: 'readLogFile', valueCallbackIndex: 1 }
     
+    ], apiReq);
 
     // === Log default instance support ===
-
     
 
     rhoUtil.namespace(moduleNS, Log);
+
+})(jQuery, Rho, Rho.util);
+// Module Rho.NativeTabbar
+
+
+(function ($, rho, rhoUtil) {
+    'use strict';
+
+    var moduleNS = 'Rho.NativeTabbar';
+    var apiReq = rhoUtil.apiReqFor(moduleNS);
+    var currentDefaultID = null;
+
+    // === NativeTabbar class definition ===
+
+    function NativeTabbar() {
+        var id = null;
+        this.getId = function () {return id;};
+
+        if (1 == arguments.length && arguments[0][rhoUtil.rhoIdParam()]) {
+            if (moduleNS != arguments[0][rhoUtil.rhoClassParam()]) {
+                throw "Wrong class instantiation!";
+            }
+            id = arguments[0][rhoUtil.rhoIdParam()];
+        } else {
+            id = rhoUtil.nextId();
+            // constructor methods are following:
+            
+        }
+    };
+
+    NativeTabbar.getId = function() { return currentDefaultID; }
+
+    // === NativeTabbar instance properties ===
+
+    rhoUtil.createPropsProxy(NativeTabbar.prototype, [
+    ], apiReq, function(){ return this.getId(); });
+
+    // === NativeTabbar instance methods ===
+
+    rhoUtil.createMethodsProxy(NativeTabbar.prototype, [
+    
+    ], apiReq, function(){ return this.getId(); });
+
+    // === NativeTabbar constants ===
+
+    
+
+    // === NativeTabbar static properties ===
+
+    rhoUtil.createPropsProxy(NativeTabbar, [
+    ], apiReq);
+
+    // === NativeTabbar static methods ===
+
+    rhoUtil.createMethodsProxy(NativeTabbar, [
+    
+          // function(/* const rho::Vector<rho::String>& */ tabElements, /* const rho::Hashtable<rho::String, rho::String>& */ tabBarProperties, /* optional function */ oResult)
+          { methodName: 'create', nativeName: 'create', persistentCallbackIndex: 2, valueCallbackIndex: 4 }
+    
+          // function(/* optional function */ oResult)
+        , { methodName: 'currentTabIndex', nativeName: 'currentTabIndex', valueCallbackIndex: 0 }
+    
+          // function(/* optional function */ oResult)
+        , { methodName: 'remove', nativeName: 'remove', valueCallbackIndex: 0 }
+    
+          // function(/* int */ tabIndex, /* const rho::String& */ badge, /* optional function */ oResult)
+        , { methodName: 'setTabBadge', nativeName: 'setTabBadge', valueCallbackIndex: 2 }
+    
+          // function(/* int */ tabIndex, /* optional function */ oResult)
+        , { methodName: 'switchTab', nativeName: 'switchTab', valueCallbackIndex: 1 }
+    
+          // function(/* optional function */ oResult)
+        , { methodName: 'isCreated', nativeName: 'isCreated', valueCallbackIndex: 0 }
+    
+    ], apiReq);
+
+    // === NativeTabbar default instance support ===
+    
+
+    rhoUtil.namespace(moduleNS, NativeTabbar);
+
+})(jQuery, Rho, Rho.util);
+// Module Rho.NativeToolbar
+
+
+(function ($, rho, rhoUtil) {
+    'use strict';
+
+    var moduleNS = 'Rho.NativeToolbar';
+    var apiReq = rhoUtil.apiReqFor(moduleNS);
+    var currentDefaultID = null;
+
+    // === NativeToolbar class definition ===
+
+    function NativeToolbar() {
+        var id = null;
+        this.getId = function () {return id;};
+
+        if (1 == arguments.length && arguments[0][rhoUtil.rhoIdParam()]) {
+            if (moduleNS != arguments[0][rhoUtil.rhoClassParam()]) {
+                throw "Wrong class instantiation!";
+            }
+            id = arguments[0][rhoUtil.rhoIdParam()];
+        } else {
+            id = rhoUtil.nextId();
+            // constructor methods are following:
+            
+        }
+    };
+
+    NativeToolbar.getId = function() { return currentDefaultID; }
+
+    // === NativeToolbar instance properties ===
+
+    rhoUtil.createPropsProxy(NativeToolbar.prototype, [
+    ], apiReq, function(){ return this.getId(); });
+
+    // === NativeToolbar instance methods ===
+
+    rhoUtil.createMethodsProxy(NativeToolbar.prototype, [
+    
+    ], apiReq, function(){ return this.getId(); });
+
+    // === NativeToolbar constants ===
+
+    
+
+    // === NativeToolbar static properties ===
+
+    rhoUtil.createPropsProxy(NativeToolbar, [
+    ], apiReq);
+
+    // === NativeToolbar static methods ===
+
+    rhoUtil.createMethodsProxy(NativeToolbar, [
+    
+          // function(/* const rho::Vector<rho::String>& */ toolbarElements, /* const rho::Hashtable<rho::String, rho::String>& */ toolBarProperties, /* optional function */ oResult)
+          { methodName: 'create', nativeName: 'create', valueCallbackIndex: 2 }
+    
+          // function(/* optional function */ oResult)
+        , { methodName: 'remove', nativeName: 'remove', valueCallbackIndex: 0 }
+    
+          // function(/* optional function */ oResult)
+        , { methodName: 'isCreated', nativeName: 'isCreated', valueCallbackIndex: 0 }
+    
+    ], apiReq);
+
+    // === NativeToolbar default instance support ===
+    
+
+    rhoUtil.namespace(moduleNS, NativeToolbar);
 
 })(jQuery, Rho, Rho.util);
 // Module Rho.Network
@@ -8669,6 +8679,7 @@ var Rho = Rho || (function ($) {
 
     var moduleNS = 'Rho.Network';
     var apiReq = rhoUtil.apiReqFor(moduleNS);
+    var currentDefaultID = null;
 
     // === Network class definition ===
 
@@ -8688,14 +8699,18 @@ var Rho = Rho || (function ($) {
         }
     };
 
+    Network.getId = function() { return currentDefaultID; }
+
     // === Network instance properties ===
 
-    rhoUtil.createPropsProxy(Network.prototype, {
-    }, apiReq);
+    rhoUtil.createPropsProxy(Network.prototype, [
+    ], apiReq, function(){ return this.getId(); });
 
     // === Network instance methods ===
 
+    rhoUtil.createMethodsProxy(Network.prototype, [
     
+    ], apiReq, function(){ return this.getId(); });
 
     // === Network constants ===
 
@@ -8706,163 +8721,66 @@ var Rho = Rho || (function ($) {
 
     // === Network static properties ===
 
-    rhoUtil.createPropsProxy(Network, {
-       'url': 'rw'
-      , 'authType': 'rw'
-      , 'authUser': 'rw'
-      , 'authPassword': 'rw'
-      , 'verifyPeerCertificate': 'rw'
-      , 'httpVerb': 'rw'
-      , 'headers': 'rw'
-      , 'responseTimeout': 'rw'
-    }, apiReq);
+    rhoUtil.createPropsProxy(Network, [
+        { propName: 'url', propAccess: 'rw' }
+      , { propName: 'authType', propAccess: 'rw' }
+      , { propName: 'authUser', propAccess: 'rw' }
+      , { propName: 'authPassword', propAccess: 'rw' }
+      , { propName: 'verifyPeerCertificate', propAccess: 'rw' }
+      , { propName: 'httpVerb', propAccess: 'rw' }
+      , { propName: 'headers', propAccess: 'rw' }
+      , { propName: 'responseTimeout', propAccess: 'rw' }
+    ], apiReq);
 
     // === Network static methods ===
 
+    rhoUtil.createMethodsProxy(Network, [
     
-        Network['cancel'] = function(/* optional function */ oResult) {
-            return apiReq({
-                instanceId: '0',
-                args: arguments,
-                method: 'cancel',
-                persistentCallbackIndex: 0,
-                valueCallbackIndex: 2
-            });
-        };
+          // function(/* optional function */ oResult)
+          { methodName: 'cancel', nativeName: 'cancel', persistentCallbackIndex: 0, valueCallbackIndex: 2 }
     
-        Network['downloadFile'] = function(/* const rho::Hashtable<rho::String, rho::String>& */ propertyMap, /* optional function */ oResult) {
-            return apiReq({
-                instanceId: '0',
-                args: arguments,
-                method: 'downloadFile',
-                persistentCallbackIndex: 1,
-                valueCallbackIndex: 3
-            });
-        };
+          // function(/* const rho::Hashtable<rho::String, rho::String>& */ propertyMap, /* optional function */ oResult)
+        , { methodName: 'downloadFile', nativeName: 'downloadFile', persistentCallbackIndex: 1, valueCallbackIndex: 3 }
     
-        Network['get'] = function(/* const rho::Hashtable<rho::String, rho::String>& */ propertyMap, /* optional function */ oResult) {
-            return apiReq({
-                instanceId: '0',
-                args: arguments,
-                method: 'get',
-                persistentCallbackIndex: 1,
-                valueCallbackIndex: 3
-            });
-        };
+          // function(/* const rho::Hashtable<rho::String, rho::String>& */ propertyMap, /* optional function */ oResult)
+        , { methodName: 'get', nativeName: 'get', persistentCallbackIndex: 1, valueCallbackIndex: 3 }
     
-        Network['post'] = function(/* const rho::Hashtable<rho::String, rho::String>& */ propertyMap, /* optional function */ oResult) {
-            return apiReq({
-                instanceId: '0',
-                args: arguments,
-                method: 'post',
-                persistentCallbackIndex: 1,
-                valueCallbackIndex: 3
-            });
-        };
+          // function(/* const rho::Hashtable<rho::String, rho::String>& */ propertyMap, /* optional function */ oResult)
+        , { methodName: 'post', nativeName: 'post', persistentCallbackIndex: 1, valueCallbackIndex: 3 }
     
-        Network['uploadFile'] = function(/* const rho::Hashtable<rho::String, rho::String>& */ propertyMap, /* optional function */ oResult) {
-            return apiReq({
-                instanceId: '0',
-                args: arguments,
-                method: 'uploadFile',
-                persistentCallbackIndex: 1,
-                valueCallbackIndex: 3
-            });
-        };
+          // function(/* const rho::Hashtable<rho::String, rho::String>& */ propertyMap, /* optional function */ oResult)
+        , { methodName: 'uploadFile', nativeName: 'uploadFile', persistentCallbackIndex: 1, valueCallbackIndex: 3 }
     
-        Network['hasNetwork'] = function(/* optional function */ oResult) {
-            return apiReq({
-                instanceId: '0',
-                args: arguments,
-                method: 'hasNetwork',
-                
-                valueCallbackIndex: 0
-            });
-        };
+          // function(/* optional function */ oResult)
+        , { methodName: 'hasNetwork', nativeName: 'hasNetwork', valueCallbackIndex: 0 }
     
-        Network['hasWifiNetwork'] = function(/* optional function */ oResult) {
-            return apiReq({
-                instanceId: '0',
-                args: arguments,
-                method: 'hasWifiNetwork',
-                
-                valueCallbackIndex: 0
-            });
-        };
+          // function(/* optional function */ oResult)
+        , { methodName: 'hasWifiNetwork', nativeName: 'hasWifiNetwork', valueCallbackIndex: 0 }
     
-        Network['hasCellNetwork'] = function(/* optional function */ oResult) {
-            return apiReq({
-                instanceId: '0',
-                args: arguments,
-                method: 'hasCellNetwork',
-                
-                valueCallbackIndex: 0
-            });
-        };
+          // function(/* optional function */ oResult)
+        , { methodName: 'hasCellNetwork', nativeName: 'hasCellNetwork', valueCallbackIndex: 0 }
     
-        Network['startStatusNotify'] = function(/* int */ pollInterval, /* optional function */ oResult) {
-            return apiReq({
-                instanceId: '0',
-                args: arguments,
-                method: 'startStatusNotify',
-                persistentCallbackIndex: 1,
-                valueCallbackIndex: 3
-            });
-        };
+          // function(/* int */ pollInterval, /* optional function */ oResult)
+        , { methodName: 'startStatusNotify', nativeName: 'startStatusNotify', persistentCallbackIndex: 1, valueCallbackIndex: 3 }
     
-        Network['stopStatusNotify'] = function(/* optional function */ oResult) {
-            return apiReq({
-                instanceId: '0',
-                args: arguments,
-                method: 'stopStatusNotify',
-                
-                valueCallbackIndex: 0
-            });
-        };
+          // function(/* optional function */ oResult)
+        , { methodName: 'stopStatusNotify', nativeName: 'stopStatusNotify', valueCallbackIndex: 0 }
     
-        Network['detectConnection'] = function(/* const rho::Hashtable<rho::String, rho::String>& */ propertyMap, /* optional function */ oResult) {
-            return apiReq({
-                instanceId: '0',
-                args: arguments,
-                method: 'detectConnection',
-                persistentCallbackIndex: 1,
-                valueCallbackIndex: 3
-            });
-        };
+          // function(/* const rho::Hashtable<rho::String, rho::String>& */ propertyMap, /* optional function */ oResult)
+        , { methodName: 'detectConnection', nativeName: 'detectConnection', persistentCallbackIndex: 1, valueCallbackIndex: 3 }
     
-        Network['stopDetectingConnection'] = function(/* optional function */ oResult) {
-            return apiReq({
-                instanceId: '0',
-                args: arguments,
-                method: 'stopDetectingConnection',
-                persistentCallbackIndex: 0,
-                valueCallbackIndex: 2
-            });
-        };
+          // function(/* optional function */ oResult)
+        , { methodName: 'stopDetectingConnection', nativeName: 'stopDetectingConnection', persistentCallbackIndex: 0, valueCallbackIndex: 2 }
     
-        Network['connectWan'] = function(/* const rho::String& */ connectionDestination, /* optional function */ oResult) {
-            return apiReq({
-                instanceId: '0',
-                args: arguments,
-                method: 'connectWan',
-                persistentCallbackIndex: 1,
-                valueCallbackIndex: 3
-            });
-        };
+          // function(/* const rho::String& */ connectionDestination, /* optional function */ oResult)
+        , { methodName: 'connectWan', nativeName: 'connectWan', persistentCallbackIndex: 1, valueCallbackIndex: 3 }
     
-        Network['disconnectWan'] = function(/* optional function */ oResult) {
-            return apiReq({
-                instanceId: '0',
-                args: arguments,
-                method: 'disconnectWan',
-                
-                valueCallbackIndex: 0
-            });
-        };
+          // function(/* optional function */ oResult)
+        , { methodName: 'disconnectWan', nativeName: 'disconnectWan', valueCallbackIndex: 0 }
     
+    ], apiReq);
 
     // === Network default instance support ===
-
     
 
     rhoUtil.namespace(moduleNS, Network);
@@ -8876,6 +8794,7 @@ var Rho = Rho || (function ($) {
 
     var moduleNS = 'Rho.System';
     var apiReq = rhoUtil.apiReqFor(moduleNS);
+    var currentDefaultID = null;
 
     // === System class definition ===
 
@@ -8895,14 +8814,18 @@ var Rho = Rho || (function ($) {
         }
     };
 
+    System.getId = function() { return currentDefaultID; }
+
     // === System instance properties ===
 
-    rhoUtil.createPropsProxy(System.prototype, {
-    }, apiReq);
+    rhoUtil.createPropsProxy(System.prototype, [
+    ], apiReq, function(){ return this.getId(); });
 
     // === System instance methods ===
 
+    rhoUtil.createMethodsProxy(System.prototype, [
     
+    ], apiReq, function(){ return this.getId(); });
 
     // === System constants ===
 
@@ -8937,297 +8860,153 @@ var Rho = Rho || (function ($) {
             System.KEYBOARD_AUTOMATIC = 'automatic';
         
     
+            System.REGKEY_CLASSES_ROOT = 'HKCR';
+        
+    
+            System.REGKEY_CURRENT_USER = 'HKCU';
+        
+    
+            System.REGKEY_LOCAL_MACHINE = 'HKLM';
+        
+    
+            System.REGKEY_USERS = 'HKU';
+        
+    
+            System.REGTYPE_SZ = 'String';
+        
+    
+            System.REGTYPE_BINARY = 'Binary';
+        
+    
+            System.REGTYPE_DWORD = 'DWORD';
+        
+    
+            System.REGTYPE_MULTI_SZ = 'MultiSZ';
+        
+    
 
     // === System static properties ===
 
-    rhoUtil.createPropsProxy(System, {
-       'platform': 'r'
-      , 'hasCamera': 'r'
-      , 'screenWidth': 'r'
-      , 'screenHeight': 'r'
-      , 'realScreenWidth': 'r'
-      , 'realScreenHeight': 'r'
-      , 'screenOrientation': 'r'
-      , 'ppiX': 'r'
-      , 'ppiY': 'r'
-      , 'phoneNumber': 'r'
-      , 'deviceOwnerEmail': 'r'
-      , 'deviceOwnerName': 'r'
-      , 'devicePushId': 'r'
-      , 'phoneId': 'r'
-      , 'deviceName': 'r'
-      , 'osVersion': 'r'
-      , 'locale': 'r'
-      , 'country': 'r'
-      , 'isEmulator': 'r'
-      , 'isRhoSimulator': 'r'
-      , 'hasCalendar': 'r'
-      , 'isMotorolaDevice': 'r'
-      , 'oemInfo': 'r'
-      , 'uuid': 'r'
-      , 'applicationIconBadge': 'rw'
-      , 'httpProxyURI': 'rw'
-      , 'lockWindowSize': 'rw'
-      , 'keyboardState': 'rw'
-      , 'localServerPort': 'r'
-      , 'freeServerPort': 'r'
-      , 'screenAutoRotate': 'rw'
-      , 'hasTouchscreen': 'r'
-      , 'securityTokenNotPassed': 'r'
-      , 'webviewFramework': 'r'
-      , 'screenSleeping': 'rw'
-      , 'hasNetwork': 'r'
-      , 'hasWifiNetwork': 'r'
-      , 'hasCellNetwork': 'r'
-      , 'hasSqlite': 'r'
-    }, apiReq);
+    rhoUtil.createPropsProxy(System, [
+        { propName: 'platform', propAccess: 'r' }
+      , { propName: 'hasCamera', propAccess: 'r' }
+      , { propName: 'screenWidth', propAccess: 'r' }
+      , { propName: 'screenHeight', propAccess: 'r' }
+      , { propName: 'realScreenWidth', propAccess: 'r' }
+      , { propName: 'realScreenHeight', propAccess: 'r' }
+      , { propName: 'screenOrientation', propAccess: 'r' }
+      , { propName: 'ppiX', propAccess: 'r' }
+      , { propName: 'ppiY', propAccess: 'r' }
+      , { propName: 'phoneNumber', propAccess: 'r' }
+      , { propName: 'deviceOwnerEmail', propAccess: 'r' }
+      , { propName: 'deviceOwnerName', propAccess: 'r' }
+      , { propName: 'devicePushId', propAccess: 'r' }
+      , { propName: 'phoneId', propAccess: 'r' }
+      , { propName: 'deviceName', propAccess: 'r' }
+      , { propName: 'osVersion', propAccess: 'r' }
+      , { propName: 'locale', propAccess: 'r' }
+      , { propName: 'country', propAccess: 'r' }
+      , { propName: 'isEmulator', propAccess: 'r' }
+      , { propName: 'isRhoSimulator', propAccess: 'r' }
+      , { propName: 'hasCalendar', propAccess: 'r' }
+      , { propName: 'isMotorolaDevice', propAccess: 'r' }
+      , { propName: 'oemInfo', propAccess: 'r' }
+      , { propName: 'uuid', propAccess: 'r' }
+      , { propName: 'applicationIconBadge', propAccess: 'rw' }
+      , { propName: 'httpProxyURI', propAccess: 'rw' }
+      , { propName: 'lockWindowSize', propAccess: 'rw' }
+      , { propName: 'keyboardState', propAccess: 'rw' }
+      , { propName: 'localServerPort', propAccess: 'r' }
+      , { propName: 'freeServerPort', propAccess: 'r' }
+      , { propName: 'screenAutoRotate', propAccess: 'rw' }
+      , { propName: 'hasTouchscreen', propAccess: 'r' }
+      , { propName: 'webviewFramework', propAccess: 'r' }
+      , { propName: 'screenSleeping', propAccess: 'rw' }
+      , { propName: 'hasNetwork', propAccess: 'r' }
+      , { propName: 'hasWifiNetwork', propAccess: 'r' }
+      , { propName: 'hasCellNetwork', propAccess: 'r' }
+      , { propName: 'hasSqlite', propAccess: 'r' }
+    ], apiReq);
 
     // === System static methods ===
 
+    rhoUtil.createMethodsProxy(System, [
     
-        System['applicationInstall'] = function(/* const rho::String& */ applicationUrl, /* optional function */ oResult) {
-            return apiReq({
-                instanceId: '0',
-                args: arguments,
-                method: 'applicationInstall',
-                
-                valueCallbackIndex: 1
-            });
-        };
+          // function(/* const rho::String& */ applicationUrl, /* optional function */ oResult)
+          { methodName: 'applicationInstall', nativeName: 'applicationInstall', valueCallbackIndex: 1 }
     
-        System['isApplicationInstalled'] = function(/* const rho::String& */ applicationName, /* optional function */ oResult) {
-            return apiReq({
-                instanceId: '0',
-                args: arguments,
-                method: 'isApplicationInstalled',
-                
-                valueCallbackIndex: 1
-            });
-        };
+          // function(/* const rho::String& */ applicationName, /* optional function */ oResult)
+        , { methodName: 'isApplicationInstalled', nativeName: 'isApplicationInstalled', valueCallbackIndex: 1 }
     
-        System['applicationUninstall'] = function(/* const rho::String& */ applicationName, /* optional function */ oResult) {
-            return apiReq({
-                instanceId: '0',
-                args: arguments,
-                method: 'applicationUninstall',
-                
-                valueCallbackIndex: 1
-            });
-        };
+          // function(/* const rho::String& */ applicationName, /* optional function */ oResult)
+        , { methodName: 'applicationUninstall', nativeName: 'applicationUninstall', valueCallbackIndex: 1 }
     
-        System['getStartParams'] = function(/* optional function */ oResult) {
-            return apiReq({
-                instanceId: '0',
-                args: arguments,
-                method: 'getStartParams',
-                
-                valueCallbackIndex: 0
-            });
-        };
+          // function(/* optional function */ oResult)
+        , { methodName: 'getStartParams', nativeName: 'getStartParams', valueCallbackIndex: 0 }
     
-        System['openUrl'] = function(/* const rho::String& */ url, /* optional function */ oResult) {
-            return apiReq({
-                instanceId: '0',
-                args: arguments,
-                method: 'openUrl',
-                
-                valueCallbackIndex: 1
-            });
-        };
+          // function(/* const rho::String& */ url, /* optional function */ oResult)
+        , { methodName: 'openUrl', nativeName: 'openUrl', valueCallbackIndex: 1 }
     
-        System['unzipFile'] = function(/* const rho::String& */ localPathToZip, /* const rho::String& */ password, /* optional function */ oResult) {
-            return apiReq({
-                instanceId: '0',
-                args: arguments,
-                method: 'unzipFile',
-                
-                valueCallbackIndex: 2
-            });
-        };
+          // function(/* const rho::String& */ localPathToZip, /* const rho::String& */ password, /* optional function */ oResult)
+        , { methodName: 'unzipFile', nativeName: 'unzipFile', valueCallbackIndex: 2 }
     
-        System['zipFile'] = function(/* const rho::String& */ localPathToZip, /* const rho::String& */ localPathToFile, /* const rho::String& */ password, /* optional function */ oResult) {
-            return apiReq({
-                instanceId: '0',
-                args: arguments,
-                method: 'zipFile',
-                
-                valueCallbackIndex: 3
-            });
-        };
+          // function(/* const rho::String& */ localPathToZip, /* const rho::String& */ localPathToFile, /* const rho::String& */ password, /* optional function */ oResult)
+        , { methodName: 'zipFile', nativeName: 'zipFile', valueCallbackIndex: 3 }
     
-        System['zipFiles'] = function(/* const rho::String& */ localPathToZip, /* const rho::String& */ basePath, /* const rho::Vector<rho::String>& */ filePathsToZip, /* const rho::String& */ password, /* optional function */ oResult) {
-            return apiReq({
-                instanceId: '0',
-                args: arguments,
-                method: 'zipFiles',
-                
-                valueCallbackIndex: 4
-            });
-        };
+          // function(/* const rho::String& */ localPathToZip, /* const rho::String& */ basePath, /* const rho::Vector<rho::String>& */ filePathsToZip, /* const rho::String& */ password, /* optional function */ oResult)
+        , { methodName: 'zipFiles', nativeName: 'zipFiles', valueCallbackIndex: 4 }
     
-        System['setRegistrySetting'] = function(/* const rho::Hashtable<rho::String, rho::String>& */ propertyMap, /* optional function */ oResult) {
-            return apiReq({
-                instanceId: '0',
-                args: arguments,
-                method: 'setRegistrySetting',
-                
-                valueCallbackIndex: 1
-            });
-        };
+          // function(/* const rho::Hashtable<rho::String, rho::String>& */ propertyMap, /* optional function */ oResult)
+        , { methodName: 'setRegistrySetting', nativeName: 'setRegistrySetting', valueCallbackIndex: 1 }
     
-        System['getRegistrySetting'] = function(/* const rho::Hashtable<rho::String, rho::String>& */ propertyMap, /* optional function */ oResult) {
-            return apiReq({
-                instanceId: '0',
-                args: arguments,
-                method: 'getRegistrySetting',
-                
-                valueCallbackIndex: 1
-            });
-        };
+          // function(/* const rho::Hashtable<rho::String, rho::String>& */ propertyMap, /* optional function */ oResult)
+        , { methodName: 'getRegistrySetting', nativeName: 'getRegistrySetting', valueCallbackIndex: 1 }
     
-        System['deleteRegistrySetting'] = function(/* const rho::Hashtable<rho::String, rho::String>& */ propertyMap, /* optional function */ oResult) {
-            return apiReq({
-                instanceId: '0',
-                args: arguments,
-                method: 'deleteRegistrySetting',
-                
-                valueCallbackIndex: 1
-            });
-        };
+          // function(/* const rho::Hashtable<rho::String, rho::String>& */ propertyMap, /* optional function */ oResult)
+        , { methodName: 'deleteRegistrySetting', nativeName: 'deleteRegistrySetting', valueCallbackIndex: 1 }
     
-        System['setWindowFrame'] = function(/* int */ x, /* int */ y, /* int */ width, /* int */ height, /* optional function */ oResult) {
-            return apiReq({
-                instanceId: '0',
-                args: arguments,
-                method: 'setWindowFrame',
-                
-                valueCallbackIndex: 4
-            });
-        };
+          // function(/* int */ x, /* int */ y, /* int */ width, /* int */ height, /* optional function */ oResult)
+        , { methodName: 'setWindowFrame', nativeName: 'setWindowFrame', valueCallbackIndex: 4 }
     
-        System['setWindowPosition'] = function(/* int */ x, /* int */ y, /* optional function */ oResult) {
-            return apiReq({
-                instanceId: '0',
-                args: arguments,
-                method: 'setWindowPosition',
-                
-                valueCallbackIndex: 2
-            });
-        };
+          // function(/* int */ x, /* int */ y, /* optional function */ oResult)
+        , { methodName: 'setWindowPosition', nativeName: 'setWindowPosition', valueCallbackIndex: 2 }
     
-        System['setWindowSize'] = function(/* int */ width, /* int */ height, /* optional function */ oResult) {
-            return apiReq({
-                instanceId: '0',
-                args: arguments,
-                method: 'setWindowSize',
-                
-                valueCallbackIndex: 2
-            });
-        };
+          // function(/* int */ width, /* int */ height, /* optional function */ oResult)
+        , { methodName: 'setWindowSize', nativeName: 'setWindowSize', valueCallbackIndex: 2 }
     
-        System['bringToFront'] = function(/* optional function */ oResult) {
-            return apiReq({
-                instanceId: '0',
-                args: arguments,
-                method: 'bringToFront',
-                
-                valueCallbackIndex: 0
-            });
-        };
+          // function(/* optional function */ oResult)
+        , { methodName: 'bringToFront', nativeName: 'bringToFront', valueCallbackIndex: 0 }
     
-        System['replaceCurrentBundle'] = function(/* const rho::String& */ pathToBundle, /* const rho::Hashtable<rho::String, rho::String>& */ params, /* optional function */ oResult) {
-            return apiReq({
-                instanceId: '0',
-                args: arguments,
-                method: 'replaceCurrentBundle',
-                
-                valueCallbackIndex: 2
-            });
-        };
+          // function(/* const rho::String& */ pathToBundle, /* const rho::Hashtable<rho::String, rho::String>& */ params, /* optional function */ oResult)
+        , { methodName: 'replaceCurrentBundle', nativeName: 'replaceCurrentBundle', valueCallbackIndex: 2 }
     
-        System['deleteFolder'] = function(/* const rho::String& */ pathToFolder, /* optional function */ oResult) {
-            return apiReq({
-                instanceId: '0',
-                args: arguments,
-                method: 'deleteFolder',
-                
-                valueCallbackIndex: 1
-            });
-        };
+          // function(/* const rho::String& */ pathToFolder, /* optional function */ oResult)
+        , { methodName: 'deleteFolder', nativeName: 'deleteFolder', valueCallbackIndex: 1 }
     
-        System['setDoNotBackupAttribute'] = function(/* const rho::String& */ pathToFile, /* bool */ doNotBackup, /* optional function */ oResult) {
-            return apiReq({
-                instanceId: '0',
-                args: arguments,
-                method: 'setDoNotBackupAttribute',
-                
-                valueCallbackIndex: 2
-            });
-        };
+          // function(/* const rho::String& */ pathToFile, /* bool */ doNotBackup, /* optional function */ oResult)
+        , { methodName: 'setDoNotBackupAttribute', nativeName: 'setDoNotBackupAttribute', valueCallbackIndex: 2 }
     
-        System['getProperty'] = function(/* const rho::String& */ propertyName, /* optional function */ oResult) {
-            return apiReq({
-                instanceId: '0',
-                args: arguments,
-                method: 'getProperty',
-                persistentCallbackIndex: 1,
-                valueCallbackIndex: 3
-            });
-        };
+          // function(/* const rho::String& */ propertyName, /* optional function */ oResult)
+        , { methodName: 'getProperty', nativeName: 'getProperty', persistentCallbackIndex: 1, valueCallbackIndex: 3 }
     
-        System['getProperties'] = function(/* const rho::Vector<rho::String>& */ arrayofNames, /* optional function */ oResult) {
-            return apiReq({
-                instanceId: '0',
-                args: arguments,
-                method: 'getProperties',
-                persistentCallbackIndex: 1,
-                valueCallbackIndex: 3
-            });
-        };
+          // function(/* const rho::Vector<rho::String>& */ arrayofNames, /* optional function */ oResult)
+        , { methodName: 'getProperties', nativeName: 'getProperties', persistentCallbackIndex: 1, valueCallbackIndex: 3 }
     
-        System['getAllProperties'] = function(/* optional function */ oResult) {
-            return apiReq({
-                instanceId: '0',
-                args: arguments,
-                method: 'getAllProperties',
-                persistentCallbackIndex: 0,
-                valueCallbackIndex: 2
-            });
-        };
+          // function(/* optional function */ oResult)
+        , { methodName: 'getAllProperties', nativeName: 'getAllProperties', persistentCallbackIndex: 0, valueCallbackIndex: 2 }
     
-        System['setProperty'] = function(/* const rho::String& */ propertyName, /* const rho::String& */ propertyValue, /* optional function */ oResult) {
-            return apiReq({
-                instanceId: '0',
-                args: arguments,
-                method: 'setProperty',
-                
-                valueCallbackIndex: 2
-            });
-        };
+          // function(/* const rho::String& */ propertyName, /* const rho::String& */ propertyValue, /* optional function */ oResult)
+        , { methodName: 'setProperty', nativeName: 'setProperty', valueCallbackIndex: 2 }
     
-        System['setProperties'] = function(/* const rho::Hashtable<rho::String, rho::String>& */ propertyMap, /* optional function */ oResult) {
-            return apiReq({
-                instanceId: '0',
-                args: arguments,
-                method: 'setProperties',
-                
-                valueCallbackIndex: 1
-            });
-        };
+          // function(/* const rho::Hashtable<rho::String, rho::String>& */ propertyMap, /* optional function */ oResult)
+        , { methodName: 'setProperties', nativeName: 'setProperties', valueCallbackIndex: 1 }
     
-        System['clearAllProperties'] = function(/* optional function */ oResult) {
-            return apiReq({
-                instanceId: '0',
-                args: arguments,
-                method: 'clearAllProperties',
-                
-                valueCallbackIndex: 0
-            });
-        };
+          // function(/* optional function */ oResult)
+        , { methodName: 'clearAllProperties', nativeName: 'clearAllProperties', valueCallbackIndex: 0 }
     
+    ], apiReq);
 
     // === System default instance support ===
-
     
 
     rhoUtil.namespace(moduleNS, System);
@@ -9241,6 +9020,7 @@ var Rho = Rho || (function ($) {
 
     var moduleNS = 'Rho.System.Process';
     var apiReq = rhoUtil.apiReqFor(moduleNS);
+    var currentDefaultID = null;
 
     // === Process class definition ===
 
@@ -9260,47 +9040,27 @@ var Rho = Rho || (function ($) {
         }
     };
 
+    Process.getId = function() { return currentDefaultID; }
+
     // === Process instance properties ===
 
-    rhoUtil.createPropsProxy(Process.prototype, {
-    }, apiReq);
+    rhoUtil.createPropsProxy(Process.prototype, [
+    ], apiReq, function(){ return this.getId(); });
 
     // === Process instance methods ===
 
+    rhoUtil.createMethodsProxy(Process.prototype, [
     
-        Process.prototype['waitForApplication'] = function(/* optional function */ oResult) {
-            return apiReq({
-                instanceId: this.getId(),
-                args: arguments,
-                method: 'waitForApplication',
-                
-                valueCallbackIndex: 0
-            });
-        };
-
+          // function(/* optional function */ oResult)
+          { methodName: 'waitForApplication', nativeName: 'waitForApplication', valueCallbackIndex: 0 }
     
-        Process.prototype['closeHandle'] = function(/* optional function */ oResult) {
-            return apiReq({
-                instanceId: this.getId(),
-                args: arguments,
-                method: 'closeHandle',
-                
-                valueCallbackIndex: 0
-            });
-        };
-
+          // function(/* optional function */ oResult)
+        , { methodName: 'closeHandle', nativeName: 'closeHandle', valueCallbackIndex: 0 }
     
-        Process.prototype['getProcessExitCode'] = function(/* optional function */ oResult) {
-            return apiReq({
-                instanceId: this.getId(),
-                args: arguments,
-                method: 'getProcessExitCode',
-                
-                valueCallbackIndex: 0
-            });
-        };
-
+          // function(/* optional function */ oResult)
+        , { methodName: 'getProcessExitCode', nativeName: 'getProcessExitCode', valueCallbackIndex: 0 }
     
+    ], apiReq, function(){ return this.getId(); });
 
     // === Process constants ===
 
@@ -9308,25 +9068,19 @@ var Rho = Rho || (function ($) {
 
     // === Process static properties ===
 
-    rhoUtil.createPropsProxy(Process, {
-    }, apiReq);
+    rhoUtil.createPropsProxy(Process, [
+    ], apiReq);
 
     // === Process static methods ===
 
+    rhoUtil.createMethodsProxy(Process, [
     
-        Process['runApplication'] = function(/* const rho::String& */ appName, /* const rho::String& */ params, /* bool */ blockingCall, /* optional function */ oResult) {
-            return apiReq({
-                instanceId: '0',
-                args: arguments,
-                method: 'runApplication',
-                
-                valueCallbackIndex: 3
-            });
-        };
+          // function(/* const rho::String& */ appName, /* const rho::String& */ params, /* bool */ blockingCall, /* optional function */ oResult)
+          { methodName: 'runApplication', nativeName: 'runApplication', valueCallbackIndex: 3 }
     
+    ], apiReq);
 
     // === Process default instance support ===
-
     
 
     rhoUtil.namespace(moduleNS, Process);
@@ -9340,6 +9094,7 @@ var Rho = Rho || (function ($) {
 
     var moduleNS = 'Rho.WebView';
     var apiReq = rhoUtil.apiReqFor(moduleNS);
+    var currentDefaultID = null;
 
     // === WebView class definition ===
 
@@ -9359,14 +9114,18 @@ var Rho = Rho || (function ($) {
         }
     };
 
+    WebView.getId = function() { return currentDefaultID; }
+
     // === WebView instance properties ===
 
-    rhoUtil.createPropsProxy(WebView.prototype, {
-    }, apiReq);
+    rhoUtil.createPropsProxy(WebView.prototype, [
+    ], apiReq, function(){ return this.getId(); });
 
     // === WebView instance methods ===
 
+    rhoUtil.createMethodsProxy(WebView.prototype, [
     
+    ], apiReq, function(){ return this.getId(); });
 
     // === WebView constants ===
 
@@ -9380,133 +9139,81 @@ var Rho = Rho || (function ($) {
             WebView.SCROLL_FINGER = 'FingerScroll';
         
     
+            WebView.SAVE_FORMAT_JPEG = 'jpeg';
+        
+    
 
     // === WebView static properties ===
 
-    rhoUtil.createPropsProxy(WebView, {
-       'framework': 'r'
-      , 'fullScreen': 'rw'
-      , 'nativeMenu': 'rw'
-      , 'enableZoom': 'rw'
-      , 'enablePageLoadingIndication': 'rw'
-      , 'enableWebPlugins': 'rw'
-      , 'navigationTimeout': 'rw'
-      , 'scrollTechnique': 'r'
-      , 'fontFamily': 'r'
-      , 'userAgent': 'r'
-      , 'viewportEnabled': 'r'
-      , 'viewportWidth': 'r'
-      , 'cacheSize': 'r'
-      , 'enableCache': 'rw'
-      , 'acceptLanguage': 'rw'
-      , 'zoomPage': 'rw'
-      , 'textZoomLevel': 'rw'
-      , 'activeTab': 'r'
-    }, apiReq);
+    rhoUtil.createPropsProxy(WebView, [
+        { propName: 'framework', propAccess: 'r' }
+      , { propName: 'fullScreen', propAccess: 'rw' }
+      , { propName: 'enableZoom', propAccess: 'rw' }
+      , { propName: 'enablePageLoadingIndication', propAccess: 'rw' }
+      , { propName: 'enableWebPlugins', propAccess: 'rw' }
+      , { propName: 'navigationTimeout', propAccess: 'rw' }
+      , { propName: 'scrollTechnique', propAccess: 'r' }
+      , { propName: 'fontFamily', propAccess: 'r' }
+      , { propName: 'userAgent', propAccess: 'r' }
+      , { propName: 'viewportEnabled', propAccess: 'r' }
+      , { propName: 'viewportWidth', propAccess: 'r' }
+      , { propName: 'cacheSize', propAccess: 'r' }
+      , { propName: 'enableCache', propAccess: 'rw' }
+      , { propName: 'acceptLanguage', propAccess: 'rw' }
+      , { propName: 'zoomPage', propAccess: 'rw' }
+      , { propName: 'textZoomLevel', propAccess: 'rw' }
+      , { propName: 'activeTab', propAccess: 'r' }
+    ], apiReq);
 
     // === WebView static methods ===
 
+    rhoUtil.createMethodsProxy(WebView, [
     
-        WebView['refresh'] = function(/* int */ tabIndex, /* optional function */ oResult) {
-            return apiReq({
-                instanceId: '0',
-                args: arguments,
-                method: 'refresh',
-                
-                valueCallbackIndex: 1
-            });
-        };
+          // function(/* int */ tabIndex, /* optional function */ oResult)
+          { methodName: 'refresh', nativeName: 'refresh', valueCallbackIndex: 1 }
     
-        WebView['navigate'] = function(/* const rho::String& */ url, /* int */ tabIndex, /* optional function */ oResult) {
-            return apiReq({
-                instanceId: '0',
-                args: arguments,
-                method: 'navigate',
-                
-                valueCallbackIndex: 2
-            });
-        };
+          // function(/* const rho::String& */ url, /* int */ tabIndex, /* optional function */ oResult)
+        , { methodName: 'navigate', nativeName: 'navigate', valueCallbackIndex: 2 }
     
-        WebView['navigateBack'] = function(/* int */ tabIndex, /* optional function */ oResult) {
-            return apiReq({
-                instanceId: '0',
-                args: arguments,
-                method: 'navigateBack',
-                
-                valueCallbackIndex: 1
-            });
-        };
+          // function(/* int */ tabIndex, /* optional function */ oResult)
+        , { methodName: 'navigateBack', nativeName: 'navigateBack', valueCallbackIndex: 1 }
     
-        WebView['currentLocation'] = function(/* int */ tabIndex, /* optional function */ oResult) {
-            return apiReq({
-                instanceId: '0',
-                args: arguments,
-                method: 'currentLocation',
-                
-                valueCallbackIndex: 1
-            });
-        };
+          // function(/* int */ tabIndex, /* optional function */ oResult)
+        , { methodName: 'currentLocation', nativeName: 'currentLocation', valueCallbackIndex: 1 }
     
-        WebView['currentURL'] = function(/* int */ tabIndex, /* optional function */ oResult) {
-            return apiReq({
-                instanceId: '0',
-                args: arguments,
-                method: 'currentURL',
-                
-                valueCallbackIndex: 1
-            });
-        };
+          // function(/* int */ tabIndex, /* optional function */ oResult)
+        , { methodName: 'currentURL', nativeName: 'currentURL', valueCallbackIndex: 1 }
     
-        WebView['executeJavascript'] = function(/* const rho::String& */ javascriptText, /* int */ tabIndex, /* optional function */ oResult) {
-            return apiReq({
-                instanceId: '0',
-                args: arguments,
-                method: 'executeJavascript',
-                
-                valueCallbackIndex: 2
-            });
-        };
+          // function(/* const rho::String& */ javascriptText, /* int */ tabIndex, /* optional function */ oResult)
+        , { methodName: 'executeJavascript', nativeName: 'executeJavascript', valueCallbackIndex: 2 }
     
-        WebView['setCookie'] = function(/* const rho::String& */ url, /* const rho::String& */ cookie, /* optional function */ oResult) {
-            return apiReq({
-                instanceId: '0',
-                args: arguments,
-                method: 'setCookie',
-                
-                valueCallbackIndex: 2
-            });
-        };
+          // function(/* const rho::String& */ url, /* const rho::String& */ cookie, /* optional function */ oResult)
+        , { methodName: 'setCookie', nativeName: 'setCookie', valueCallbackIndex: 2 }
     
-        WebView['save'] = function(/* const rho::String& */ format, /* const rho::String& */ path, /* int */ tabIndex, /* optional function */ oResult) {
-            return apiReq({
-                instanceId: '0',
-                args: arguments,
-                method: 'save',
-                
-                valueCallbackIndex: 3
-            });
-        };
+          // function(/* const rho::String& */ format, /* const rho::String& */ path, /* int */ tabIndex, /* optional function */ oResult)
+        , { methodName: 'save', nativeName: 'save', valueCallbackIndex: 3 }
     
+    ], apiReq);
 
     // === WebView default instance support ===
-
     
 
     rhoUtil.namespace(moduleNS, WebView);
 
 })(jQuery, Rho, Rho.util);
-// Module Rho.RhoConnectClient
+// Module Rho.Barcode
 
 
 (function ($, rho, rhoUtil) {
     'use strict';
 
-    var moduleNS = 'Rho.RhoConnectClient';
+    var moduleNS = 'Rho.Barcode';
     var apiReq = rhoUtil.apiReqFor(moduleNS);
+    var currentDefaultID = null;
 
-    // === RhoConnectClient class definition ===
+    // === Barcode class definition ===
 
-    function RhoConnectClient() {
+    function Barcode() {
         var id = null;
         this.getId = function () {return id;};
 
@@ -9522,200 +9229,929 @@ var Rho = Rho || (function ($) {
         }
     };
 
-    // === RhoConnectClient instance properties ===
+    Barcode.getId = function() { return currentDefaultID; }
 
-    rhoUtil.createPropsProxy(RhoConnectClient.prototype, {
-    }, apiReq);
+    // === Barcode instance properties ===
 
-    // === RhoConnectClient instance methods ===
+    rhoUtil.createPropsProxy(Barcode.prototype, [
+        { propName: 'autoEnter', propAccess: 'rw' }
+      , { propName: 'autoTab', propAccess: 'rw' }
+      , { propName: 'linearSecurityLevel', propAccess: 'rw' }
+      , { propName: 'scanTimeout', propAccess: 'rw' }
+      , { propName: 'rasterMode', propAccess: 'rw' }
+      , { propName: 'rasterHeight', propAccess: 'rw' }
+      , { propName: 'aimType', propAccess: 'rw' }
+      , { propName: 'timedAimDuration', propAccess: 'rw' }
+      , { propName: 'sameSymbolTimeout', propAccess: 'rw' }
+      , { propName: 'differentSymbolTimeout', propAccess: 'rw' }
+      , { propName: 'aimMode', propAccess: 'rw' }
+      , { propName: 'picklistMode', propAccess: 'rw' }
+      , { propName: 'viewfinderMode', propAccess: 'rw' }
+      , { propName: 'viewfinderX', propAccess: 'rw' }
+      , { propName: 'viewfinderY', propAccess: 'rw' }
+      , { propName: 'viewfinderWidth', propAccess: 'rw' }
+      , { propName: 'viewfinderHeight', propAccess: 'rw' }
+      , { propName: 'viewfinderFeedback', propAccess: 'rw' }
+      , { propName: 'viewfinderFeedbackTime', propAccess: 'rw' }
+      , { propName: 'focusMode', propAccess: 'rw' }
+      , { propName: 'illuminationMode', propAccess: 'rw' }
+      , { propName: 'dpmMode', propAccess: 'rw' }
+      , { propName: 'inverse1dMode', propAccess: 'rw' }
+      , { propName: 'poorQuality1dMode', propAccess: 'rw' }
+      , { propName: 'beamWidth', propAccess: 'rw' }
+      , { propName: 'dbpMode', propAccess: 'rw' }
+      , { propName: 'klasseEins', propAccess: 'rw' }
+      , { propName: 'adaptiveScanning', propAccess: 'rw' }
+      , { propName: 'bidirectionalRedundancy', propAccess: 'rw' }
+      , { propName: 'barcodeDataFormat', propAccess: 'rw' }
+      , { propName: 'dataBufferSize', propAccess: 'rw' }
+      , { propName: 'connectionIdleTimeout', propAccess: 'rw' }
+      , { propName: 'disconnectBtOnDisable', propAccess: 'rw' }
+      , { propName: 'displayBtAddressBarcodeOnEnable', propAccess: 'rw' }
+      , { propName: 'enableTimeout', propAccess: 'rw' }
+      , { propName: 'friendlyName', propAccess: 'r' }
+      , { propName: 'lowBatteryScan', propAccess: 'rw' }
+      , { propName: 'disableScannerDuringNavigate', propAccess: 'rw' }
+      , { propName: 'decodeVolume', propAccess: 'rw' }
+      , { propName: 'decodeDuration', propAccess: 'rw' }
+      , { propName: 'decodeFrequency', propAccess: 'rw' }
+      , { propName: 'invalidDecodeFrequency', propAccess: 'rw' }
+      , { propName: 'decodeSound', propAccess: 'rw' }
+      , { propName: 'invalidDecodeSound', propAccess: 'rw' }
+      , { propName: 'scannerType', propAccess: 'r' }
+      , { propName: 'allDecoders', propAccess: 'rw' }
+      , { propName: 'aztec', propAccess: 'rw' }
+      , { propName: 'chinese2of5', propAccess: 'rw' }
+      , { propName: 'codabar', propAccess: 'rw' }
+      , { propName: 'codabarClsiEditing', propAccess: 'rw' }
+      , { propName: 'codabarMaxLength', propAccess: 'rw' }
+      , { propName: 'codabarMinLength', propAccess: 'rw' }
+      , { propName: 'codabarNotisEditing', propAccess: 'rw' }
+      , { propName: 'codabarRedundancy', propAccess: 'rw' }
+      , { propName: 'code11', propAccess: 'rw' }
+      , { propName: 'code11checkDigitCount', propAccess: 'rw' }
+      , { propName: 'code11maxLength', propAccess: 'rw' }
+      , { propName: 'code11minLength', propAccess: 'rw' }
+      , { propName: 'code11redundancy', propAccess: 'rw' }
+      , { propName: 'code11reportCheckDigit', propAccess: 'rw' }
+      , { propName: 'code128', propAccess: 'rw' }
+      , { propName: 'code128checkIsBtTable', propAccess: 'rw' }
+      , { propName: 'code128ean128', propAccess: 'rw' }
+      , { propName: 'code128isbt128', propAccess: 'rw' }
+      , { propName: 'code128isbt128ConcatMode', propAccess: 'rw' }
+      , { propName: 'code128maxLength', propAccess: 'rw' }
+      , { propName: 'code128minLength', propAccess: 'rw' }
+      , { propName: 'code128other128', propAccess: 'rw' }
+      , { propName: 'code128redundancy', propAccess: 'rw' }
+      , { propName: 'code128securityLevel', propAccess: 'rw' }
+      , { propName: 'compositeAb', propAccess: 'rw' }
+      , { propName: 'compositeAbUccLinkMode', propAccess: 'rw' }
+      , { propName: 'compositeAbUseUpcPreambleCheckDigitRules', propAccess: 'rw' }
+      , { propName: 'compositeC', propAccess: 'rw' }
+      , { propName: 'code39', propAccess: 'rw' }
+      , { propName: 'code39code32Prefix', propAccess: 'rw' }
+      , { propName: 'code39convertToCode32', propAccess: 'rw' }
+      , { propName: 'code39fullAscii', propAccess: 'rw' }
+      , { propName: 'code39maxLength', propAccess: 'rw' }
+      , { propName: 'code39minLength', propAccess: 'rw' }
+      , { propName: 'code39redundancy', propAccess: 'rw' }
+      , { propName: 'code39reportCheckDigit', propAccess: 'rw' }
+      , { propName: 'code39securityLevel', propAccess: 'rw' }
+      , { propName: 'code39verifyCheckDigit', propAccess: 'rw' }
+      , { propName: 'code93', propAccess: 'rw' }
+      , { propName: 'code93maxLength', propAccess: 'rw' }
+      , { propName: 'code93minLength', propAccess: 'rw' }
+      , { propName: 'code93redundancy', propAccess: 'rw' }
+      , { propName: 'd2of5', propAccess: 'rw' }
+      , { propName: 'd2of5maxLength', propAccess: 'rw' }
+      , { propName: 'd2of5minLength', propAccess: 'rw' }
+      , { propName: 'd2of5redundancy', propAccess: 'rw' }
+      , { propName: 'datamatrix', propAccess: 'rw' }
+      , { propName: 'ean13', propAccess: 'rw' }
+      , { propName: 'ean8', propAccess: 'rw' }
+      , { propName: 'ean8convertToEan13', propAccess: 'rw' }
+      , { propName: 'i2of5', propAccess: 'rw' }
+      , { propName: 'i2of5convertToEan13', propAccess: 'rw' }
+      , { propName: 'i2of5maxLength', propAccess: 'rw' }
+      , { propName: 'i2of5minLength', propAccess: 'rw' }
+      , { propName: 'i2of5redundancy', propAccess: 'rw' }
+      , { propName: 'i2of5reportCheckDigit', propAccess: 'rw' }
+      , { propName: 'i2of5verifyCheckDigit', propAccess: 'rw' }
+      , { propName: 'korean3of5', propAccess: 'rw' }
+      , { propName: 'korean3of5redundancy', propAccess: 'rw' }
+      , { propName: 'korean3of5maxLength', propAccess: 'rw' }
+      , { propName: 'korean3of5minLength', propAccess: 'rw' }
+      , { propName: 'macroPdf', propAccess: 'rw' }
+      , { propName: 'macroPdfBufferLabels', propAccess: 'rw' }
+      , { propName: 'macroPdfConvertToPdf417', propAccess: 'rw' }
+      , { propName: 'macroPdfExclusive', propAccess: 'rw' }
+      , { propName: 'macroMicroPdf', propAccess: 'rw' }
+      , { propName: 'macroMicroPdfBufferLabels', propAccess: 'rw' }
+      , { propName: 'macroMicroPdfConvertToMicroPdf', propAccess: 'rw' }
+      , { propName: 'macroMicroPdfExclusive', propAccess: 'rw' }
+      , { propName: 'macroMicroPdfReportAppendInfo', propAccess: 'rw' }
+      , { propName: 'matrix2of5', propAccess: 'rw' }
+      , { propName: 'matrix2of5maxLength', propAccess: 'rw' }
+      , { propName: 'matrix2of5minLength', propAccess: 'rw' }
+      , { propName: 'matrix2of5reportCheckDigit', propAccess: 'rw' }
+      , { propName: 'matrix2of5verifyCheckDigit', propAccess: 'rw' }
+      , { propName: 'maxiCode', propAccess: 'rw' }
+      , { propName: 'microPdf', propAccess: 'rw' }
+      , { propName: 'microQr', propAccess: 'rw' }
+      , { propName: 'msi', propAccess: 'rw' }
+      , { propName: 'msiCheckDigits', propAccess: 'rw' }
+      , { propName: 'msiCheckDigitScheme', propAccess: 'rw' }
+      , { propName: 'msiMaxLength', propAccess: 'rw' }
+      , { propName: 'msiMinLength', propAccess: 'rw' }
+      , { propName: 'msiRedundancy', propAccess: 'rw' }
+      , { propName: 'msiReportCheckDigit', propAccess: 'rw' }
+      , { propName: 'pdf417', propAccess: 'rw' }
+      , { propName: 'signature', propAccess: 'rw' }
+      , { propName: 'signatureImageHeight', propAccess: 'rw' }
+      , { propName: 'signatureImageWidth', propAccess: 'rw' }
+      , { propName: 'signatureImageQuality', propAccess: 'rw' }
+      , { propName: 'ausPostal', propAccess: 'rw' }
+      , { propName: 'canPostal', propAccess: 'rw' }
+      , { propName: 'dutchPostal', propAccess: 'rw' }
+      , { propName: 'japPostal', propAccess: 'rw' }
+      , { propName: 'ukPostal', propAccess: 'rw' }
+      , { propName: 'ukPostalReportCheckDigit', propAccess: 'rw' }
+      , { propName: 'us4state', propAccess: 'rw' }
+      , { propName: 'us4stateFics', propAccess: 'rw' }
+      , { propName: 'usPlanet', propAccess: 'rw' }
+      , { propName: 'usPlanetReportCheckDigit', propAccess: 'rw' }
+      , { propName: 'usPostNet', propAccess: 'rw' }
+      , { propName: 'usPostNetReportCheckDigit', propAccess: 'rw' }
+      , { propName: 'qrCode', propAccess: 'rw' }
+      , { propName: 'gs1dataBar', propAccess: 'rw' }
+      , { propName: 'gs1dataBarExpanded', propAccess: 'rw' }
+      , { propName: 'gs1dataBarLimited', propAccess: 'rw' }
+      , { propName: 'tlc39', propAccess: 'rw' }
+      , { propName: 'trioptic39', propAccess: 'rw' }
+      , { propName: 'trioptic39Redundancy', propAccess: 'rw' }
+      , { propName: 'upcEanBookland', propAccess: 'rw' }
+      , { propName: 'upcEanBooklandFormat', propAccess: 'rw' }
+      , { propName: 'upcEanConvertGs1dataBarToUpcEan', propAccess: 'rw' }
+      , { propName: 'upcEanCoupon', propAccess: 'rw' }
+      , { propName: 'upcEanLinearDecode', propAccess: 'rw' }
+      , { propName: 'upcEanRandomWeightCheckDigit', propAccess: 'rw' }
+      , { propName: 'upcEanRetryCount', propAccess: 'rw' }
+      , { propName: 'upcEanSecurityLevel', propAccess: 'rw' }
+      , { propName: 'upcEanSupplemental2', propAccess: 'rw' }
+      , { propName: 'upcEanSupplemental5', propAccess: 'rw' }
+      , { propName: 'upcEanSupplementalMode', propAccess: 'rw' }
+      , { propName: 'upca', propAccess: 'rw' }
+      , { propName: 'upcaPreamble', propAccess: 'rw' }
+      , { propName: 'upcaReportCheckDigit', propAccess: 'rw' }
+      , { propName: 'upce0', propAccess: 'rw' }
+      , { propName: 'upce0convertToUpca', propAccess: 'rw' }
+      , { propName: 'upce0preamble', propAccess: 'rw' }
+      , { propName: 'upce0reportCheckDigit', propAccess: 'rw' }
+      , { propName: 'upce1', propAccess: 'rw' }
+      , { propName: 'upce1convertToUpca', propAccess: 'rw' }
+      , { propName: 'upce1preamble', propAccess: 'rw' }
+      , { propName: 'upce1reportCheckDigit', propAccess: 'rw' }
+      , { propName: 'webcode', propAccess: 'rw' }
+      , { propName: 'webcodeDecodeGtSubtype', propAccess: 'rw' }
+      , { propName: 'rsmModelNumber', propAccess: 'r' }
+      , { propName: 'rsmSerialNumber', propAccess: 'r' }
+      , { propName: 'rsmDateOfManufacture', propAccess: 'r' }
+      , { propName: 'rsmDateOfService', propAccess: 'r' }
+      , { propName: 'rsmBluetoothAddress', propAccess: 'r' }
+      , { propName: 'rsmFirmwareVersion', propAccess: 'r' }
+      , { propName: 'rsmDeviceClass', propAccess: 'r' }
+      , { propName: 'rsmBatteryStatus', propAccess: 'r' }
+      , { propName: 'rsmBatteryCapacity', propAccess: 'r' }
+      , { propName: 'rsmBatteryId', propAccess: 'r' }
+      , { propName: 'rsmBluetoothAuthentication', propAccess: 'rw' }
+      , { propName: 'rsmBluetoothEncryption', propAccess: 'rw' }
+      , { propName: 'rsmBluetoothPinCode', propAccess: 'rw' }
+      , { propName: 'rsmBluetoothPinCodeType', propAccess: 'rw' }
+      , { propName: 'rsmBluetoothReconnectionAttempts', propAccess: 'rw' }
+      , { propName: 'rsmBluetoothBeepOnReconnectAttempt', propAccess: 'rw' }
+      , { propName: 'rsmBluetoothHidAutoReconnect', propAccess: 'rw' }
+      , { propName: 'rsmBluetoothFriendlyName', propAccess: 'rw' }
+      , { propName: 'rsmBluetoothInquiryMode', propAccess: 'rw' }
+      , { propName: 'rsmBluetoothAutoReconnect', propAccess: 'rw' }
+      , { propName: 'rsmForceSavePairingBarcode', propAccess: 'rw' }
+      , { propName: 'rsmLowBatteryIndication', propAccess: 'rw' }
+      , { propName: 'rsmLowBatteryIndicationCycle', propAccess: 'rw' }
+      , { propName: 'rsmScanLineWidth', propAccess: 'rw' }
+      , { propName: 'rsmGoodScansDelay', propAccess: 'rw' }
+      , { propName: 'rsmDecodeFeedback', propAccess: 'rw' }
+      , { propName: 'rsmIgnoreCode128Usps', propAccess: 'rw' }
+      , { propName: 'rsmScanTriggerWakeup', propAccess: 'rw' }
+      , { propName: 'rsmMems', propAccess: 'rw' }
+      , { propName: 'rsmProximityEnable', propAccess: 'rw' }
+      , { propName: 'rsmProximityContinuous', propAccess: 'rw' }
+      , { propName: 'rsmProximityDistance', propAccess: 'rw' }
+      , { propName: 'rsmPagingEnable', propAccess: 'rw' }
+      , { propName: 'rsmPagingBeepSequence', propAccess: 'rw' }
+    ], apiReq, function(){ return this.getId(); });
+
+    // === Barcode instance methods ===
+
+    rhoUtil.createMethodsProxy(Barcode.prototype, [
+    
+          // function(/* const rho::Hashtable<rho::String, rho::String>& */ propertyMap, /* optional function */ oResult)
+          { methodName: 'enable', nativeName: 'enable', persistentCallbackIndex: 1, valueCallbackIndex: 3 }
+    
+          // function(/* optional function */ oResult)
+        , { methodName: 'registerBluetoothStatus', nativeName: 'registerBluetoothStatus', persistentCallbackIndex: 0, valueCallbackIndex: 2 }
+    
+          // function(/* optional function */ oResult)
+        , { methodName: 'start', nativeName: 'start', valueCallbackIndex: 0 }
+    
+          // function(/* optional function */ oResult)
+        , { methodName: 'stop', nativeName: 'stop', valueCallbackIndex: 0 }
+    
+          // function(/* optional function */ oResult)
+        , { methodName: 'disable', nativeName: 'disable', valueCallbackIndex: 0 }
+    
+          // function(/* optional function */ oResult)
+        , { methodName: 'getSupportedProperties', nativeName: 'getSupportedProperties', persistentCallbackIndex: 0, valueCallbackIndex: 2 }
+    
+          // function(/* const rho::Hashtable<rho::String, rho::String>& */ propertyMap, /* optional function */ oResult)
+        , { methodName: 'take', nativeName: 'take', persistentCallbackIndex: 1, valueCallbackIndex: 3 }
+    
+          // function(/* const rho::String& */ command, /* optional function */ oResult)
+        , { methodName: 'commandRemoteScanner', nativeName: 'commandRemoteScanner', valueCallbackIndex: 1 }
+    
+          // function(/* const rho::String& */ propertyName, /* optional function */ oResult)
+        , { methodName: 'getProperty', nativeName: 'getProperty', persistentCallbackIndex: 1, valueCallbackIndex: 3 }
+    
+          // function(/* const rho::Vector<rho::String>& */ arrayofNames, /* optional function */ oResult)
+        , { methodName: 'getProperties', nativeName: 'getProperties', persistentCallbackIndex: 1, valueCallbackIndex: 3 }
+    
+          // function(/* optional function */ oResult)
+        , { methodName: 'getAllProperties', nativeName: 'getAllProperties', persistentCallbackIndex: 0, valueCallbackIndex: 2 }
+    
+          // function(/* const rho::String& */ propertyName, /* const rho::String& */ propertyValue, /* optional function */ oResult)
+        , { methodName: 'setProperty', nativeName: 'setProperty', valueCallbackIndex: 2 }
+    
+          // function(/* const rho::Hashtable<rho::String, rho::String>& */ propertyMap, /* optional function */ oResult)
+        , { methodName: 'setProperties', nativeName: 'setProperties', valueCallbackIndex: 1 }
+    
+          // function(/* optional function */ oResult)
+        , { methodName: 'clearAllProperties', nativeName: 'clearAllProperties', valueCallbackIndex: 0 }
+    
+    ], apiReq, function(){ return this.getId(); });
+
+    // === Barcode constants ===
+
+    
+            Barcode.REDUNDANCY_AND_LENGTH = 'redundancyAndLength';
+        
+    
+            Barcode.SHORT_OR_CODABAR = 'shortOrCodabar';
+        
+    
+            Barcode.LONG_AND_SHORT = 'longAndShort';
+        
+    
+            Barcode.ALL_TWICE = 'allTwice';
+        
+    
+            Barcode.ALL_THRICE = 'allThrice';
+        
+    
+            Barcode.RASTER_NONE = 'none';
+        
+    
+            Barcode.RASTER_OPEN_ALWAYS = 'openAlways';
+        
+    
+            Barcode.RASTER_SMART = 'smart';
+        
+    
+            Barcode.RASTER_CYCLONE = 'cyclone';
+        
+    
+            Barcode.AIMTYPE_TRIGGER = 'trigger';
+        
+    
+            Barcode.AIMTYPE_TIMED_HOLD = 'timedHold';
+        
+    
+            Barcode.AIMTYPE_TIMED_RELEASE = 'timedRelease';
+        
+    
+            Barcode.AIMTYPE_PRESENTATION = 'presentation';
+        
+    
+            Barcode.AIMTYPE_PRESS_AND_RELEASE = 'pressAndRelease';
+        
+    
+            Barcode.AIMTYPE_CONTINUOUS_READ = 'continuousRead';
+        
+    
+            Barcode.AIMMODE_NONE = 'none';
+        
+    
+            Barcode.AIMMODE_DOT = 'dot';
+        
+    
+            Barcode.AIMMODE_SLAB = 'slab';
+        
+    
+            Barcode.AIMMODE_RETICLE = 'reticle';
+        
+    
+            Barcode.PICKLIST_DISABLED = 'disabled';
+        
+    
+            Barcode.PICKLIST_HARDWARE_RETICLE = 'hardwareReticle';
+        
+    
+            Barcode.PICKLIST_SOFTWARE_RETICLE = 'softwareReticle';
+        
+    
+            Barcode.VIEWFINDER_ENABLED = 'enabled';
+        
+    
+            Barcode.VIEWFINDER_DISABLED = 'disabled';
+        
+    
+            Barcode.VIEWFINDER_STATIC_RETICLE = 'staticReticle';
+        
+    
+            Barcode.VIEWFINDER_DYNAMIC_RETICLE = 'dynamicReticle';
+        
+    
+            Barcode.VF_FEEDBACK_ENABLED = 'enabled';
+        
+    
+            Barcode.VF_FEEDBACK_DISABLED = 'disabled';
+        
+    
+            Barcode.VF_FEEDBACK_RETICLE = 'reticle';
+        
+    
+            Barcode.FOCUS_FIXED = 'fixed';
+        
+    
+            Barcode.FOCUS_AUTO = 'auto';
+        
+    
+            Barcode.ILLUMINATION_AUTO = 'auto';
+        
+    
+            Barcode.ILLUMINATION_ALWAYS_ON = 'alwaysOn';
+        
+    
+            Barcode.ILLUMINATION_ALWAYS_OFF = 'alwaysOff';
+        
+    
+            Barcode.INVERSE_ENABLED = 'enabled';
+        
+    
+            Barcode.INVERSE_DISABLED = 'disabled';
+        
+    
+            Barcode.INVERSE_AUTO = 'auto';
+        
+    
+            Barcode.BEAM_NORMAL = 'normal';
+        
+    
+            Barcode.BEAM_WIDE = 'wide';
+        
+    
+            Barcode.BEAM_NARROW = 'narrow';
+        
+    
+            Barcode.DBP_NORMAL = 'normal';
+        
+    
+            Barcode.DBP_COMPOSITE = 'composite';
+        
+    
+            Barcode.FORMAT_BINARY = 'binary';
+        
+    
+            Barcode.FORMAT_TEXT = 'text';
+        
+    
+            Barcode.CODE11_CHECKDIGIT_NONE = 'none';
+        
+    
+            Barcode.CODE11_CHECKDIGIT_ONE = 'one';
+        
+    
+            Barcode.CODE11_CHECKDIGIT_TWO = 'two';
+        
+    
+            Barcode.CODE128ISBT_NEVER = 'never';
+        
+    
+            Barcode.CODE128ISBT_ALWAYS = 'always';
+        
+    
+            Barcode.CODE128ISBT_AUTO = 'auto';
+        
+    
+            Barcode.UCC_NEVER = 'never';
+        
+    
+            Barcode.UCC_ALWAYS = 'always';
+        
+    
+            Barcode.UCC_AUTO = 'auto';
+        
+    
+            Barcode.I2OF5_VERIFY_NONE = 'none';
+        
+    
+            Barcode.I2OF5_VERIFY_USS = 'uss';
+        
+    
+            Barcode.I2OF5_VERIFY_OPCC = 'opcc';
+        
+    
+            Barcode.MSI_CHECKDIGITS_ONE = 'one';
+        
+    
+            Barcode.MSI_CHECKDIGITS_TWO = 'two';
+        
+    
+            Barcode.MSI_CHECKDIGITS_MOD11 = 'mod11';
+        
+    
+            Barcode.MSI_CHECKDIGITS_MOD10 = 'mod10';
+        
+    
+            Barcode.BOOKLAND_ISBN10 = 'isbn10';
+        
+    
+            Barcode.BOOKLAND_ISBN13 = 'isbn13';
+        
+    
+            Barcode.UPCEAN_NONE = 'none';
+        
+    
+            Barcode.UPCEAN_AUTO = 'auto';
+        
+    
+            Barcode.UPCEAN_ALWAYS = 'always';
+        
+    
+            Barcode.UPCEAN_SMART = 'smart';
+        
+    
+            Barcode.UPCEAN_379 = '378or379';
+        
+    
+            Barcode.UPCEAN_979 = '978or979';
+        
+    
+            Barcode.UPCEAN_439 = '414or419or434or439';
+        
+    
+            Barcode.UPCA_PREAMBLE_NONE = 'none';
+        
+    
+            Barcode.UPCA_PREAMBLE_SYSTEMCHAR = 'systemChar';
+        
+    
+            Barcode.UPCA_PREAMBLE_COUNTRY = 'countryAndSystemChars';
+        
+    
+            Barcode.UPCE0_PREAMBLE_NONE = 'none';
+        
+    
+            Barcode.UPCE0_PREAMBLE_SYSTEMCHAR = 'systemChar';
+        
+    
+            Barcode.UPCE0_PREAMBLE_COUNTRY = 'countryAndSystemChars';
+        
+    
+            Barcode.UPCE1_PREAMBLE_NONE = 'none';
+        
+    
+            Barcode.UPCE1_PREAMBLE_SYSTEMCHAR = 'systemChar';
+        
+    
+            Barcode.UPCE1_PREAMBLE_COUNTRY = 'countryAndSystemChars';
+        
+    
+            Barcode.RSM_AUTORECONNECT_NONE = 'none';
+        
+    
+            Barcode.RSM_AUTORECONNECT_ON_POWER = 'onPower';
+        
+    
+            Barcode.RSM_AUTORECONNECT_ON_OUT_OF_RANGE = 'onOutOfRange';
+        
+    
+            Barcode.RSM_AUTORECONNECT_ON_POWER_OUT_OF_RANGE = 'onPowerOutOfRange';
+        
+    
+
+    // === Barcode static properties ===
+
+    rhoUtil.createPropsProxy(Barcode, [
+    ], apiReq);
+
+    // === Barcode static methods ===
+
+    rhoUtil.createMethodsProxy(Barcode, [
+    
+          // function(/* optional function */ oResult)
+          { methodName: 'enumerate', nativeName: 'enumerate', persistentCallbackIndex: 0, valueCallbackIndex: 2 }
+    
+    ], apiReq);
+
+    // === Barcode default instance support ===
+    
+
+        rhoUtil.createPropsProxy(Barcode, [
+            { propName: 'default:getDefault', propAccess: 'r' }
+          , { propName: 'defaultID:getDefaultID::setDefaultID', propAccess: 'rw', customSet: function(id) {currentDefaultID = id;} }
+        ], apiReq);
+
+        Barcode.getId = function() {
+            if (null == currentDefaultID) {
+                currentDefaultID = Barcode.getDefaultID();
+            }
+            return currentDefaultID;
+        }
+
+        // === Barcode default instance properties ===
+
+        rhoUtil.createPropsProxy(Barcode, [
+            { propName: 'autoEnter', propAccess: 'rw' }
+          , { propName: 'autoTab', propAccess: 'rw' }
+          , { propName: 'linearSecurityLevel', propAccess: 'rw' }
+          , { propName: 'scanTimeout', propAccess: 'rw' }
+          , { propName: 'rasterMode', propAccess: 'rw' }
+          , { propName: 'rasterHeight', propAccess: 'rw' }
+          , { propName: 'aimType', propAccess: 'rw' }
+          , { propName: 'timedAimDuration', propAccess: 'rw' }
+          , { propName: 'sameSymbolTimeout', propAccess: 'rw' }
+          , { propName: 'differentSymbolTimeout', propAccess: 'rw' }
+          , { propName: 'aimMode', propAccess: 'rw' }
+          , { propName: 'picklistMode', propAccess: 'rw' }
+          , { propName: 'viewfinderMode', propAccess: 'rw' }
+          , { propName: 'viewfinderX', propAccess: 'rw' }
+          , { propName: 'viewfinderY', propAccess: 'rw' }
+          , { propName: 'viewfinderWidth', propAccess: 'rw' }
+          , { propName: 'viewfinderHeight', propAccess: 'rw' }
+          , { propName: 'viewfinderFeedback', propAccess: 'rw' }
+          , { propName: 'viewfinderFeedbackTime', propAccess: 'rw' }
+          , { propName: 'focusMode', propAccess: 'rw' }
+          , { propName: 'illuminationMode', propAccess: 'rw' }
+          , { propName: 'dpmMode', propAccess: 'rw' }
+          , { propName: 'inverse1dMode', propAccess: 'rw' }
+          , { propName: 'poorQuality1dMode', propAccess: 'rw' }
+          , { propName: 'beamWidth', propAccess: 'rw' }
+          , { propName: 'dbpMode', propAccess: 'rw' }
+          , { propName: 'klasseEins', propAccess: 'rw' }
+          , { propName: 'adaptiveScanning', propAccess: 'rw' }
+          , { propName: 'bidirectionalRedundancy', propAccess: 'rw' }
+          , { propName: 'barcodeDataFormat', propAccess: 'rw' }
+          , { propName: 'dataBufferSize', propAccess: 'rw' }
+          , { propName: 'connectionIdleTimeout', propAccess: 'rw' }
+          , { propName: 'disconnectBtOnDisable', propAccess: 'rw' }
+          , { propName: 'displayBtAddressBarcodeOnEnable', propAccess: 'rw' }
+          , { propName: 'enableTimeout', propAccess: 'rw' }
+          , { propName: 'friendlyName', propAccess: 'r' }
+          , { propName: 'lowBatteryScan', propAccess: 'rw' }
+          , { propName: 'disableScannerDuringNavigate', propAccess: 'rw' }
+          , { propName: 'decodeVolume', propAccess: 'rw' }
+          , { propName: 'decodeDuration', propAccess: 'rw' }
+          , { propName: 'decodeFrequency', propAccess: 'rw' }
+          , { propName: 'invalidDecodeFrequency', propAccess: 'rw' }
+          , { propName: 'decodeSound', propAccess: 'rw' }
+          , { propName: 'invalidDecodeSound', propAccess: 'rw' }
+          , { propName: 'scannerType', propAccess: 'r' }
+          , { propName: 'allDecoders', propAccess: 'rw' }
+          , { propName: 'aztec', propAccess: 'rw' }
+          , { propName: 'chinese2of5', propAccess: 'rw' }
+          , { propName: 'codabar', propAccess: 'rw' }
+          , { propName: 'codabarClsiEditing', propAccess: 'rw' }
+          , { propName: 'codabarMaxLength', propAccess: 'rw' }
+          , { propName: 'codabarMinLength', propAccess: 'rw' }
+          , { propName: 'codabarNotisEditing', propAccess: 'rw' }
+          , { propName: 'codabarRedundancy', propAccess: 'rw' }
+          , { propName: 'code11', propAccess: 'rw' }
+          , { propName: 'code11checkDigitCount', propAccess: 'rw' }
+          , { propName: 'code11maxLength', propAccess: 'rw' }
+          , { propName: 'code11minLength', propAccess: 'rw' }
+          , { propName: 'code11redundancy', propAccess: 'rw' }
+          , { propName: 'code11reportCheckDigit', propAccess: 'rw' }
+          , { propName: 'code128', propAccess: 'rw' }
+          , { propName: 'code128checkIsBtTable', propAccess: 'rw' }
+          , { propName: 'code128ean128', propAccess: 'rw' }
+          , { propName: 'code128isbt128', propAccess: 'rw' }
+          , { propName: 'code128isbt128ConcatMode', propAccess: 'rw' }
+          , { propName: 'code128maxLength', propAccess: 'rw' }
+          , { propName: 'code128minLength', propAccess: 'rw' }
+          , { propName: 'code128other128', propAccess: 'rw' }
+          , { propName: 'code128redundancy', propAccess: 'rw' }
+          , { propName: 'code128securityLevel', propAccess: 'rw' }
+          , { propName: 'compositeAb', propAccess: 'rw' }
+          , { propName: 'compositeAbUccLinkMode', propAccess: 'rw' }
+          , { propName: 'compositeAbUseUpcPreambleCheckDigitRules', propAccess: 'rw' }
+          , { propName: 'compositeC', propAccess: 'rw' }
+          , { propName: 'code39', propAccess: 'rw' }
+          , { propName: 'code39code32Prefix', propAccess: 'rw' }
+          , { propName: 'code39convertToCode32', propAccess: 'rw' }
+          , { propName: 'code39fullAscii', propAccess: 'rw' }
+          , { propName: 'code39maxLength', propAccess: 'rw' }
+          , { propName: 'code39minLength', propAccess: 'rw' }
+          , { propName: 'code39redundancy', propAccess: 'rw' }
+          , { propName: 'code39reportCheckDigit', propAccess: 'rw' }
+          , { propName: 'code39securityLevel', propAccess: 'rw' }
+          , { propName: 'code39verifyCheckDigit', propAccess: 'rw' }
+          , { propName: 'code93', propAccess: 'rw' }
+          , { propName: 'code93maxLength', propAccess: 'rw' }
+          , { propName: 'code93minLength', propAccess: 'rw' }
+          , { propName: 'code93redundancy', propAccess: 'rw' }
+          , { propName: 'd2of5', propAccess: 'rw' }
+          , { propName: 'd2of5maxLength', propAccess: 'rw' }
+          , { propName: 'd2of5minLength', propAccess: 'rw' }
+          , { propName: 'd2of5redundancy', propAccess: 'rw' }
+          , { propName: 'datamatrix', propAccess: 'rw' }
+          , { propName: 'ean13', propAccess: 'rw' }
+          , { propName: 'ean8', propAccess: 'rw' }
+          , { propName: 'ean8convertToEan13', propAccess: 'rw' }
+          , { propName: 'i2of5', propAccess: 'rw' }
+          , { propName: 'i2of5convertToEan13', propAccess: 'rw' }
+          , { propName: 'i2of5maxLength', propAccess: 'rw' }
+          , { propName: 'i2of5minLength', propAccess: 'rw' }
+          , { propName: 'i2of5redundancy', propAccess: 'rw' }
+          , { propName: 'i2of5reportCheckDigit', propAccess: 'rw' }
+          , { propName: 'i2of5verifyCheckDigit', propAccess: 'rw' }
+          , { propName: 'korean3of5', propAccess: 'rw' }
+          , { propName: 'korean3of5redundancy', propAccess: 'rw' }
+          , { propName: 'korean3of5maxLength', propAccess: 'rw' }
+          , { propName: 'korean3of5minLength', propAccess: 'rw' }
+          , { propName: 'macroPdf', propAccess: 'rw' }
+          , { propName: 'macroPdfBufferLabels', propAccess: 'rw' }
+          , { propName: 'macroPdfConvertToPdf417', propAccess: 'rw' }
+          , { propName: 'macroPdfExclusive', propAccess: 'rw' }
+          , { propName: 'macroMicroPdf', propAccess: 'rw' }
+          , { propName: 'macroMicroPdfBufferLabels', propAccess: 'rw' }
+          , { propName: 'macroMicroPdfConvertToMicroPdf', propAccess: 'rw' }
+          , { propName: 'macroMicroPdfExclusive', propAccess: 'rw' }
+          , { propName: 'macroMicroPdfReportAppendInfo', propAccess: 'rw' }
+          , { propName: 'matrix2of5', propAccess: 'rw' }
+          , { propName: 'matrix2of5maxLength', propAccess: 'rw' }
+          , { propName: 'matrix2of5minLength', propAccess: 'rw' }
+          , { propName: 'matrix2of5reportCheckDigit', propAccess: 'rw' }
+          , { propName: 'matrix2of5verifyCheckDigit', propAccess: 'rw' }
+          , { propName: 'maxiCode', propAccess: 'rw' }
+          , { propName: 'microPdf', propAccess: 'rw' }
+          , { propName: 'microQr', propAccess: 'rw' }
+          , { propName: 'msi', propAccess: 'rw' }
+          , { propName: 'msiCheckDigits', propAccess: 'rw' }
+          , { propName: 'msiCheckDigitScheme', propAccess: 'rw' }
+          , { propName: 'msiMaxLength', propAccess: 'rw' }
+          , { propName: 'msiMinLength', propAccess: 'rw' }
+          , { propName: 'msiRedundancy', propAccess: 'rw' }
+          , { propName: 'msiReportCheckDigit', propAccess: 'rw' }
+          , { propName: 'pdf417', propAccess: 'rw' }
+          , { propName: 'signature', propAccess: 'rw' }
+          , { propName: 'signatureImageHeight', propAccess: 'rw' }
+          , { propName: 'signatureImageWidth', propAccess: 'rw' }
+          , { propName: 'signatureImageQuality', propAccess: 'rw' }
+          , { propName: 'ausPostal', propAccess: 'rw' }
+          , { propName: 'canPostal', propAccess: 'rw' }
+          , { propName: 'dutchPostal', propAccess: 'rw' }
+          , { propName: 'japPostal', propAccess: 'rw' }
+          , { propName: 'ukPostal', propAccess: 'rw' }
+          , { propName: 'ukPostalReportCheckDigit', propAccess: 'rw' }
+          , { propName: 'us4state', propAccess: 'rw' }
+          , { propName: 'us4stateFics', propAccess: 'rw' }
+          , { propName: 'usPlanet', propAccess: 'rw' }
+          , { propName: 'usPlanetReportCheckDigit', propAccess: 'rw' }
+          , { propName: 'usPostNet', propAccess: 'rw' }
+          , { propName: 'usPostNetReportCheckDigit', propAccess: 'rw' }
+          , { propName: 'qrCode', propAccess: 'rw' }
+          , { propName: 'gs1dataBar', propAccess: 'rw' }
+          , { propName: 'gs1dataBarExpanded', propAccess: 'rw' }
+          , { propName: 'gs1dataBarLimited', propAccess: 'rw' }
+          , { propName: 'tlc39', propAccess: 'rw' }
+          , { propName: 'trioptic39', propAccess: 'rw' }
+          , { propName: 'trioptic39Redundancy', propAccess: 'rw' }
+          , { propName: 'upcEanBookland', propAccess: 'rw' }
+          , { propName: 'upcEanBooklandFormat', propAccess: 'rw' }
+          , { propName: 'upcEanConvertGs1dataBarToUpcEan', propAccess: 'rw' }
+          , { propName: 'upcEanCoupon', propAccess: 'rw' }
+          , { propName: 'upcEanLinearDecode', propAccess: 'rw' }
+          , { propName: 'upcEanRandomWeightCheckDigit', propAccess: 'rw' }
+          , { propName: 'upcEanRetryCount', propAccess: 'rw' }
+          , { propName: 'upcEanSecurityLevel', propAccess: 'rw' }
+          , { propName: 'upcEanSupplemental2', propAccess: 'rw' }
+          , { propName: 'upcEanSupplemental5', propAccess: 'rw' }
+          , { propName: 'upcEanSupplementalMode', propAccess: 'rw' }
+          , { propName: 'upca', propAccess: 'rw' }
+          , { propName: 'upcaPreamble', propAccess: 'rw' }
+          , { propName: 'upcaReportCheckDigit', propAccess: 'rw' }
+          , { propName: 'upce0', propAccess: 'rw' }
+          , { propName: 'upce0convertToUpca', propAccess: 'rw' }
+          , { propName: 'upce0preamble', propAccess: 'rw' }
+          , { propName: 'upce0reportCheckDigit', propAccess: 'rw' }
+          , { propName: 'upce1', propAccess: 'rw' }
+          , { propName: 'upce1convertToUpca', propAccess: 'rw' }
+          , { propName: 'upce1preamble', propAccess: 'rw' }
+          , { propName: 'upce1reportCheckDigit', propAccess: 'rw' }
+          , { propName: 'webcode', propAccess: 'rw' }
+          , { propName: 'webcodeDecodeGtSubtype', propAccess: 'rw' }
+          , { propName: 'rsmModelNumber', propAccess: 'r' }
+          , { propName: 'rsmSerialNumber', propAccess: 'r' }
+          , { propName: 'rsmDateOfManufacture', propAccess: 'r' }
+          , { propName: 'rsmDateOfService', propAccess: 'r' }
+          , { propName: 'rsmBluetoothAddress', propAccess: 'r' }
+          , { propName: 'rsmFirmwareVersion', propAccess: 'r' }
+          , { propName: 'rsmDeviceClass', propAccess: 'r' }
+          , { propName: 'rsmBatteryStatus', propAccess: 'r' }
+          , { propName: 'rsmBatteryCapacity', propAccess: 'r' }
+          , { propName: 'rsmBatteryId', propAccess: 'r' }
+          , { propName: 'rsmBluetoothAuthentication', propAccess: 'rw' }
+          , { propName: 'rsmBluetoothEncryption', propAccess: 'rw' }
+          , { propName: 'rsmBluetoothPinCode', propAccess: 'rw' }
+          , { propName: 'rsmBluetoothPinCodeType', propAccess: 'rw' }
+          , { propName: 'rsmBluetoothReconnectionAttempts', propAccess: 'rw' }
+          , { propName: 'rsmBluetoothBeepOnReconnectAttempt', propAccess: 'rw' }
+          , { propName: 'rsmBluetoothHidAutoReconnect', propAccess: 'rw' }
+          , { propName: 'rsmBluetoothFriendlyName', propAccess: 'rw' }
+          , { propName: 'rsmBluetoothInquiryMode', propAccess: 'rw' }
+          , { propName: 'rsmBluetoothAutoReconnect', propAccess: 'rw' }
+          , { propName: 'rsmForceSavePairingBarcode', propAccess: 'rw' }
+          , { propName: 'rsmLowBatteryIndication', propAccess: 'rw' }
+          , { propName: 'rsmLowBatteryIndicationCycle', propAccess: 'rw' }
+          , { propName: 'rsmScanLineWidth', propAccess: 'rw' }
+          , { propName: 'rsmGoodScansDelay', propAccess: 'rw' }
+          , { propName: 'rsmDecodeFeedback', propAccess: 'rw' }
+          , { propName: 'rsmIgnoreCode128Usps', propAccess: 'rw' }
+          , { propName: 'rsmScanTriggerWakeup', propAccess: 'rw' }
+          , { propName: 'rsmMems', propAccess: 'rw' }
+          , { propName: 'rsmProximityEnable', propAccess: 'rw' }
+          , { propName: 'rsmProximityContinuous', propAccess: 'rw' }
+          , { propName: 'rsmProximityDistance', propAccess: 'rw' }
+          , { propName: 'rsmPagingEnable', propAccess: 'rw' }
+          , { propName: 'rsmPagingBeepSequence', propAccess: 'rw' }
+        ], apiReq, function(){ return this.getId(); });
+
+        // === Barcode default instance methods ===
+
+        rhoUtil.createMethodsProxy(Barcode, [
+        
+              // function(/* const rho::Hashtable<rho::String, rho::String>& */ propertyMap, /* optional function */ oResult)
+              { methodName: 'enable', nativeName: 'enable', persistentCallbackIndex: 1, valueCallbackIndex: 3 }
+        
+              // function(/* optional function */ oResult)
+            , { methodName: 'registerBluetoothStatus', nativeName: 'registerBluetoothStatus', persistentCallbackIndex: 0, valueCallbackIndex: 2 }
+        
+              // function(/* optional function */ oResult)
+            , { methodName: 'start', nativeName: 'start', valueCallbackIndex: 0 }
+        
+              // function(/* optional function */ oResult)
+            , { methodName: 'stop', nativeName: 'stop', valueCallbackIndex: 0 }
+        
+              // function(/* optional function */ oResult)
+            , { methodName: 'disable', nativeName: 'disable', valueCallbackIndex: 0 }
+        
+              // function(/* optional function */ oResult)
+            , { methodName: 'getSupportedProperties', nativeName: 'getSupportedProperties', persistentCallbackIndex: 0, valueCallbackIndex: 2 }
+        
+              // function(/* const rho::Hashtable<rho::String, rho::String>& */ propertyMap, /* optional function */ oResult)
+            , { methodName: 'take', nativeName: 'take', persistentCallbackIndex: 1, valueCallbackIndex: 3 }
+        
+              // function(/* const rho::String& */ command, /* optional function */ oResult)
+            , { methodName: 'commandRemoteScanner', nativeName: 'commandRemoteScanner', valueCallbackIndex: 1 }
+        
+              // function(/* const rho::String& */ propertyName, /* optional function */ oResult)
+            , { methodName: 'getProperty', nativeName: 'getProperty', persistentCallbackIndex: 1, valueCallbackIndex: 3 }
+        
+              // function(/* const rho::Vector<rho::String>& */ arrayofNames, /* optional function */ oResult)
+            , { methodName: 'getProperties', nativeName: 'getProperties', persistentCallbackIndex: 1, valueCallbackIndex: 3 }
+        
+              // function(/* optional function */ oResult)
+            , { methodName: 'getAllProperties', nativeName: 'getAllProperties', persistentCallbackIndex: 0, valueCallbackIndex: 2 }
+        
+              // function(/* const rho::String& */ propertyName, /* const rho::String& */ propertyValue, /* optional function */ oResult)
+            , { methodName: 'setProperty', nativeName: 'setProperty', valueCallbackIndex: 2 }
+        
+              // function(/* const rho::Hashtable<rho::String, rho::String>& */ propertyMap, /* optional function */ oResult)
+            , { methodName: 'setProperties', nativeName: 'setProperties', valueCallbackIndex: 1 }
+        
+              // function(/* optional function */ oResult)
+            , { methodName: 'clearAllProperties', nativeName: 'clearAllProperties', valueCallbackIndex: 0 }
+        
+        ], apiReq, function(){ return this.getId(); });
 
     
 
-    // === RhoConnectClient constants ===
+    rhoUtil.namespace(moduleNS, Barcode);
+
+})(jQuery, Rho, Rho.util);
+// Module Rho.Signature
+
+
+(function ($, rho, rhoUtil) {
+    'use strict';
+
+    var moduleNS = 'Rho.Signature';
+    var apiReq = rhoUtil.apiReqFor(moduleNS);
+    var currentDefaultID = null;
+
+    // === Signature class definition ===
+
+    function Signature() {
+        var id = null;
+        this.getId = function () {return id;};
+
+        if (1 == arguments.length && arguments[0][rhoUtil.rhoIdParam()]) {
+            if (moduleNS != arguments[0][rhoUtil.rhoClassParam()]) {
+                throw "Wrong class instantiation!";
+            }
+            id = arguments[0][rhoUtil.rhoIdParam()];
+        } else {
+            id = rhoUtil.nextId();
+            // constructor methods are following:
+            
+        }
+    };
+
+    Signature.getId = function() { return currentDefaultID; }
+
+    // === Signature instance properties ===
+
+    rhoUtil.createPropsProxy(Signature.prototype, [
+    ], apiReq, function(){ return this.getId(); });
+
+    // === Signature instance methods ===
+
+    rhoUtil.createMethodsProxy(Signature.prototype, [
+    
+    ], apiReq, function(){ return this.getId(); });
+
+    // === Signature constants ===
 
     
-
-    // === RhoConnectClient static properties ===
-
-    rhoUtil.createPropsProxy(RhoConnectClient, {
-       'userName': 'r'
-      , 'pollInterval': 'rw'
-      , 'syncServer': 'rw'
-      , 'pageSize': 'rw'
-      , 'threadedMode': 'rw'
-      , 'showStatusPopup': 'rw'
-      , 'sslVerifyPeer': 'rw'
-    }, apiReq);
-
-    // === RhoConnectClient static methods ===
-
+            Signature.COMPRESSION_FORMAT_JPG = 'jpg';
+        
     
-        RhoConnectClient['isLoggedIn'] = function(/* optional function */ oResult) {
-            return apiReq({
-                instanceId: '0',
-                args: arguments,
-                method: 'isLoggedIn',
-                
-                valueCallbackIndex: 0
-            });
-        };
+            Signature.COMPRESSION_FORMAT_PNG = 'png';
+        
     
-        RhoConnectClient['isSyncing'] = function(/* optional function */ oResult) {
-            return apiReq({
-                instanceId: '0',
-                args: arguments,
-                method: 'isSyncing',
-                
-                valueCallbackIndex: 0
-            });
-        };
+            Signature.COMPRESSION_FORMAT_BMP = 'bmp';
+        
     
-        RhoConnectClient['search'] = function(/* const rho::Hashtable<rho::String, rho::String>& */ args, /* optional function */ oResult) {
-            return apiReq({
-                instanceId: '0',
-                args: arguments,
-                method: 'search',
-                persistentCallbackIndex: 1,
-                valueCallbackIndex: 3
-            });
-        };
+            Signature.OUTPUT_FORMAT_IMAGE = 'image';
+        
     
-        RhoConnectClient['doSync'] = function(/* bool */ showStatusPopup, /* const rho::String& */ queryParams, /* bool */ syncOnlyChangedSources, /* optional function */ oResult) {
-            return apiReq({
-                instanceId: '0',
-                args: arguments,
-                method: 'doSync',
-                
-                valueCallbackIndex: 3
-            });
-        };
-    
-        RhoConnectClient['doSyncSource'] = function(/* const rho::String& */ sourceName, /* bool */ showStatusPopup, /* const rho::String& */ queryParams, /* optional function */ oResult) {
-            return apiReq({
-                instanceId: '0',
-                args: arguments,
-                method: 'doSyncSource',
-                
-                valueCallbackIndex: 3
-            });
-        };
-    
-        RhoConnectClient['login'] = function(/* const rho::String& */ login, /* const rho::String& */ password, /* optional function */ oResult) {
-            return apiReq({
-                instanceId: '0',
-                args: arguments,
-                method: 'login',
-                persistentCallbackIndex: 2,
-                valueCallbackIndex: 4
-            });
-        };
-    
-        RhoConnectClient['logout'] = function(/* optional function */ oResult) {
-            return apiReq({
-                instanceId: '0',
-                args: arguments,
-                method: 'logout',
-                
-                valueCallbackIndex: 0
-            });
-        };
-    
-        RhoConnectClient['stopSync'] = function(/* optional function */ oResult) {
-            return apiReq({
-                instanceId: '0',
-                args: arguments,
-                method: 'stopSync',
-                
-                valueCallbackIndex: 0
-            });
-        };
-    
-        RhoConnectClient['setNotification'] = function(/* const rho::String& */ sourceName, /* optional function */ oResult) {
-            return apiReq({
-                instanceId: '0',
-                args: arguments,
-                method: 'setNotification',
-                persistentCallbackIndex: 1,
-                valueCallbackIndex: 3
-            });
-        };
-    
-        RhoConnectClient['clearNotification'] = function(/* const rho::String& */ sourceName, /* optional function */ oResult) {
-            return apiReq({
-                instanceId: '0',
-                args: arguments,
-                method: 'clearNotification',
-                
-                valueCallbackIndex: 1
-            });
-        };
-    
-        RhoConnectClient['setObjectNotification'] = function(/* optional function */ oResult) {
-            return apiReq({
-                instanceId: '0',
-                args: arguments,
-                method: 'setObjectNotification',
-                persistentCallbackIndex: 0,
-                valueCallbackIndex: 2
-            });
-        };
-    
-        RhoConnectClient['addObjectNotify'] = function(/* const rho::String& */ sourceName, /* const rho::String& */ object, /* optional function */ oResult) {
-            return apiReq({
-                instanceId: '0',
-                args: arguments,
-                method: 'addObjectNotify',
-                
-                valueCallbackIndex: 2
-            });
-        };
-    
-        RhoConnectClient['cleanObjectNotify'] = function(/* optional function */ oResult) {
-            return apiReq({
-                instanceId: '0',
-                args: arguments,
-                method: 'cleanObjectNotify',
-                
-                valueCallbackIndex: 0
-            });
-        };
-    
-        RhoConnectClient['getLastSyncObjectCount'] = function(/* const rho::String& */ sourceName, /* optional function */ oResult) {
-            return apiReq({
-                instanceId: '0',
-                args: arguments,
-                method: 'getLastSyncObjectCount',
-                
-                valueCallbackIndex: 1
-            });
-        };
-    
-        RhoConnectClient['setSourceProperty'] = function(/* const rho::String& */ sourceName, /* const rho::String& */ propertyName, /* const rho::String& */ propertyValue, /* optional function */ oResult) {
-            return apiReq({
-                instanceId: '0',
-                args: arguments,
-                method: 'setSourceProperty',
-                
-                valueCallbackIndex: 3
-            });
-        };
-    
-        RhoConnectClient['getSourceProperty'] = function(/* const rho::String& */ sourceName, /* const rho::String& */ propertyName, /* optional function */ oResult) {
-            return apiReq({
-                instanceId: '0',
-                args: arguments,
-                method: 'getSourceProperty',
-                
-                valueCallbackIndex: 2
-            });
-        };
+            Signature.OUTPUT_FORMAT_DATAURI = 'dataUri';
+        
     
 
-    // === RhoConnectClient default instance support ===
+    // === Signature static properties ===
 
+    rhoUtil.createPropsProxy(Signature, [
+        { propName: 'compressionFormat', propAccess: 'rw' }
+      , { propName: 'outputFormat', propAccess: 'rw' }
+      , { propName: 'fileName', propAccess: 'rw' }
+      , { propName: 'border', propAccess: 'rw' }
+      , { propName: 'penColor', propAccess: 'rw' }
+      , { propName: 'penWidth', propAccess: 'rw' }
+      , { propName: 'bgColor', propAccess: 'rw' }
+      , { propName: 'left', propAccess: 'rw' }
+      , { propName: 'top', propAccess: 'rw' }
+      , { propName: 'width', propAccess: 'rw' }
+      , { propName: 'height', propAccess: 'rw' }
+      , { propName: 'fullScreen', propAccess: 'rw' }
+    ], apiReq);
+
+    // === Signature static methods ===
+
+    rhoUtil.createMethodsProxy(Signature, [
+    
+          // function(/* const rho::Hashtable<rho::String, rho::String>& */ propertyMap, /* optional function */ oResult)
+          { methodName: 'takeFullScreen', nativeName: 'takeFullScreen', persistentCallbackIndex: 1, valueCallbackIndex: 3 }
+    
+          // function(/* const rho::Hashtable<rho::String, rho::String>& */ propertyMap, /* optional function */ oResult)
+        , { methodName: 'show', nativeName: 'show', valueCallbackIndex: 1 }
+    
+          // function(/* optional function */ oResult)
+        , { methodName: 'capture', nativeName: 'capture', persistentCallbackIndex: 0, valueCallbackIndex: 2 }
+    
+          // function(/* optional function */ oResult)
+        , { methodName: 'clear', nativeName: 'clear', valueCallbackIndex: 0 }
+    
+          // function(/* optional function */ oResult)
+        , { methodName: 'hide', nativeName: 'hide', valueCallbackIndex: 0 }
+    
+          // function(/* optional function */ oResult)
+        , { methodName: 'setVectorCallback', nativeName: 'setVectorCallback', persistentCallbackIndex: 0, valueCallbackIndex: 2 }
+    
+    ], apiReq);
+
+    // === Signature default instance support ===
     
 
-    rhoUtil.namespace(moduleNS, RhoConnectClient);
+    rhoUtil.namespace(moduleNS, Signature);
 
 })(jQuery, Rho, Rho.util);
 // Module Rho.Database
@@ -9845,3 +10281,6 @@ var Rho = Rho || (function ($) {
     rhoUtil.namespace(moduleNS, Database, true);
 
 })(jQuery, Rho, Rho.util);
+// Module rhoapi-native.rhosim
+
+/* */

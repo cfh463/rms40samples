@@ -6,9 +6,15 @@ KitchenSink.Samples.Screenorientation = KitchenSink.Samples.Screenorientation ||
 	   is_auto_rotate = Rho.ScreenOrientation.autoRotate;
 		alert("Is Screen Autorotated:" + is_auto_rotate)
 	}
+	
+	function setCallback() {
+	    Rho.ScreenOrientation.upsideDown();
+		ScreenOrientation.setScreenOrientationEvent('/app/Screenorientation/orientation_callback');
+	}
 
 	return {
-		autoRotate: autoRotate
+		autoRotate: autoRotate,
+		setCallback: setCallback
 	};
 
 })();

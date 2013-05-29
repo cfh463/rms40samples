@@ -10,4 +10,17 @@ class ScreenorientationController < Rho::RhoController
     Rho::ScreenOrientation.autoRotate=true
     @is_auto_rotated = Rho::ScreenOrientation.autoRotate
   end
+  
+  def set_callback
+    render
+  end
+  
+  def trigger_callback
+    Rho::ScreenOrientation.upsideDown()
+    ScreenOrientation.setScreenOrientationEvent( url_for :action => :orientation_callback)
+  end
+  
+  def orientation_callback
+    Alert.show_popup("Screen Orientation upside down is called")
+  end
 end
