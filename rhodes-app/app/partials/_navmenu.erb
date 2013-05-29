@@ -59,7 +59,15 @@
     </ul>
         
     </div>
-    
+
+    <div data-role="collapsible"  data-filter="nativetabbar tabbar tab bar">
+      <h3>NativeTabbar</h3>
+
+       <ul data-role="listview" data-inset="true">
+           <li><a href="<%= url_for :controller => :NativeTabbar, :action => :tabbar_menu %>">Create Tabbar</a></li>
+       </ul>
+     </div>
+
     <div data-role="collapsible"  data-filter="log info warning debug memory usage read clean category categories">
       <h3>Log</h3>
       
