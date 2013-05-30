@@ -13,8 +13,8 @@
       <li><a href="<%= url_for :action => :stop_status_notify %>">Stop detecting network events</a></li>
       <li><a href="<%= url_for :action => :upload_file %>">Upload file</a></li>
       <li><a href="<%= url_for :action => :download_file %>">Download file</a></li>
-      <li><a href="#">Using http headers and verbs</a></li>
-      <li><a href="#">Connecting with basic authentication</a></li>      
+      <li><a href="<%= url_for :action => :headers_and_verbs %>">Using http headers and verbs</a></li>
+      <li><a href="<%= url_for :action => :basic_auth %>">Connecting with basic authentication</a></li>      
     </ul>
     <h2>Javascript</h2>
     <ul data-role="listview">
@@ -23,8 +23,8 @@
       <li><a href="#" onclick="stop_status_notify()">Stop detecting network events</a></li>
       <li><a href="#" onclick="upload_file()">Upload file</a></li>
       <li><a href="#" onclick="download_file()">Download file</a></li>
-      <li><a href="#">Using http headers and verbs</a></li>
-      <li><a href="#">Connecting with basic authentication</a></li>      
+      <li><a href="<%= url_for :action => :headers_and_verbs %>">Using http headers and verbs</a></li>
+      <li><a href="#" onclick="basic_auth()">Connecting with basic authentication</a></li>      
     </ul>
 
   </div>
@@ -96,6 +96,21 @@
       var network = Rho.Network.hasNetwork()
       
       alert("Cell network: "+cell_network+"\nWi-Fi network: "+wifi_network+"\nNetwork: "+network);
+    }
+
+    function basic_auth() {
+      getProps = {
+        url: "http://rhodes-basic-auth.herokuapp.com/secret.json",
+        headers: {"Content-Type" : "application/json"},
+        authType: "basic",
+        authUser: "test",
+        authPassword: "test12345"
+      };
+      Rho.Network.get(getProps, auth_callback);
+    }
+
+    function auth_callback(params){
+        alert(params["body"])
     }
     
   </script>

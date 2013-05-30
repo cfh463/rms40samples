@@ -1,0 +1,56 @@
+<div data-role="page">
+
+  <div data-role="header" data-position="inline">
+    <h1>Http Headers and Verbs</h1>
+  </div>
+
+  <div data-role="content">
+    <h2>Ruby</h2>
+    <ul data-role="listview">
+      <li><a href="<%= url_for :action => :get %>">GET</a></li>
+      <li><a href="<%= url_for :action => :post %>">POST</a></li>
+    </ul>
+    <h2>Javascript</h2>
+    <ul data-role="listview">
+      <li><a href="#" onclick="get()">GET</a></li>
+      <li><a href="#" onclick="post()">POST</a></li>
+    </ul> 
+  </div>
+
+  <script type="text/javascript">
+    function get() {
+      getProps = {
+        url: "http://www.apache.org/licenses/LICENSE-2.0",
+        headers: {"Content-Type" : "application/json"}
+      };
+      Rho.Network.get(getProps, get_callback);
+    }
+
+    function get_callback(params){
+      if (params["status"] == "ok"){
+        alert(params["body"])
+      }else{
+        alert("Failed");
+      }
+    }
+
+    function post(){
+      var body = '{"product" : {"name" : "test_name", "brand" : "test_brand", "sku" : "1" , "price" : "$2000" , "quantity" : "2" } }';
+      postProps = {
+        url: "http://rhostore.herokuapp.com/products.json",
+        headers: {"Content-Type" : "application/json"},
+        body: body    
+      };
+      Rho.Network.post(postProps, post_callback);
+    }
+
+    function post_callback(params){
+      if (params["status"] == "ok"){
+        alert("Posted Success");
+      }else{
+        alert("Posted Failed");
+      }
+    }
+  </script>
+  
+</div>
