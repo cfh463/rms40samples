@@ -59,7 +59,15 @@
     </ul>
         
     </div>
-    
+
+    <div data-role="collapsible"  data-filter="filesystem open read write close directory folder storage sdcard">
+      <h3>File</h3>
+      
+      <ul data-role="listview" data-inset="true">
+         <li><a href="<%= url_for :controller => :File, :action => :browse_filesystem %>">Browse filesystem</a></li>
+      </ul>
+    </div>
+
     <div data-role="collapsible"  data-filter="log info warning debug memory usage read clean category categories">
       <h3>Log</h3>
       
