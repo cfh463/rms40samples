@@ -1,4 +1,4 @@
-<div data-role="page">
+<div data-role="page" class="filesample">
 
   <%= render :partial => "/partials/page_head" %>
     
@@ -32,11 +32,17 @@
     </div>
     
     <div class="sample javascript">
+      Folders:
       <ul class="folders">
       </ul>
       
+      Files:
       <ul class="files">
       </ul>
+      
+      <script type="text/javascript">
+        KitchenSink.Samples.File.browse_filesystem();
+      </script>
     </div>
     
     
