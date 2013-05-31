@@ -1,0 +1,25 @@
+<div data-role="page">
+
+<%= render :partial => "/partials/page_head" %>
+  
+<div data-role="content">
+ <%= render :partial => "/partials/example_header", :locals => {:title => "Mediaplayer- Show all ringtones and play them", :description => "
+      It will list all the ringtones available on the device and show them in an HTML list. When a ringtone is clicked, it will be played.    
+    " }
+    %>
+
+  <%= render :partial => "/partials/language_tabs" %>
+
+  <div data-role="content">
+  	
+	<% if @ringtones.empty? %>
+	No ring tones
+	<% else %>
+	<% @ringtones.each do |key,v| %>
+	<%= link_to key, { :action => 'play', :query => { :name => key} } %> <br/>
+	<% end %>
+	<% end %>
+
+  </div>
+
+</div>
