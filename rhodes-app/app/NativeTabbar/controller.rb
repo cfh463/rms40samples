@@ -27,9 +27,7 @@ class NativeTabbarController < Rho::RhoController
       :label => "Remove",
       :action => url_for(:action => :remove_tabbar)
       }
-    ], {
-
-    })
+    ], {}, url_for(:action => :tabbar_callback))
     
     render :action => :tabbar_menu
   end
@@ -41,5 +39,9 @@ class NativeTabbarController < Rho::RhoController
   def remove_tabbar
     Rho::NativeTabbar.remove
     render :action => :tabbar_menu
+  end
+  
+  def tabbar_callback
+    Alert.show_popup("Switching to tab #{@params["rab_index"]}")
   end
 end

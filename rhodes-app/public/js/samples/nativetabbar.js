@@ -11,6 +11,7 @@ KitchenSink.Samples.NativeTabbar = KitchenSink.Samples.NativeTabbar || (function
 	}
 
 	function tabbarCallback(params) {
+		alert("callback");
 		if (params["tabEvent"] == "onTabFocus") {
 			var newIndex = params["newTabIndex"];
 			
@@ -24,6 +25,7 @@ KitchenSink.Samples.NativeTabbar = KitchenSink.Samples.NativeTabbar || (function
 	}
 
 	function createTabbar() {
+		alert("creating tabbar");
 		Rho.NativeTabbar.create([{
 				label: "Home"
 			}, {
@@ -32,13 +34,17 @@ KitchenSink.Samples.NativeTabbar = KitchenSink.Samples.NativeTabbar || (function
 				label: "example.com"
 			}, {
 				label: "Remove"
-			}], tabbarCallback)
+			}], {}, tabbarCallback);
 
 	}
 
-	function switchTab() { }
+	function switchTab() { 
+		Rho.NativeTabbar.switchTab(2);
+	}
 
-	function removeTabbar() { }
+	function removeTabbar() { 
+		Rho.NativeTabbar.remove();
+	}
 
 	return {
 		createTabbar: createTabbar,
