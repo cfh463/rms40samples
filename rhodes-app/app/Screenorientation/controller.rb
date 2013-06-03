@@ -16,27 +16,27 @@ class ScreenorientationController < Rho::RhoController
   end
   
   def trigger_callback
-    Rho::ScreenOrientation.upsideDown()
-    ScreenOrientation.setScreenOrientationEvent( url_for :action => :orientation_callback)
+    Rho::ScreenOrientation.upsideDown
+    ScreenOrientation.setScreenOrientationEvent(url_for(:action => :orientation_callback))
   end
   
   def orientation_callback
-    Alert.show_popup("Screen Orientation upside down is called")
+    Alert.show_popup("Screen changed orientation")
   end
   
   def left_handed_position
-    Rho::ScreenOrientation.leftHanded()
+    Rho::ScreenOrientation.leftHanded
   end
   
   def right_handed_position
-    Rho::ScreenOrientation.rightHanded()
+    Rho::ScreenOrientation.rightHanded
   end
   
   def upside_down_position
-    Rho::ScreenOrientation.upsideDown()
+    Rho::ScreenOrientation.upsideDown
   end
   
   def normal_position
-    Rho::ScreenOrientation.normal()
+    Rho::ScreenOrientation.normal
   end
 end

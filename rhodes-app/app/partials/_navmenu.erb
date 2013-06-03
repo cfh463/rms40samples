@@ -91,6 +91,15 @@
       <h3>ORM</h3>
     </div>
     
+    <div data-role="collapsible"  data-filter="screenorientation autorotate callback change">
+        <h3>ScreenOrientation</h3>
+        <ul data-role="listview" data-inset="true">
+          <li><a href="<%= url_for :controller => :Screenorientation, :action => :auto_rotate %>">Auto-rotate</a></li>
+          <li><a href="<%= url_for :controller => :Screenorientation, :action => :set_callback  %>">Detect changes</a></li> 
+          <li><a href="<%= url_for :controller => :Screenorientation, :action => :change_orientations %>">Change orientation</a></li>    
+        </ul>
+    </div>
+
     <div data-role="collapsible"  data-filter="signature capture fullscreen full-screen full screen inline line handwriting hand writing">
       <h3>Signature</h3>
       <h4>Ruby</h4>
@@ -130,17 +139,4 @@
       
     </div>
 
-
-	<div data-role="collapsible"  data-filter="screenorientation autorotate callback change">
-      <h3>ScreenOrientation</h3>
-      <ul data-role="listview" data-inset="true">
-        <li><a href="<%= url_for :controller => :Screenorientation, :action => :auto_rotate %>">ScreenOrientation - autorotate </a></li>
-        <li><a href="<%= url_for :controller => :Screenorientation, :action => :set_callback  %>">ScreenOrientation - set callback </a></li> 
-        <li><a href="<%= url_for :controller => :Screenorientation, :action => :change_orientations %>">ScreenOrientation - change orientations </a></li>    
-           
-      </ul>
-      
-    </div>
-    
-  </div>
 </div>
