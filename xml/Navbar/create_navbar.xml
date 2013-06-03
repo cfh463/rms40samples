@@ -1,0 +1,45 @@
+<EXAMPLES >
+           <EXAMPLE title="Create navbar">
+            <SECTIONS>
+               
+              <SECTION>
+               <DESC>
+                   Create a native Navbar on iOS
+               </DESC>
+               <CODE>
+                <RUBY>
+           <![CDATA[
+Rho::Navbar.create({
+  :left => {
+    :label => "Home",
+    :action => url_for(Rho::Application.startURI)
+  },
+  :right => {
+    :label => "example.com",
+    :action => "http://www.example.com",
+  },
+  :title => "Navbar title"
+})
+                   ]]>
+                 </RUBY>
+                <JAVASCRIPT>
+           <![CDATA[
+Rho.Navbar.create({
+	left: {
+		label: "Home",
+		action: Rho.Application.startURI
+	},
+	right: {
+		label: "example.com",
+		action: "http://www.example.com",
+	},
+	title: "Navbar title"
+});
+
+                   ]]>
+                 </JAVASCRIPT>
+               </CODE>
+               </SECTION>
+               </SECTIONS>
+           </EXAMPLE>
+       </EXAMPLES>
