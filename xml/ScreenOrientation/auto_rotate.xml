@@ -1,0 +1,32 @@
+<EXAMPLES >
+           <EXAMPLE title="Enable / disable auto rotate">
+            <SECTIONS>
+               
+              <SECTION>
+               <DESC>
+                   Enable / disable automatic rotation of the screen according to device orientation
+               </DESC>
+               <CODE>
+                <RUBY>
+           <![CDATA[
+# Enable autorotate
+Rho::ScreenOrientation.autoRotate=true
+
+# Disable autorotate
+Rho::ScreenOrientation.autoRotate=false
+                   ]]>
+                 </RUBY>
+                <JAVASCRIPT>
+           <![CDATA[
+// Enable autorotate
+Rho.ScreenOrientation.autoRotate=true;
+
+// Disable autorotate
+Rho.ScreenOrientation.autoRotate=false;
+                   ]]>
+                 </JAVASCRIPT>
+               </CODE>
+               </SECTION>
+               </SECTIONS>
+           </EXAMPLE>
+       </EXAMPLES>
