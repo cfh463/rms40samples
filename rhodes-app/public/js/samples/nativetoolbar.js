@@ -28,7 +28,9 @@ KitchenSink.Samples.NativeToolbar = KitchenSink.Samples.NativeToolbar || (functi
 	}
 
 
-	function removeToolbar() { }
+	function removeToolbar() { 
+		Rho.NativeToolbar.remove();
+	}
 
 	return {
 		createToolbar: createToolbar,
