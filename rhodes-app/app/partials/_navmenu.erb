@@ -59,7 +59,23 @@
     </ul>
         
     </div>
-    
+
+    <div data-role="collapsible"  data-filter="filesystem open read write close directory folder storage sdcard">
+      <h3>File</h3>
+      
+      <ul data-role="listview" data-inset="true">
+         <li><a href="<%= url_for :controller => :File, :action => :browse_filesystem %>">Browse filesystem</a></li>
+      </ul>
+    </div>
+
+    <div data-role="collapsible"  data-filter="nativetabbar tabbar tab bar">
+      <h3>NativeTabbar</h3>
+
+       <ul data-role="listview" data-inset="true">
+           <li><a href="<%= url_for :controller => :NativeTabbar, :action => :tabbar_menu %>">Create Tabbar</a></li>
+       </ul>
+     </div>
+
     <div data-role="collapsible"  data-filter="log info warning debug memory usage read clean category categories">
       <h3>Log</h3>
       
@@ -73,6 +89,20 @@
        </ul>
        
     </div>
+
+    <div data-role="collapsible"  data-filter="navbar navigation bar ios iphone native">
+      <h3>Navbar</h3>
+       <ul data-role="listview" data-inset="true">
+        <li><a href="<%= url_for :controller => :Navbar, :action => :navbar_menu %>">Create Navbar</a></li>
+       </ul>
+    </div>
+    
+    <div data-role="collapsible"  data-filter="nativetoolbar">
+      <h3>Native Toolbar</h3>
+       <ul data-role="listview" data-inset="true">
+        <li><a href="<%= url_for :controller => :NativeToolbar, :action => :toolbar_menu %>">Create Toolbar</a></li>
+       </ul>
+    </div>
     
     <div data-role="collapsible"  data-filter="network wifi 3g cdma hsdpa gprs wireless connection upload download http authentication">
       <h3>Network</h3>
@@ -83,7 +113,7 @@
         <li><a href="<%= url_for :controller => :Network, :action => :upload %>">Upload file</a></li>
         <li><a href="<%= url_for :controller => :Network, :action => :download %>">Download file</a></li>
         <li><a href="#">Using http headers and verbs</a></li>
-        <li><a href="#">Connecting with basic authentication</a></li>      
+        <li><a href="<%= url_for :controller => :Network, :action => :confirm_basic_auth %>">Basic authentication</a></li>      
       </ul>
     </div>
     
@@ -91,6 +121,15 @@
       <h3>ORM</h3>
     </div>
     
+    <div data-role="collapsible"  data-filter="screenorientation autorotate callback change">
+        <h3>Screen orientation</h3>
+        <ul data-role="listview" data-inset="true">
+          <li><a href="<%= url_for :controller => :Screenorientation, :action => :auto_rotate %>">Auto-rotate</a></li>
+          <li><a href="<%= url_for :controller => :Screenorientation, :action => :confirm_set_callback %>">Detect changes</a></li> 
+          <li><a href="<%= url_for :controller => :Screenorientation, :action => :change_orientations %>">Change orientation</a></li>    
+        </ul>
+    </div>
+
     <div data-role="collapsible"  data-filter="signature capture fullscreen full-screen full screen inline line handwriting hand writing">
       <h3>Signature</h3>
       <h4>Ruby</h4>
@@ -127,8 +166,7 @@
         <li><a href="<%= url_for :controller => :Webview, :action => :refresh_page %>">Refreshing the page</a></li>  
         <li><a href="<%= url_for :controller => :Webview, :action => :save_page %>">Saving the page - yet to implement</a></li>    
       </ul>
-      
     </div>
-    
+
   </div>
 </div>

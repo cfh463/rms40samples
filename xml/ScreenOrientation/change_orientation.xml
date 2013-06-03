@@ -1,0 +1,52 @@
+<EXAMPLES >
+           <EXAMPLE title="Change screen orientation">
+            <SECTIONS>
+               
+              <SECTION>
+               <DESC>
+                   Set the screen orientation programmatically. Particularly useful in a tablet: before capturing a signature, set the orientation to upside-down so that the interface will look right from the user's point of view without having to physically rotate the device
+               </DESC>
+               <CODE>
+                <RUBY>
+           <![CDATA[
+def capture_signature_with_attention_to_details
+	# Set screen orientation to upside down
+	Rho::ScreenOrientation.upsideDown
+	# At this point, offer the device to the user. You just saved yourself the hassle of rotating the tablet before offering it to the user
+	# and there's less potential for the device to be dropped along the way  
+	Rho::Signature.takeFullScreen({}, url_for(:action => :signature_callback))
+end
+
+def signature_callback
+	# do whatever we need to do with the signature
+	...
+	# restore screen orientation to default
+	Rho::ScreenOrientation.normal
+end
+                   ]]>
+                 </RUBY>
+                <JAVASCRIPT>
+           <![CDATA[
+
+function capture_signature_with_attention_to_details() {
+	// Set screen orientation to upside down
+	Rho.ScreenOrientation.upsideDown();
+
+	// At this point, offer the device to the user. You just saved yourself the hassle of rotating the tablet before offering it to the user
+	// and there's less potential for the device to be dropped along the way  
+	Rho.Signature.takeFullScreen({}, signature_callback);
+}           
+
+function signature_callback(params) {
+	// do whatever we need to do with the signature
+	...
+	// restore screen orientation to default
+	Rho.ScreenOrientation.normal();
+}
+                   ]]>
+                 </JAVASCRIPT>
+               </CODE>
+               </SECTION>
+               </SECTIONS>
+           </EXAMPLE>
+       </EXAMPLES>

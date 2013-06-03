@@ -1,0 +1,26 @@
+<EXAMPLES >
+           <EXAMPLE title="Switch tab">
+            <SECTIONS>
+               
+              <SECTION>
+               <DESC>
+					Switch the active tab
+               </DESC>
+               <CODE>
+                <RUBY>
+           <![CDATA[
+# Make the third tab active
+Rho::NativeTabbar.switchTab(2);
+                   ]]>
+                 </RUBY>
+                <JAVASCRIPT>
+           <![CDATA[
+// Make the third tab active
+Rho.NativeTabbar.switchTab(2);
+                   ]]>
+                 </JAVASCRIPT>
+               </CODE>
+               </SECTION>
+               </SECTIONS>
+           </EXAMPLE>
+       </EXAMPLES>

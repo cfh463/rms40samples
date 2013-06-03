@@ -64,12 +64,29 @@ KitchenSink.Samples.Network = KitchenSink.Samples.Network || (function() {
 
 		alert("Cell network: " + cell_network + "\nWi-Fi network: " + wifi_network + "\nNetwork: " + network);
 	}
+	
+    function basic_auth() {
+        getProps = {
+          url: "http://rhodes-basic-auth.herokuapp.com/secret.json",
+          headers: {"Content-Type" : "application/json"},
+          authType: "basic",
+          authUser: "test",
+          authPassword: "test12345"
+        };
+        Rho.Network.get(getProps, auth_callback);
+      }
+
+      function auth_callback(params){
+          alert(params["body"])
+      }
+	
 	return {
 		start_status_notify: start_status_notify,
 		stop_status_notify: stop_status_notify,
 		upload_file: upload_file,
 		download_file: download_file,
-		network_availability: network_availability
+		network_availability: network_availability,
+		basic_auth: basic_auth
 	};
 
 })();
