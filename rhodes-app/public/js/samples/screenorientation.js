@@ -2,21 +2,24 @@ KitchenSink.Samples.Screenorientation = KitchenSink.Samples.Screenorientation ||
 
 	
 	function autoRotate() {
-  	   Rho.ScreenOrientation.autoRotate=true;
+  	   Rho.ScreenOrientation.autoRotate=!Rho.ScreenOrientation.autoRotate;
 	   is_auto_rotate = Rho.ScreenOrientation.autoRotate;
-		alert("Is Screen Autorotated:" + is_auto_rotate)
+	   alert("Is Screen Autorotated:" + is_auto_rotate)
 	}
 	
-	function setCallback() {
-	    Rho.ScreenOrientation.upsideDown();
-		ScreenOrientation.setScreenOrientationEvent('/app/Screenorientation/orientation_callback');
+	function orientation_callback(params) {
+		alert("The screen changed orientation");
 	}
 	
-	function leftHanded() {
+	function set_callback() {
+		ScreenOrientation.setScreenOrientationEvent(orientation_callback);
+	}
+	
+	function left_handed() {
 		Rho.ScreenOrientation.leftHanded();
 	}
 	
-    function rightHanded() {
+    function right_handed() {
 		Rho.ScreenOrientation.rightHanded();
 	}
 	
@@ -24,15 +27,16 @@ KitchenSink.Samples.Screenorientation = KitchenSink.Samples.Screenorientation ||
 		Rho.ScreenOrientation.normal();
 	}
 	
-	function upsideDown() {
+	function upside_down() {
 		Rho.ScreenOrientation.upsideDown();
 	}
+	
 	return {
-		autoRotate: autoRotate,
-		setCallback: setCallback,
-		upsideDown: upsideDown,
-		leftHanded: leftHanded,
-		rightHanded: rightHanded,
+		auto_rotate: auto_rotate,
+		set_callback: set_callback,
+		upside_down: upside_down,
+		left_handed: left_handed,
+		right_handed: right_handed,
 		normal: normal
 	};
 
