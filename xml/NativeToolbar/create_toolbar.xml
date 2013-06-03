@@ -1,0 +1,38 @@
+<EXAMPLES >
+           <EXAMPLE title="Create native toolbar">
+            <SECTIONS>
+               
+              <SECTION>
+               <DESC>
+                   Create a native Toolbar
+               </DESC>
+               <CODE>
+                <RUBY>
+           <![CDATA[
+Rho::NativeToolbar.create([{
+  :label => "Home",
+  :action => url_for(Rho::Application.startURI)
+  },
+  {
+  :label => "example.com",
+  :action => "http://www.example.com",
+  }
+], {})
+                   ]]>
+                 </RUBY>
+                <JAVASCRIPT>
+           <![CDATA[
+Rho.NativeToolbar.create([{
+		label: "Home",
+		action: Rho.Application.startURI
+	}, {
+		label: "example.com",
+		action: "http://www.example.org"
+	}], {})
+                   ]]>
+                 </JAVASCRIPT>
+               </CODE>
+               </SECTION>
+               </SECTIONS>
+           </EXAMPLE>
+       </EXAMPLES>
