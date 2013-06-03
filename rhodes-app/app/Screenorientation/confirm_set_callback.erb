@@ -12,15 +12,13 @@
     <%= render :partial => "/partials/language_tabs" %>
     
     <div class="sample ruby">
-      <ul>
-		<li><a href="<%= url_for :action => :trigger_callback %>">ScreenOrientation - set callback</a></li>
-
-      </ul>
+      <a href="<%= url_for :action => :set_callback %>" data-role="button">Start detecting changes</a>
     </div>
     
     <div class="sample javascript">
-          <a href="#" data-role="button" onclick="KitchenSink.Samples.Screenorientation.setCallback()">ScreenOrientation - set callback</a>
+          <a href="#" data-role="button" onclick="KitchenSink.Samples.Screenorientation.set_callback()">Start detecting changes</a>
     </div>
     
     
   </div>
+</div>

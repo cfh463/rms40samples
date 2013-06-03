@@ -92,10 +92,10 @@
     </div>
     
     <div data-role="collapsible"  data-filter="screenorientation autorotate callback change">
-        <h3>ScreenOrientation</h3>
+        <h3>Screen orientation</h3>
         <ul data-role="listview" data-inset="true">
           <li><a href="<%= url_for :controller => :Screenorientation, :action => :auto_rotate %>">Auto-rotate</a></li>
-          <li><a href="<%= url_for :controller => :Screenorientation, :action => :set_callback  %>">Detect changes</a></li> 
+          <li><a href="<%= url_for :controller => :Screenorientation, :action => :confirm_set_callback %>">Detect changes</a></li> 
           <li><a href="<%= url_for :controller => :Screenorientation, :action => :change_orientations %>">Change orientation</a></li>    
         </ul>
     </div>
@@ -136,7 +136,7 @@
         <li><a href="<%= url_for :controller => :Webview, :action => :refresh_page %>">Refreshing the page</a></li>  
         <li><a href="<%= url_for :controller => :Webview, :action => :save_page %>">Saving the page - yet to implement</a></li>    
       </ul>
-      
     </div>
 
+  </div>
 </div>
