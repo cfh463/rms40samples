@@ -10,6 +10,7 @@ class NativeToolbarController < Rho::RhoController
     render
   end
   
+  
   def create_toolbar
     Rho::NativeToolbar.create([{
       :label => "Home",
@@ -27,9 +28,7 @@ class NativeToolbarController < Rho::RhoController
       :label => "Remove",
       :action => url_for(:action => :remove_toolbar)
       }
-    ], {
-
-    })
+    ], {})
     
     render :action => :toolbar_menu
   end

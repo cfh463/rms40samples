@@ -10,39 +10,28 @@ KitchenSink.Samples.NativeToolbar = KitchenSink.Samples.NativeToolbar || (functi
 		return urls;
 	}
 
-	function toolbarCallback(params) {
-		if (params["tabEvent"] == "onTabFocus") {
-			var newIndex = params["newTabIndex"];
-			
-			if (newIndex==3) {
-				removeToolbar();
-			} else {
-				var urls = getActionUrls();
-				Rho.WebView.navigate(urls[newIndex]);
-			}
-		}
-	}
-
 	function createToolbar() {
+		var urls = getActionUrls();
 		Rho.NativeToolbar.create([{
-				label: "Home"
+				label: "Home",
+				action: urls[0]
 			}, {
-				label: "Toolbar"
+				label: "Toolbar",
+				action: urls[1]
 			}, {
-				label: "example.com"
+				label: "example.com",
+				action: urls[2]
 			}, {
-				label: "Remove"
-			}], toolbarCallback)
-
+				label: "Remove",
+				action: urls[3]
+			}], {})
 	}
 
-	function switchTab() { }
 
 	function removeToolbar() { }
 
 	return {
 		createToolbar: createToolbar,
-		switchTab: switchTab,
 		removeToolbar: removeToolbar
 	};
 })();
