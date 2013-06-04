@@ -46,4 +46,21 @@ class LogController < Rho::RhoController
     @logFileContentAfter = Rho::Log.readLogFile 16384
     render :action => :display_log_file_before_and_after
   end
+
+  def send_log_file
+    # Read log file
+    @logFileContentBefore = Rho::Log.readLogFile 16384
+    if !@logFileContentBefore.empty?
+      #Send log file to destinationURI property.
+      Rho::Log.destinationURI="http://rhodes-server-log.herokuapp.com/rholog?log_name=RMS_CodeSample_App_Log"
+      Rho::Log.sendLogFile(url_for :action => :send_log_callback)
+      render :action => :server_log
+    else
+      Alert.show_popup "Log FileContents are empty."
+      render :action => :index
+    end
+  end
+
+  def send_log_callback
+  end
 end
