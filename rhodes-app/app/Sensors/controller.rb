@@ -18,10 +18,12 @@ class SensorsController < Rho::RhoController
   end
   
   def start_accelerometer_test
-    Rho::Sensors.watchAccelerometer
+    Rho::Sensors.watchAccelerometer(200, url_for(:action => accelerometer_callback))
     render :accelerometer_test
   end
   
   def stop_accelerometer_test
+    Rho::Sensors.stopAccelerometer
+    render :accelerometer_test
   end
 end
