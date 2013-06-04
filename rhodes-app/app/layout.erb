@@ -14,8 +14,6 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"/>
     <% end %>
 
-    <% if System::get_property('platform') == 'APPLE' || System::get_property('platform') == 'ANDROID' || is_bb6 || 
-        ( System::get_property('platform') != 'WINDOWS' && System::get_property('webview_framework') =~ /^WEBKIT/) %>
 
 
         <link rel="stylesheet" href="/public/jqmobile/jquery.mobile-1.3.1.min.css">
@@ -71,7 +69,7 @@
         <script type="text/javascript" src="/public/js/samples/signature.js"></script>
         <script type="text/javascript" src="/public/js/samples/system.js"></script>
         <script type="text/javascript" src="/public/js/samples/webview.js"></script>        
-    <% end %>
+
     
     <script type="text/javascript" charset="utf-8" src="/public/api/rhoapi-modules.js"></script>
 </head>
