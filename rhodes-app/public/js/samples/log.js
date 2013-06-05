@@ -34,6 +34,16 @@ KitchenSink.Samples.Log = KitchenSink.Samples.Log || (function() {
 	    var log_contents_after = Rho.Log.readLogFile(400);
 	    alert('Log file contents after cleaning: '+log_contents_after);
 	  }
+
+	  function send_log_file () {
+		    var log_contents = Rho.Log.readLogFile(16384);
+		    if (log_contents){
+		      Rho.Log.destinationURI = "http://localhost:3000/rholog?log_name=RMS_CodeSample_App_Log";
+		      Rho.Log.sendLogFile(send_log_callback);
+		    } else{
+		      alert("Log FileContents are empty");
+		    }
+		  }
 	
 	return {
 		log_categories : log_categories,
@@ -41,7 +51,8 @@ KitchenSink.Samples.Log = KitchenSink.Samples.Log || (function() {
 		stop_logging_memory_usage : stop_logging_memory_usage,
 		show_log : show_log,
 		read_log_file : read_log_file,
-		clean_log_file : clean_log_file
+		clean_log_file : clean_log_file,
+		send_log_file : send_log_file
 	};
 
 })();

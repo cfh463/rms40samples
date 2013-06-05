@@ -82,7 +82,7 @@
      <ul data-role="listview" data-inset="true">
          <li><a href="<%= url_for :controller => :Log, :action => :logging_categories %>">Logging categories</a></li>
          <li><a href="<%= url_for :controller => :Log, :action => :log_memory_usage %>">Logging memory usage</a></li>
-         <li><a href="#">Logging to remote location</a></li>
+         <li><a href="<%= url_for :controller => :Log, :action => :confirm_send_log_file %>">Logging to remote location</a></li>
          <li><a href="<%= url_for :controller => :Log, :action => :show_log_info %>">Show log</a></li>
          <li><a href="<%= url_for :controller => :Log, :action => :read_log_file %>">Read log file</a></li>
          <li><a href="<%= url_for :controller => :Log, :action => :clean_log_file %>">Clean log file</a></li>
@@ -127,6 +127,13 @@
           <li><a href="<%= url_for :controller => :Screenorientation, :action => :auto_rotate %>">Auto-rotate</a></li>
           <li><a href="<%= url_for :controller => :Screenorientation, :action => :confirm_set_callback %>">Detect changes</a></li> 
           <li><a href="<%= url_for :controller => :Screenorientation, :action => :change_orientations %>">Change orientation</a></li>    
+        </ul>
+    </div>
+
+    <div data-role="collapsible"  data-filter="sensors accelerometer">
+        <h3>Sensors</h3>
+        <ul data-role="listview" data-inset="true">
+          <li><a href="<%= url_for :controller => :Sensors, :action => :accelerometer_test %>">Accelerometer</a></li>
         </ul>
     </div>
 

@@ -1,0 +1,39 @@
+<EXAMPLES >
+           <EXAMPLE title="Send log file">
+            <SECTIONS>
+               
+              <SECTION>
+               <DESC>
+                   Upload log file to remote server
+               </DESC>
+               <CODE>
+                <RUBY>
+           <![CDATA[
+def upload_log_file           
+  Rho::Log.destinationURI = "http://www.example.com"
+  Rho::Log.sendLogFile(url_for(:action => :upload_log_file_callback))
+end
+
+def upload_log_file_callback
+  # operation complete
+end
+                   ]]>
+                 </RUBY>
+                <JAVASCRIPT>
+           <![CDATA[
+function upload_log_file() {
+	Rho.Log.destinationURI = "http://www.example.com";
+	Rho.Log.sendLogFile(upload_log_file_callback);
+}
+
+function upload_log_file_callback(params){
+	// Operation complete
+	alert("Done");
+}
+                   ]]>
+                 </JAVASCRIPT>
+               </CODE>
+               </SECTION>
+               </SECTIONS>
+           </EXAMPLE>
+       </EXAMPLES>
