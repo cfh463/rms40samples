@@ -37,7 +37,7 @@ KitchenSink.Samples.Log = KitchenSink.Samples.Log || (function() {
 
 	  function send_log_file () {
 		    var log_contents = Rho.Log.readLogFile(16384);
-		    if (log_contents != ""){
+		    if (log_contents){
 		      Rho.Log.destinationURI = "http://localhost:3000/rholog?log_name=RMS_CodeSample_App_Log";
 		      Rho.Log.sendLogFile(send_log_callback);
 		    } else{
