@@ -130,6 +130,13 @@
         </ul>
     </div>
 
+    <div data-role="collapsible"  data-filter="sensors accelerometer">
+        <h3>Sensors</h3>
+        <ul data-role="listview" data-inset="true">
+          <li><a href="<%= url_for :controller => :Sensors, :action => :accelerometer_test %>">Accelerometer</a></li>
+        </ul>
+    </div>
+
     <div data-role="collapsible"  data-filter="signature capture fullscreen full-screen full screen inline line handwriting hand writing">
       <h3>Signature</h3>
       <h4>Ruby</h4>

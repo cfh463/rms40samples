@@ -6,14 +6,14 @@ require 'helpers/browser_helper'
 class SensorsController < Rho::RhoController
   include BrowserHelper
   
-  def index
+  def accelerometer_test
     render
   end
   
   def accelerometer_callback
     @accelerometer_x = @params['x']
-    @accelerometer_y = @params['x']
-    @accelerometer_z = @params['x']
+    @accelerometer_y = @params['y']
+    @accelerometer_z = @params['z']
     Rho::WebView.refresh
   end
   
