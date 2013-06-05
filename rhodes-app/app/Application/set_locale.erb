@@ -1,0 +1,27 @@
+<div data-role="page">
+
+  <%= render :partial => "/partials/page_head" %>
+    
+  <div data-role="content">
+  
+    <%= render :partial => "/partials/example_header", :locals => {:title => "Set locale", :description => "
+      If your application is internationalized, you may want to set the locale depending on the user's preference      
+    " }
+    %>
+
+    <%= render :partial => "/partials/language_tabs" %>
+
+    <div class="sample ruby">
+      <ul>
+        <li>Old locale: <%= @previous_locale %></li>
+        <li>New locale: <%= @current_locale %></li>
+      </ul>
+    </div>
+    
+    <div class="sample javascript">
+      <a href="#" data-role="button" onclick="KitchenSink.Samples.Application.set_locale()">Set locale</a>    
+    </div>
+  </div>
+
+
+</div>

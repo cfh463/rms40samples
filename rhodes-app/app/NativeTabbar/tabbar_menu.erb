@@ -1,0 +1,33 @@
+<div data-role="page">
+
+  <%= render :partial => "/partials/page_head" %>
+    
+  <div data-role="content">
+  
+    <%= render :partial => "/partials/example_header", :locals => {:title => "Create tabbar", :description => "
+      Create Native Tabbar
+    " }
+    %>
+
+    <%= render :partial => "/partials/language_tabs" %>
+    
+    <div class="sample ruby">
+      <a href="<%= url_for :action => :create_tabbar %>" data-role="button">Create Tabbar</a>
+      <a href="<%= url_for :action => :switch_tab %>" data-role="button">Switch tab</a>
+      <a href="<%= url_for :action => :remove_tabbar %>" data-role="button">Remove Tabbar</a>
+    </div>
+    
+    <div class="sample javascript">
+		<ul style="display:none" class="tabbarurls">
+			<li><a href="<%= url_for(Rho::Application.startURI) %>"/></li>
+			<li><a href="<%= url_for(:action => :tabbar_menu) %>"/></li>
+			<li><a href="http://example.com"/></li>
+		</ul>
+    	
+	  <a href="#" data-role="button" onclick="KitchenSink.Samples.NativeTabbar.createTabbar()">Create Tabbar</a>
+	  <a href="#" data-role="button" onclick="KitchenSink.Samples.NativeTabbar.switchTab()">Switch Tab</a>
+	  <a href="#" data-role="button" onclick="KitchenSink.Samples.NativeTabbar.removeTabbar()">Remove Tabbar</a>
+    </div>
+    
+    
+  </div>

@@ -1,0 +1,23 @@
+<div data-role="page">
+
+  <%= render :partial => "/partials/page_head" %>
+    
+  <div data-role="content">
+  
+    <%= render :partial => "/partials/example_header", :locals => {:title => "Install / uninstall other applications", :description => "
+      This example will show you how to install/uninstall application
+    " }
+    %>
+
+    <%= render :partial => "/partials/language_tabs" %>
+    
+    <div class="sample ruby">
+      <li><a href="<%= url_for :action => :install_or_uninstall_app %>">Install / uninstall other applications</a></li>
+     </div>
+    
+    <div class="sample javascript">
+          <a href="#" data-role="button" onclick="KitchenSink.Samples.System.install_or_uninstall_app()">Install / uninstall other applications</a>    
+    </div>
+    
+    
+  </div>

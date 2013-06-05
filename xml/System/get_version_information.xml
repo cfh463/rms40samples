@@ -1,0 +1,26 @@
+<EXAMPLES >
+           <EXAMPLE title="Get version information">
+            <SECTIONS>
+               
+              <SECTION>
+               <DESC>
+                   Retrieve the version of the underlying Operating System
+               </DESC>
+               <CODE>
+                <RUBY>
+           <![CDATA[
+version_info = Rho::System.osVersion
+Alert.show_popup(version_info)
+                   ]]>
+                 </RUBY>
+                <JAVASCRIPT>
+           <![CDATA[
+var version_info = Rho.System.osVersion;
+alert(version_info);
+                   ]]>
+                 </JAVASCRIPT>
+               </CODE>
+               </SECTION>
+               </SECTIONS>
+           </EXAMPLE>
+       </EXAMPLES>

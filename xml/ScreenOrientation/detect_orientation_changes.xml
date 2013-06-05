@@ -1,0 +1,36 @@
+<EXAMPLES >
+           <EXAMPLE title="Detect screen orientation changes">
+            <SECTIONS>
+               
+              <SECTION>
+               <DESC>
+                   Detect when the device changes orientation
+               </DESC>
+               <CODE>
+                <RUBY>
+           <![CDATA[
+def start_detecting_orientation_changes
+  Rho::ScreenOrientation.setScreenOrientationEvent(url_for(:action => :orientation_callback))
+end
+ 
+def orientation_callback
+  Alert.show_popup("The screen changed orientation")
+end
+]]>
+                 </RUBY>
+                <JAVASCRIPT>
+           <![CDATA[
+function start_detecting_orientation_changes()
+  ScreenOrientation.setScreenOrientationEvent(url_for(:action => :orientation_callback))
+end
+ 
+def orientation_callback
+  Alert.show_popup("The screen changed orientation")
+end
+                   ]]>
+                 </JAVASCRIPT>
+               </CODE>
+               </SECTION>
+               </SECTIONS>
+           </EXAMPLE>
+       </EXAMPLES>

@@ -2,7 +2,7 @@ require 'rho'
 require 'rho/rhocontroller'
 require 'rho/rhoerror'
 require 'helpers/browser_helper'
-
+require 'base64'
 class NetworkController < Rho::RhoController
  include BrowserHelper
 
@@ -96,6 +96,69 @@ class NetworkController < Rho::RhoController
   	end
   end
 
+  def get
+    #Perform an HTTP GET request.
+    getProps = Hash.new
+    getProps['url'] = "http://www.apache.org/licenses/LICENSE-2.0"
+    getProps['headers'] = {"Content-Type" => "application/json"}
+    Rho::Network.get(getProps, url_for(:action => :get_callback))
+  end
+  
+  def get_callback
+    if @params['status'] == "ok"
+      @@get_result = @params['body']
+      WebView.navigate(url_for(:action => :show_result))
+    else
+      WebView.navigate(url_for(:action => :show_error ))
+    end
+  end
+  
+  def show_result
+  end
 
+  def show_error
+    Alert.show_popup "Get Failed"
+    render :action => :index
+  end
 
+  def get_resposnse
+    @@get_result
+  end
+
+  def post
+    #Download a file to the specified filename.
+    body = '{"product" : {"name" : "test_name", "brand" : "test_brand", "sku" : "1" , "price" : "$2000" , "quantity" : "2" } }'   
+    postProps = Hash.new
+    postProps['url'] = "http://rhostore.herokuapp.com/products.json"
+    postProps['headers'] = {"Content-Type" => "application/json"}
+    postProps['body'] = body
+    postProps['httpVerb'] = "POST"
+    Rho::Network.post( postProps, url_for(:action => :post_callback)) 
+    render :action => :headers_and_verbs
+  end
+
+  def post_callback
+    if @params['status'] == "ok"
+      Alert.show_popup "Posted Success - #{@params['body']}"
+    else
+      Alert.show_popup "Posted Failed - #{@params['body']}"
+    end
+  end
+
+  def confirm_basic_auth
+    render
+  end
+  
+  def do_basic_auth
+    #Perform an HTTP GET request with basic authentication.
+    @response= Rho::Network.get(
+      :url => "http://rhodes-basic-auth.herokuapp.com/secret.json",
+      :headers =>  {"Content-Type" => "application/json"},
+      :authType => :basic,
+      :authUser => "test",
+      :authPassword => "test12345"
+    )
+    Alert.show_popup "#{@response['body']}"
+    redirect :action => :confirm_basic_auth
+  end
 end

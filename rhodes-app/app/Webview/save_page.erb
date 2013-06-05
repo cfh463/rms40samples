@@ -1,0 +1,23 @@
+<div data-role="page">
+
+  <%= render :partial => "/partials/page_head" %>
+    
+  <div data-role="content">
+  
+    <%= render :partial => "/partials/example_header", :locals => {:title => "Save the page", :description => "
+      Save the current page
+    " }
+    %>
+
+    <%= render :partial => "/partials/language_tabs" %>
+    
+    <div class="sample ruby">
+      <li><a href="<%= url_for :action => :save %>">Save the page</a></li>  
+    </div>
+    
+    <div class="sample javascript">
+          <a href="#" data-role="button" onclick="KitchenSink.Samples.Webview.savePage()">Interacting with Webview - execute_js</a>    
+    </div>
+    
+    
+  </div>

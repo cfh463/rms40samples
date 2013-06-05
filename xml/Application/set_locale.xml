@@ -1,0 +1,28 @@
+<EXAMPLES >
+           <EXAMPLE title="Set the locale">
+            <SECTIONS>
+               
+              <SECTION>
+               <DESC>
+                   If your application is internationalized, you may want to set the locale depending on the user's preference 
+               </DESC>
+               <CODE>
+                <RUBY>
+           <![CDATA[
+Rho::Application.setLocale('en')
+current_locale = Rho::Application.locale
+Alert.show_popup(current_locale)
+                   ]]>
+                 </RUBY>
+                <JAVASCRIPT>
+           <![CDATA[
+Rho.Application.setLocale('en')
+var current_locale = Rho.Application.locale();
+alert(current_locale)
+                   ]]>
+                 </JAVASCRIPT>
+               </CODE>
+               </SECTION>
+               </SECTIONS>
+           </EXAMPLE>
+       </EXAMPLES>

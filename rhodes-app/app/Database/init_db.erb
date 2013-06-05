@@ -1,0 +1,27 @@
+<div data-role="page">
+
+  <%= render :partial => "/partials/page_head" %>
+    
+  <div data-role="content">
+  
+    <%= render :partial => "/partials/example_header", :locals => {:title => "Init DB", :description => "
+      Init DB
+      
+      
+    " }
+    %>
+
+    <%= render :partial => "/partials/language_tabs" %>
+    
+    <div class="sample ruby">
+      <ul>
+      <li><a href="<%= url_for :action => :initdb %>">Init DB</a></li>    
+      </ul>
+    </div>
+    
+    <div class="sample javascript">
+          <a href="#" data-role="button" onclick="">Init DB - Not yet Implemented</a>
+    </div>
+    
+    
+  </div>

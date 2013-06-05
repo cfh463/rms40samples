@@ -31,24 +31,32 @@ class SignatureController < Rho::RhoController
     end  
   end
   
-  def set_properties
-    # TODO: pending further testing when a beta newer than 11 is available - apparently not implemented yet
-    
-    # Change fullscreen from true (default) to false           
-    Rho::Signature.fullScreen = false;
+  def set_properties           
     # Change background color from white (default) to black
-    Rho::Signature.bgColor = "#000000"
     # Change pen color from blue (default) to white
-    Rho::Signature.penColor = "#FFFFFF"
-      
-    redirect :index  
+    Rho::Signature.takeFullScreen({:bgColor => "#000000", :penColor => "#FFFFFF"}, url_for(:action => :signature_callback))
+    render :action => :show_signature  
   end
   
   def capture_inline
-    Rho::Signature.show({:fullScreen => false})
-    render :action => :show_signature
+    Rho::Signature.show({
+      :top => 0,
+      :left => 0,
+      :width => 320,
+      :height => Rho::System.screenHeight / 3,
+      :fullScreen => false,
+    })
+    
+#    render :action => :show_signature
   end
 
+  def capture_as_datauri
+    # Ask for a DataURI repesentation of the image instead of a file
+    Rho::Signature.takeFullScreen({:outputFormat => "dataUri"}, url_for(:action => :signature_callback))
+          
+    render :action => :show_signature
+  end
+  
   def do_capture          
     Signature.capture(url_for( :action => :signature_callback))    
   end

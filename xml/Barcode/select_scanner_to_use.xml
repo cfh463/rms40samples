@@ -1,0 +1,57 @@
+<EXAMPLES >
+           <EXAMPLE title="Select which scanner to use">
+            <SECTIONS>
+               
+              <SECTION>
+               <DESC>
+                   By default, Rho::Barcode will select a hardware scanner if present on the device. If you want to let the user choose which scanner to use at any particular time, you must enumerate the available scanners and select one from the set.
+               </DESC>
+               <CODE>
+                <RUBY>
+           <![CDATA[
+# ---------------
+# controller.rb  
+# ---------------
+         
+def choose_scanner
+  # Obtain list of available scanners on the system. Devices without a hardware scanner will return a software-based recognizer 
+  $scanners = Rho::Barcode.enumerate
+  render
+end
+
+def scan_using_chosen_scanner
+  # receive an integer as parameter, which represent the number of the scanner we wish to use
+  scanner = $scanners[@params["scannerIndex"].to_i]
+  scanner.take({}, url_for(:action => :scan_received_callback))
+end
+
+def scan_received_callback
+  # Did we actually find a barcode ?
+  # If status is not 'ok', the scan was cancelled
+  if @params["status"] == "ok"
+    Rho::Log.info(@params["barcode"],"Barcode result")
+  else
+    Rho::Log.info("Cancelled", "Barcode result")
+  end
+end
+
+
+# ---------------
+# choose_scanner.erb
+# ---------------
+<ul data-role="listview">
+  <% $scanners.each_with_index do |scanner, index| %>
+    <li><a href="<%= url_for(:action => :scan_using_chosen_scanner, :query => {:scanner_index => index}) %>"><%= scanner.friendlyName %></li> 
+  <% end %>
+</ul>
+                   ]]>
+                 </RUBY>
+                <JAVASCRIPT>
+           <![CDATA[
+                   ]]>
+                 </JAVASCRIPT>
+               </CODE>
+               </SECTION>
+               </SECTIONS>
+           </EXAMPLE>
+       </EXAMPLES>

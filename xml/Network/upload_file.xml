@@ -1,5 +1,7 @@
 <EXAMPLES >
            <EXAMPLE title="Upload files via HTTP POST">
+              <SECTIONS>
+               
               <SECTION>
                <DESC>
                    You can upload any file to an external server via HTTP POST and be notified whether the transfer succeeded or not
@@ -53,5 +55,7 @@
                  </JAVASCRIPT>
                </CODE>
                </SECTION>
+             </SECTIONS>
+               
            </EXAMPLE>
        </EXAMPLES>

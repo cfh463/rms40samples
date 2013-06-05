@@ -1,0 +1,32 @@
+<EXAMPLES >
+           <EXAMPLE title="Zipping and unzipping files">
+            <SECTIONS>
+               
+              <SECTION>
+               <DESC>
+                   If you ever need to build or extract zip archives, RhoMobile includes easy-to-use APIs for this task  
+               </DESC>
+               <CODE>
+                <RUBY>
+           <![CDATA[
+# unzip a file 
+Rho::System.unzipFile("/app/public/sample.zip")
+
+# zip a file
+Rho::System.zipFile("/app/public", "/app/public/sample.txt")
+                   ]]>
+                 </RUBY>
+                <JAVASCRIPT>
+           <![CDATA[
+// unzip file 
+Rho.System.unzipFile("/app/public/sample.zip");
+  
+// zip file
+Rho.System.zipFile("/app/public/zipfile.zip", "/app/public/sample.txt");
+                   ]]>
+                 </JAVASCRIPT>
+               </CODE>
+               </SECTION>
+               </SECTIONS>
+           </EXAMPLE>
+       </EXAMPLES>

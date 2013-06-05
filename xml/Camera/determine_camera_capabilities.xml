@@ -1,0 +1,54 @@
+<EXAMPLES >
+           <EXAMPLE title="Determine camera capabilities">
+            <SECTIONS>
+               
+              <SECTION>
+               <DESC>
+                   You can get all available camera properties in a single call
+               </DESC>
+               <CODE>
+                <RUBY>
+           <![CDATA[
+# controller.rb
+
+def determine_camera_capabilities
+  # Get all camera properties
+  @properties = Rho::Camera.getAllProperties
+  render
+end
+
+# determine_camera_capabilities.erb
+    <ul data-role="listview">
+    
+    <% @properties.each_pair do |name,value| %>
+      <li><%= name %> : <%= value %></li>
+    <% end %>
+
+    </ul>
+                   ]]>
+                 </RUBY>
+                <JAVASCRIPT>
+           <![CDATA[
+function determine_camera_capabilities() {
+  var capabilitiesList = "<ul>"; 
+
+  // Get all capabilities of the camera...
+  var capabilities = Rho.Camera.getAllProperties();
+
+  // ... compose a nicely formatted list with their names and values ...
+  for (var capability in capabilities) {
+    capabilitiesList+="<li>"+capability+": "+capabilities[capability]+"</li>";
+  }
+
+  capabilitiesList += "</ul>";
+  
+  // ... and show it
+  $("#camera_capabilities").html(capabilitiesList);
+}
+                   ]]>
+                 </JAVASCRIPT>
+               </CODE>
+               </SECTION>
+               </SECTIONS>
+           </EXAMPLE>
+       </EXAMPLES>

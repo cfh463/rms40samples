@@ -1,0 +1,24 @@
+<EXAMPLES >
+           <EXAMPLE title="Remove navbar">
+            <SECTIONS>
+               
+              <SECTION>
+               <DESC>
+                   Remove the Navbar
+               </DESC>
+               <CODE>
+                <RUBY>
+           <![CDATA[
+Rho::Navbar.remove
+                   ]]>
+                 </RUBY>
+                <JAVASCRIPT>
+           <![CDATA[
+Rho.Navbar.remove();
+                   ]]>
+                 </JAVASCRIPT>
+               </CODE>
+               </SECTION>
+               </SECTIONS>
+           </EXAMPLE>
+       </EXAMPLES>

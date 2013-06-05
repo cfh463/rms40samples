@@ -49,16 +49,19 @@ LastVisitedPage = ''
 # for example: 'http://localhost:9292/application'
 syncserver = ''
 
+# 0 will disable auto sync 
+sync_poll_interval=0
+
 # geo location inactivity timeout (in seconds)
 #geo_location_inactivity_timeout = 30
 
 # open rhodes app in full screen mode
 # default 1 for Android up to Rhodes 2.2.5.
 # on all other platforms and on Android from Rhodes >2.2.5 default 0
-#full_screen = 1
+full_screen = 0
 
 # disable the Android page loading progress bar
-#disable_loading_indication = 0
+disable_loading_indication = 1
 
 # Port of the local (embedded) HTTP server. This parameter is mainly for debug purposes.
 # If not specified, application will use dynamically selected one.
