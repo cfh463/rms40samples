@@ -10,7 +10,8 @@ class MediaplayerController < Rho::RhoController
   end
   
   def list_ringtones
-     Rho::Mediaplayer.getAllRingtones(url_for(:action => :mediaplayer_callback))
+    Rho::Mediaplayer.getAllRingtones(url_for(:action => :mediaplayer_callback))
+    render :action => :loading
   end
   
   def mediaplayer_callback
