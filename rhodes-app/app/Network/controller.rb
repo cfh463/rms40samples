@@ -46,7 +46,7 @@ class NetworkController < Rho::RhoController
     # Request the system to check every 3 seconds and call us back if there is a change in network connectivity
   	Rho::Network.startStatusNotify(3000, url_for(:action => :status_notify_callback))
     Alert.show_popup "Started network status notifications"
-    redirect :index
+    redirect :confirm_detect_network_events
   end
 
   # This is our notification that the status of the network changed. old_status and new_status can be "disconnected" or "connected"
@@ -54,11 +54,15 @@ class NetworkController < Rho::RhoController
   	Alert.show_popup("Network status changed from #{@params["prev_status"]} to #{@params["current_status"]}")
   end
 
-
   def stop_status_notify
     # Stop network status notifications
   	Rho::Network.stopStatusNotify
     Alert.show_popup "Stopped network status notifications"
+    redirect :confirm_detect_network_events
+  end
+
+  def confirm_detect_network_events
+    render
   end
 
   def upload_file

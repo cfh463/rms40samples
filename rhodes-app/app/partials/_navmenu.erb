@@ -108,8 +108,7 @@
       <h3>Network</h3>
        <ul data-role="listview" data-inset="true">
         <li><a href="<%= url_for :controller => :Network, :action => :network_availability %>">Detect network availability</a></li>
-        <li><a href="<%= url_for :controller => :Network, :action => :start_statusnotify %>">Start detecting network events</a></li>
-        <li><a href="<%= url_for :controller => :Network, :action => :stop_statusnotify %>">Stop detecting network events</a></li>
+        <li><a href="<%= url_for :controller => :Network, :action => :confirm_detect_network_events %>">Detect network events</a></li>
         <li><a href="<%= url_for :controller => :Network, :action => :upload %>">Upload file</a></li>
         <li><a href="<%= url_for :controller => :Network, :action => :download %>">Download file</a></li>
         <li><a href="#">Using http headers and verbs</a></li>
@@ -139,9 +138,8 @@
 
     <div data-role="collapsible"  data-filter="signature capture fullscreen full-screen full screen inline line handwriting hand writing">
       <h3>Signature</h3>
-      <h4>Ruby</h4>
       <ul data-role="listview" data-inset="true">
-        <li><a href="<%= url_for :controller => :Signature, :action => :set_properties %>">Set capture properties</a></li>
+        <li><a href="<%= url_for :controller => :Signature, :action => :edit_properties %>">Set capture properties</a></li>
         <li><a href="#">Capture to file</a></li>
         <li><a href="#">Capture to dataURI</a></li>
         <li><a href="<%= url_for :controller => :Signature, :action => :capture_fullscreen %>">Capture full-screen</a></li>
