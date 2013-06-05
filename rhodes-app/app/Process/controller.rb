@@ -13,7 +13,7 @@ class ProcessController < Rho::RhoController
 
   def launch_external_app
   	p "launch_external_app---------------------------launch_external_app----------"
-  	Rho::Process.runApplication("Asset Tracker")
+  	Rho::Process.getProcessExitCode()
   	p "------------------------sss"
   	render :action => :index
   end
