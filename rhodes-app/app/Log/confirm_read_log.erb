@@ -6,23 +6,19 @@
   
     <%= render :partial => "/partials/example_header", :locals => {:title => "Read log file", :description => "
       This example will show you the Log information
-      
-      
     " }
     %>
 
     <%= render :partial => "/partials/language_tabs" %>
     
     <div class="sample ruby">
-      <ul>
-<li><a href="<%= url_for :action => :read_log_file %>">Read log file</a></li>
- 
-      </ul>
+        <a href="<%= url_for :action => :read_log_file %>" data-role="button">Read log file</a>
     </div>
     
     <div class="sample javascript">
-          <a href="#" data-role="button" onclick="KitchenSink.Samples.Log.read_log_file()">Read log file</a>
+        <a href="#" data-role="button" onclick="KitchenSink.Samples.Log.read_log_file()">Read log file</a>
     </div>
     
     
   </div>
+</div>

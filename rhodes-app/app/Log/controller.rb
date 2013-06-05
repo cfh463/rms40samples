@@ -17,7 +17,7 @@ class LogController < Rho::RhoController
   end
   
 
-  def logginig_categories
+  def logging_categories
     render
   end
   
@@ -43,39 +43,44 @@ class LogController < Rho::RhoController
   def show_log
     # Show the contents of the log file in a window with controls to refresh, clear and send. Useful for debugging and when asking users to report error messages
     Rho::Log.showLog
-    redirect :show_log_info
-  end
-  
-  def read_log_info
-    render
+    redirect :confirm_show_log
   end
   
   def read_log_file
     # Read at most 16384 symbols
     @logFileContent = Rho::Log.readLogFile 16384
     Rho::Log.info(@logFileContent, "Log file content")
-    render :action => :read_log_info
+
+    render
+  end
+  
+  def confirm_read_log
+    render
   end
   
   def clean_log_file
     # Read log file
-    @logFileContentBefore = Rho::Log.readLogFile 16384
+    @logFileContentBefore = Rho::Log.readLogFile 1024
     
     # Clear log file
     Rho::Log.cleanLogFile
     
     # Read log file again - this time it will be empty
-    @logFileContentAfter = Rho::Log.readLogFile 16384
-  #  render :action => :display_log_file_before_and_after
+    @logFileContentAfter = Rho::Log.readLogFile 1024
+    render :action => :confirm_clean_log_file
   end
 
+  def confirm_clean_log_file
+    render
+  end
+  
   def send_log_file
     # Read log file
     @logFileContentBefore = Rho::Log.readLogFile 16384
     if !@logFileContentBefore.empty?
       #Send log file to destinationURI property.
       Rho::Log.destinationURI="http://rhodes-server-log.herokuapp.com/rholog?log_name=RMS_CodeSample_App_Log"
-      Rho::Log.sendLogFile(url_for :action => :send_log_callback)
+      Rho::Log.sendLogFile(url_for(:action => :send_log_callback))
       render :action => :server_log
     else
       Alert.show_popup "Log FileContents are empty."
