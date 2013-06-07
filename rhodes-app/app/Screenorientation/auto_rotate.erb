@@ -12,13 +12,12 @@
     <%= render :partial => "/partials/language_tabs" %>
     
     <div class="sample ruby">
-      <ul>
-<li>Is Screen Autorotated: <%= @is_auto_rotated %> </li> 
-      </ul>
+        Is Screen Autorotated: <%= @is_auto_rotated %> 
+        <a href="<%= url_for(:action => toggle_autorotation) %>" data-role="button">Toggle autorotation</a> 
     </div>
     
     <div class="sample javascript">
-          <a href="#" data-role="button" onclick="KitchenSink.Samples.Screenorientation.autoRotate()">ScreenOrientation - autorotate</a>
+          <a href="#" data-role="button" onclick="KitchenSink.Samples.Screenorientation.toggle_autorotation()">Toggle autorotation</a>
     </div>
     
     

@@ -1,7 +1,7 @@
 KitchenSink.Samples.NativeToolbar = KitchenSink.Samples.NativeToolbar || (function() {
 
 	function getActionUrls() {
-		var links = $(".ui-page-active").find(".toolbarurls > a").attr("href");
+		var links = $(".ui-page-active").find(".toolbarurls > a");
 		var urls = [];
 		links.each(function(index) {
 			urls.push($(links[index]).attr("href"));
@@ -16,14 +16,11 @@ KitchenSink.Samples.NativeToolbar = KitchenSink.Samples.NativeToolbar || (functi
 				label: "Home",
 				action: urls[0]
 			}, {
-				label: "Toolbar",
+				label: "Show alert",
 				action: urls[1]
 			}, {
-				label: "example.com",
-				action: urls[2]
-			}, {
 				label: "Remove",
-				action: urls[3]
+				action: urls[2]
 			}], {})
 	}
 

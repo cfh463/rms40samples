@@ -38,7 +38,7 @@ KitchenSink.Samples.Webview = KitchenSink.Samples.Webview || (function() {
 	}
 
 	function navigate() {
-	   Rho.WebView.navigate("/app/Webview/index");
+	   Rho.WebView.navigate("/app/Webview/set_properties");
 		
 	}
 

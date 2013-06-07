@@ -14,27 +14,27 @@ class NativeToolbarController < Rho::RhoController
   def create_toolbar
     Rho::NativeToolbar.create([{
       :label => "Home",
-      :action => url_for(Rho::Application.startURI)
+      :action => Rho::Application.startURI
       },
       {
-      :label => "Toolbar",
-      :action => url_for(:action => :toolbar_menu),
+      :label => "Show alert",
+      :action => "callback:#{url_for(:action => :show_alert)}"
       },
-      {
-      :label => "example.com",
-      :action => "http://www.example.com",
-      },      
       {
       :label => "Remove",
-      :action => url_for(:action => :remove_toolbar)
+      :action => "callback:#{url_for(:action => :remove_toolbar)}"
       }
     ], {})
     
     render :action => :toolbar_menu
   end
 
+  def show_alert
+    Alert.show_popup("This alert was invoked from a NativeToolbar button")
+  end
+  
   def remove_toolbar
     Rho::NativeToolbar.remove
-    render :action => :toolbar_menu
+    Rho::Webview.navigate(url_for(:action => :toolbar_menu))
   end
 end

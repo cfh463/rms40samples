@@ -27,15 +27,18 @@ class SignatureController < Rho::RhoController
       WebView.executeJavascript("updateSignature('#{signature}')")
     else
       # if we did not really capture a signature, there is nothing else to do here
-      WebView.navigate(url_for(:action => :index )) 
+      WebView.navigateBack
     end  
   end
   
   def set_properties           
     # Change background color from white (default) to black
     # Change pen color from blue (default) to white
-    Rho::Signature.takeFullScreen({:bgColor => "#000000", :penColor => "#FFFFFF"}, url_for(:action => :signature_callback))
+    Rho::Signature.takeFullScreen(@params, url_for(:action => :signature_callback))
     render :action => :show_signature  
+  end
+  
+  def edit_properties
   end
   
   def capture_inline

@@ -1,4 +1,4 @@
-KitchenSink.Samples.NativeTabbar = KitchenSink.Samples.NativeTabbar || (function() {
+KitchenSink.Samples.NativeTabbar = KitchenSink.Samples.NativeTabbar || (function(Rho) {
 
 	function getActionUrls() {
 		var links = $(".ui-page-active").find(".tabbarurls > a");
@@ -13,26 +13,28 @@ KitchenSink.Samples.NativeTabbar = KitchenSink.Samples.NativeTabbar || (function
 	function tabbarCallback(params) {
 		if (params["tabEvent"] == "onTabFocus") {
 			var newIndex = params["tab_index"];
-			
-			if (newIndex==3) {
-				removeTabbar();
-			} else {
-				var urls = getActionUrls();
-				Rho.WebView.navigate(urls[newIndex]);
-			}
+			alert("Switching to tab number "+newIndex);
 		}
 	}
 
 	function createTabbar() {
+		var actionUrls = getActionUrls();
+		// Actions are empty because we will use the callback to decide what to do when each button is selected
 		Rho.NativeTabbar.create([{
-				label: "Home"
+				label: "Home",
+				action: actionUrls[0]
 			}, {
-				label: "Tabbar"
+				label: "Tabbar",
+				action: actionUrls[1]
 			}, {
-				label: "example.com"
+				label: "example.com",
+				action: actionUrls[2]
 			}, {
-				label: "Remove"
-			}], {}, tabbarCallback);
+				label: "Remove",
+				action: actionUrls[3]
+			}], {
+				createOnDemand : true
+			}, tabbarCallback);
 	}
 
 	function switchTab() { 
@@ -49,4 +51,4 @@ KitchenSink.Samples.NativeTabbar = KitchenSink.Samples.NativeTabbar || (function
 		removeTabbar: removeTabbar
 	};
 
-})();
+})(Rho);

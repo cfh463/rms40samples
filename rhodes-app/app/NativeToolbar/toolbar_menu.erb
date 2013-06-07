@@ -18,10 +18,9 @@
     
     <div class="sample javascript">
 		<ul style="display:none" class="toolbarurls">
-			<li><a href="<%= url_for(Rho::Application.startURI) %>"/></li>
-			<li><a href="<%= url_for(:action => :toolbar_menu) %>"/></li>
-			<li><a href="http://example.com"/></li>
-			<li><a href="<%= url_for(:action => :remove_toolbar) %>"/></li>
+			<li><a href="<%= Rho::Application.startURI %>"/></li>
+			<li><a href="callback:<%= url_for(:action => :show_alert) %>"/></li>
+			<li><a href="callback:<%= url_for(:action => :remove_toolbar) %>"/></li>
 		</ul>
     	
 	  <a href="#" data-role="button" onclick="KitchenSink.Samples.NativeToolbar.createToolbar()">Create Toolbar</a>
