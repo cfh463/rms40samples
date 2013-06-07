@@ -22,6 +22,7 @@
 			<li><a href="<%= url_for(Rho::Application.startURI) %>"/></li>
 			<li><a href="<%= url_for(:action => :tabbar_menu) %>"/></li>
 			<li><a href="http://example.com"/></li>
+      <li><a href="<%= url_for(:action => :remove_tabbar) %>"/></li>
 		</ul>
     	
 	  <a href="#" data-role="button" onclick="KitchenSink.Samples.NativeTabbar.createTabbar()">Create Tabbar</a>

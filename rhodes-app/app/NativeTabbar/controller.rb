@@ -27,7 +27,9 @@ class NativeTabbarController < Rho::RhoController
       :label => "Remove",
       :action => url_for(:action => :remove_tabbar)
       }
-    ], {}, url_for(:action => :tabbar_callback))
+    ], {
+      :createOnDemand => true
+    }, url_for(:action => :tabbar_callback))
     
     render :action => :tabbar_menu
   end
