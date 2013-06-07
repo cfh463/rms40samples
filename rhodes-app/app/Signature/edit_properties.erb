@@ -13,6 +13,8 @@
     
     <div class="sample ruby">
       <form action ="<%= url_for(:action => :set_properties) %>">
+        <input type="submit" value="Take signature">
+        
         <div data-role="controlgroup">
           Background color
           <label><input type="radio" name="bgColor" value="FFFFFF" checked>White</label>
@@ -29,12 +31,28 @@
           <label><input type="radio" name="penColor" value="0000FF">Blue</label>        
         </div>
         
-        <input type="submit" value="Take signature">
+
       </form>
     </div>
     
     <div class="sample javascript">
-          <a href="#" data-role="button" onclick="KitchenSink.Samples.Network.network_availability()">Network Availability</a>    
+          <a href="#" data-role="button" onclick="KitchenSink.Samples.Signature.set_properties()">Take signature</a>
+          <img class="signature" src="">
+          <div data-role="controlgroup">
+            Background color
+            <label><input type="radio" name="bgColor" value="FFFFFF" checked>White</label>
+            <label><input type="radio" name="bgColor" value="000000">Black</label>
+            <label><input type="radio" name="bgColor" value="00FF00">Green</label>
+            <label><input type="radio" name="bgColor" value="0000FF">Blue</label>        
+          </div>
+          
+          <div data-role="controlgroup">
+            Pen color
+            <label><input type="radio" name="penColor" value="000000" checked>Black</label>          
+            <label><input type="radio" name="penColor" value="FFFFFF">White</label>
+            <label><input type="radio" name="penColor" value="00FF00">Green</label>
+            <label><input type="radio" name="penColor" value="0000FF">Blue</label>        
+          </div>
     </div>
     
     
