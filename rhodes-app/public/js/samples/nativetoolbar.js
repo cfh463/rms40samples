@@ -12,7 +12,6 @@ KitchenSink.Samples.NativeToolbar = KitchenSink.Samples.NativeToolbar || (functi
 
 	function createToolbar() {
 		var urls = getActionUrls();
-		alert(urls);
 		Rho.NativeToolbar.create([{
 				label: "Home",
 				action: urls[0]
