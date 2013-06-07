@@ -1,7 +1,7 @@
 KitchenSink.Samples.Screenorientation = KitchenSink.Samples.Screenorientation || (function() {
 
 	
-	function autoRotate() {
+	function toggle_autorotation() {
   	   Rho.ScreenOrientation.autoRotate=!Rho.ScreenOrientation.autoRotate;
 	   is_auto_rotate = Rho.ScreenOrientation.autoRotate;
 	   alert("Is Screen Autorotated:" + is_auto_rotate)
@@ -32,7 +32,7 @@ KitchenSink.Samples.Screenorientation = KitchenSink.Samples.Screenorientation ||
 	}
 	
 	return {
-		auto_rotate: auto_rotate,
+		toggle_autorotation: toggle_autorotation,
 		set_callback: set_callback,
 		upside_down: upside_down,
 		left_handed: left_handed,

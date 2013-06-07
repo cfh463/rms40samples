@@ -1,7 +1,12 @@
 KitchenSink.Samples.Barcode = KitchenSink.Samples.Barcode || (function() {
 
     function scan_received(params) {
-        
+    	if (params["status"]=="ok") {
+    		alert('Barcode scanning complete. Scanned barcode: '+params["barcode"]);
+    	} else {
+    		alert('Barcode scanning aborted');
+    	}
+    	Rho.Barcode.stop();
     }
     
     function scan_using_default_scanner() {
