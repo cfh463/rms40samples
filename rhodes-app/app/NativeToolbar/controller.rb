@@ -35,6 +35,6 @@ class NativeToolbarController < Rho::RhoController
   
   def remove_toolbar
     Rho::NativeToolbar.remove
-    Rh::Webview.navigate(url_for(:action => :toolbar_menu))
+    Rho::Webview.navigate(url_for(:action => :toolbar_menu))
   end
 end
