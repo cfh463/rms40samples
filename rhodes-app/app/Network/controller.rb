@@ -87,7 +87,7 @@ class NetworkController < Rho::RhoController
     # Download a file to the specified filename. Be careful with the overwriteFile parameter!
     downloadfileProps = Hash.new
     downloadfileProps["url"]='http://www.google.com/images/icons/product/chrome-48.png'
-    downloadfileProps["filename"] = Rho::Application.publicFolder+"/images/sample.png"
+    downloadfileProps["filename"] = Rho::RhoFile.join(Rho::Application.userFolder,"images","sample.png")
     downloadfileProps["overwriteFile"] = true
     Rho::Network.downloadFile(downloadfileProps, url_for(:action => :download_file_callback))
   end

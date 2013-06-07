@@ -36,7 +36,7 @@ class WebviewController < Rho::RhoController
   
   def navigate_page
     #Force WebView to navigate to a URL.
-    Rho::WebView.navigate(url_for(:action => :showrequest))
+    Rho::WebView.navigate(url_for(:action => :set_properties))
   end
   
   def refresh_page
