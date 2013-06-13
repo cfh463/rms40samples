@@ -1,5 +1,7 @@
 KitchenSink.Samples.Barcode = KitchenSink.Samples.Barcode || (function() {
 
+	var scanners;
+	
     function scan_received(params) {
     	if (params["status"]=="ok") {
     		alert('Barcode scanning complete. Scanned barcode: '+params["barcode"]);
@@ -13,9 +15,26 @@ KitchenSink.Samples.Barcode = KitchenSink.Samples.Barcode || (function() {
       Rho.Barcode.take({}, scan_received);
     }
 
+    function scan_using_chosen_scanner(scanner_index) {
+    	var scanner = scanners[scanner_index];
+    	scanner.take({}, scan_received);
+    }
+    
+    function enumerate_scanners() {
+    	scanners = Rho.Barcode.enumerate();
+    	
+    	var scanner_elements = "";
+    	
+    	for (var i=0; i<scanners.length; i++) {
+    		var scanner = scanners[i];
+    		scanner_elements+="<a href='#' data-role='button' onclick='KitchenSink.Samples.Barcode.scan_using_chosen_scanner("+i+")'>"+scanner.friendlyName+"</a>";
+    	}
+    	$(".ui-page-active .sample.javascript .scanner_list").html(scanner_elements).trigger("create");
+    }
+
     function _read_properties_from_form() {
     	var result={};
-    	$.mobile.activePage.find("form input[checked]").each(function() {
+    	$.mobile.activePage.find("form input[type=radio]:checked").each(function() {
     		var element = $(this);
     		result[element.attr('name')] = element.val();
     	});
@@ -26,6 +45,7 @@ KitchenSink.Samples.Barcode = KitchenSink.Samples.Barcode || (function() {
     function set_properties() {
       // assign properties
       var properties = _read_properties_from_form();
+      Rho.Log.info(properties, "Scanning properties");
       Rho.Barcode.aimMode = properties["aimMode"];
       Rho.Barcode.aimType = properties["aimType"];
       Rho.Barcode.beamWidth = properties["beamWidth"];
@@ -46,10 +66,19 @@ KitchenSink.Samples.Barcode = KitchenSink.Samples.Barcode || (function() {
     	this.scan_using_default_scanner();
     }
     
+    function update_scanner_result(message) {
+    	var element = $(".ui-page-active .scanner_result");
+    	alert(element);
+    	element.html(message);
+    }
+    
 	return {
 		scan_using_default_scanner : scan_using_default_scanner,
+		scan_using_chosen_scanner : scan_using_chosen_scanner,
+		enumerate_scanners : enumerate_scanners,
 		set_properties : set_properties,
-		set_audible_options : set_audible_options		
+		set_audible_options : set_audible_options,
+		update_scanner_result : update_scanner_result
 	};
 
 })();

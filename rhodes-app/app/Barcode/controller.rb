@@ -14,15 +14,16 @@ class BarcodeController < Rho::RhoController
   def scan_using_default_scanner
     # Scan with default options
     Rho::Barcode.take({}, url_for(:action => :scan_received_callback))
+    render :action => :awaiting_scanner_result      
   end
   
   def scan_received_callback
     # Did we actually find a barcode ?
     # If status is not 'ok', the scan was cancelled
     if @params["status"] == "ok"
-      Rho::Log.info(@params["barcode"],"Barcode result")
+      Rho::WebView.executeJavascript("KitchenSink.Samples.Barcode.update_scanner_result('Barcode found: #{@params["barcode"]}')")
     else
-      Rho::Log.info("Cancelled", "Barcode result")
+      Rho::WebView.executeJavascript("KitchenSink.Samples.Barcode.update_scanner_result('Barcode scan cancelled')")
     end
   end
   
@@ -32,8 +33,9 @@ class BarcodeController < Rho::RhoController
   end
     
   def scan_using_chosen_scanner
-    scanner = $scanners[@params[:scanner_index].to_i]
+    scanner = $scanners[@params["scanner_index"].to_i]
     scanner.take({}, url_for(:action => :scan_received_callback))
+    render :action => :awaiting_scanner_result
   end
   
   def set_symbology
@@ -43,7 +45,7 @@ class BarcodeController < Rho::RhoController
     # ... and enable only the one we are interested in:
     Rho::Barcode.upca = true
     # All other barcode symbologies will be ignored
-    Rho::Barcode.take({}, url_for(:action => :scan_received_callback))
+    scan_using_default_scanner      
   end
   
   def control_properties_sample
@@ -81,7 +83,7 @@ class BarcodeController < Rho::RhoController
     Rho::Barcode.aimType = @params["aimType"]
     Rho::Barcode.beamWidth = @params["beamWidth"]
 
-    redirect :action => scan_using_default_scanner
+    scan_using_default_scanner
   end
   
   def sample_change_audible_options
@@ -92,7 +94,7 @@ class BarcodeController < Rho::RhoController
     # One-second long
     Rho::Barcode.decodeDuration = 1000
     
-    Rho::Barcode.take({}, url_for(:action => :scan_received_callback))
+    scan_using_default_scanner
   end
   
   def set_audible_options
