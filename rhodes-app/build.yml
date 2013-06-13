@@ -1,25 +1,24 @@
----
-sdkversion: 4.0.0
-name: rhodes-app
+sdkversion: "4.0.0"
+name: "rhodes-app"
 version: 1.0
-vendor: rhomobile
-build: debug
+vendor: "rhomobile"
+build: "debug"
 bbver: 6.0
-applog: rholog.txt
+applog: "rholog.txt"
 iphone:
-  configuration: Release
-  sdk: iphonesimulator6.1
+  configuration: "Release"
+  sdk: "iphonesimulator6.1"
   provisionprofile: 
   codesignidentity: 
   entitlements: 
-  BundleIdentifier: com.rhomobile.rhodes-app
-  BundleURLScheme: rhodes-app
+  BundleIdentifier: "com.rhomobile.rhodes-app"
+  BundleURLScheme: "rhodes-app"
 wp:
-  productid: 689a2850-8ff7-0130-db8c-38f6b118e4ff
+  productid: "689a2850-8ff7-0130-db8c-38f6b118e4ff"
 symbian:
-  uid: '0xe8a1ed84'
+  uid: "0xe8a1ed84"
 android:
-  version: '2.1'
+  version: "2.1"
 extensions:
   - json
   - rho-javascript

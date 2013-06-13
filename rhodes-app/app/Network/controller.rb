@@ -147,6 +147,7 @@ class NetworkController < Rho::RhoController
     else
       Alert.show_popup "Posted Failed - #{@params['body']}"
     end
+    Rho::Log.info(@params, "callback results")    
   end
 
   def confirm_basic_auth
