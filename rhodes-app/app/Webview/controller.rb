@@ -47,7 +47,6 @@ class WebviewController < Rho::RhoController
   def refresh_page
     render
   end
-  
   def save
     # saves the current page
     # currently not working. Have to check why?
