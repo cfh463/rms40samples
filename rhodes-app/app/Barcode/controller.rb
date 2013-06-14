@@ -5,8 +5,7 @@ require 'helpers/browser_helper'
 
 class BarcodeController < Rho::RhoController
   include BrowserHelper
-  
-    
+
   def index
     render
   end
@@ -14,7 +13,7 @@ class BarcodeController < Rho::RhoController
   def scan_using_default_scanner
     # Scan with default options
     Rho::Barcode.take({}, url_for(:action => :scan_received_callback))
-    render :action => :awaiting_scanner_result      
+    redirect :action => :await_scanner_result      
   end
   
   def scan_received_callback
@@ -35,7 +34,7 @@ class BarcodeController < Rho::RhoController
   def scan_using_chosen_scanner
     scanner = $scanners[@params["scanner_index"].to_i]
     scanner.take({}, url_for(:action => :scan_received_callback))
-    render :action => :awaiting_scanner_result
+    redirect :action => :await_scanner_result
   end
   
   def set_symbology

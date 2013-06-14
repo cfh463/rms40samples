@@ -19,7 +19,6 @@ symbian:
   uid: "0xe8a1ed84"
 android:
   version: "2.1"
-  capabilities:
 extensions:
   - json
   - rho-javascript
