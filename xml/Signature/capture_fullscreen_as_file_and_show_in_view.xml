@@ -21,12 +21,12 @@
       # We must convert that relative filename to an absolute path in order to access the file. However, if the output format is
       # "dataUri", then imageUri will contain the image as a data URI we can assign directly to an img element
       signature = @params["imageUri"]
-        if signature.start_with?("data:image")
-          # substitute newline characters for their representation in a javascript call
-          signature.gsub!("\n","\\n")
-        else
-          signature = Rho::Application.expandDatabaseBlobFilePath(signature)
-        end
+      if signature.start_with?("data:image")
+        # substitute newline characters for their representation in a javascript call
+        signature.gsub!("\n","\\n")
+      else
+        signature = Rho::Application.expandDatabaseBlobFilePath(signature)
+      end
  
 
       # In our example, we will display the signature as soon as it is captured.
