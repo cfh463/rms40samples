@@ -69,7 +69,7 @@ class NetworkController < Rho::RhoController
     # Upload the specified file using HTTP POST.
     uploadfileProps = Hash.new
     uploadfileProps["url"] = "http://www.example.com"
-    uploadfileProps["filename"] = Rho::Application.publicFolder+"/images/backButton.png"
+    uploadfileProps["filename"] = Rho::RhoFile.Join(Rho::Application.publicFolder,"images","backButton.png")
     uploadfileProps["body"] = "uploading file"
     uploadfileProps["fileContentType"]="image/png"
     Rho::Network.uploadFile(uploadfileProps, url_for(:action => :upload_file_callback))
@@ -87,7 +87,7 @@ class NetworkController < Rho::RhoController
     # Download a file to the specified filename. Be careful with the overwriteFile parameter!
     downloadfileProps = Hash.new
     downloadfileProps["url"]='http://www.google.com/images/icons/product/chrome-48.png'
-    downloadfileProps["filename"] = Rho::File.join(Rho::Application.userFolder,"images","sample.png")
+    downloadfileProps["filename"] = Rho::RhoFile.join(Rho::Application.userFolder,"images","sample.png")
     downloadfileProps["overwriteFile"] = true
     Rho::Network.downloadFile(downloadfileProps, url_for(:action => :download_file_callback))
   end
