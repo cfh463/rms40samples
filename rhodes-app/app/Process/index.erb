@@ -1,19 +1,26 @@
 <div data-role="page">
 
-	<div data-role="header" data-position="inline">
-    <h1>Process sample</h1>
-    <a href="<%= Rho::RhoConfig.start_path %>" class="ui-btn-left" data-icon="home" data-direction="reverse" <%= "data-ajax='false'" if is_bb6 %>>
-      Home
-    </a>
-    <a href="<%= url_for :action => :new %>" class="ui-btn-right" data-icon="plus">
-      New
-    </a>
-	</div>
-
+  <%= render :partial => "/partials/page_head" %>
+    
   <div data-role="content">
-    <ul data-role="listview">
-     <li><a href="<%= url_for :controller => :Process, :action => :launch_external_app %>">launch external application</a>
-    </ul>
+  
+    <%= render :partial => "/partials/example_header", :locals => {:title => "Run external application", :description => "
+      You can execute a different application and (optionally) wait for it to finish      
+    " }
+    %>
+
+    <%= render :partial => "/partials/language_tabs" %>
+
+    <div class="sample ruby">
+      <a href="<%= url_for :action => :run_nonblocking %>" data-role="button">Run without waiting</a>
+      <a href="<%= url_for :action => :run_blocking %>" data-role="button">Run and wait</a>
+    </div>
+    
+    <div class="sample javascript">
+      <a href="#" data-role="button" onclick="KitchenSink.Samples.Process.run_nonblocking()">Run without waiting</a>
+      <a href="#" data-role="button" onclick="KitchenSink.Samples.Process.run_blocking()">Run and wait</a>
+    </div>
   </div>
+
 
 </div>
