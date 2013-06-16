@@ -24,6 +24,7 @@ extensions:
   - rho-javascript
   - barcode
   - signature
+  - mediaplayer
 capabilities:
   - camera
   - motorola_browser
