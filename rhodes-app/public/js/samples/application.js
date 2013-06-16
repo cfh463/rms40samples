@@ -29,7 +29,10 @@ KitchenSink.Samples.Application = KitchenSink.Samples.Application || (function()
 	}
 
 	function restore_app() {
-		Rho.Application.restore();
+		Rho.Application.minimize();
+		setTimeout(function() {
+			Rho.Application.restore();
+		}, 2000);
 	}
 	
 	return {

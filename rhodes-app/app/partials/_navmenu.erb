@@ -94,6 +94,14 @@
     </div>
 
     
+    <div data-role="collapsible"  data-filter="sound mediaplayer ringtone mp3 wav audio">
+      <h3>Mediaplayer</h3>
+      
+      <ul data-role="listview" data-inset="true">
+         <li><a href="<%= url_for :controller => :Mediaplayer, :action => :list_ringtones %>">Play ringtones</a></li>
+      </ul>
+    </div>
+    
     <div data-role="collapsible"  data-filter="nativetabbar tabbar tab bar">
       <h3>Native Tabbar</h3>
 
@@ -129,7 +137,7 @@
         <li><a href="<%= url_for :controller => :Network, :action => :confirm_detect_network_events %>">Detect network events</a></li>
         <li><a href="<%= url_for :controller => :Network, :action => :upload %>">Upload file</a></li>
         <li><a href="<%= url_for :controller => :Network, :action => :download %>">Download file</a></li>
-        <li><a href="#">Using http headers and verbs</a></li>
+        <li><a href="<%= url_for :controller => :Network, :action => :headers_and_verbs %>">Using http headers and verbs</a></li>
         <li><a href="<%= url_for :controller => :Network, :action => :confirm_basic_auth %>">Basic authentication</a></li>      
       </ul>
     </div>
@@ -173,7 +181,7 @@
       <ul data-role="listview" data-inset="true">
         <li><a href="<%= url_for :controller => :Signature, :action => :edit_properties %>">Set capture properties</a></li>
         <li><a href="#">Capture to file</a></li>
-        <li><a href="#">Capture to dataURI</a></li>
+        <li><a href="<%= url_for :controller => :Signature, :action => :capture_datauri %>">Capture to dataURI</a></li>
         <li><a href="<%= url_for :controller => :Signature, :action => :capture_fullscreen %>">Capture full-screen</a></li>
         <li><a href="<%= url_for :controller => :Signature, :action => :capture_inline %>">Capture in a window (responsive)</a></li>
         <li><a href="#">Change orientation before / after capture</a></li>
