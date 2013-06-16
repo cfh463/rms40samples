@@ -42,6 +42,7 @@ class WebviewController < Rho::RhoController
   def refresh
     # call to refresh the current page.
     Rho::WebView.refresh()
+    redirect :action => :refresh_page
   end
   
   def refresh_page
