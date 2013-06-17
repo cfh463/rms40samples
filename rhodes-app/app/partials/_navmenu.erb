@@ -77,6 +77,14 @@
          <li><a href="<%= url_for :controller => :File, :action => :browse_filesystem %>">Browse filesystem</a></li>
       </ul>
     </div>
+    
+    <div data-role="collapsible"  data-filter="keycapture keyboard">
+      <h3>Keycapture</h3>
+      
+      <ul data-role="listview" data-inset="true">
+         <li><a href="<%= url_for :controller => :Keycapture, :action => :index %>">Capture hardware keys</a></li>
+      </ul>
+    </div>
 
     <div data-role="collapsible"  data-filter="keystate keyboard shift alt control ctrl fn function caps lock num orange">
       <h3>Keystate</h3>
