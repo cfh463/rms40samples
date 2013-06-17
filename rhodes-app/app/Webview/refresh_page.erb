@@ -12,11 +12,11 @@
     <%= render :partial => "/partials/language_tabs" %>
     
     <div class="sample ruby">
-      <li><a href="<%= url_for :action => :refresh %>">Refresh the page</a></li>  
+      <a data-role="button" href="<%= url_for :action => :refresh %>">Refresh the page</a></li>  
     </div>
     
     <div class="sample javascript">
-          <a href="#" data-role="button" onclick="KitchenSink.Samples.Webview.refresh()">Refresh the page</a>    
+      <a href="#" data-role="button" onclick="KitchenSink.Samples.Webview.refresh()">Refresh the page</a>    
     </div>
     
     

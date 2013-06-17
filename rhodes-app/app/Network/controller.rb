@@ -69,7 +69,7 @@ class NetworkController < Rho::RhoController
     # Upload the specified file using HTTP POST.
     uploadfileProps = Hash.new
     uploadfileProps["url"] = "http://www.example.com"
-    uploadfileProps["filename"] = Rho::Application.publicFolder+"/images/backButton.png"
+    uploadfileProps["filename"] = Rho::RhoFile.Join(Rho::Application.publicFolder,"images","backButton.png")
     uploadfileProps["body"] = "uploading file"
     uploadfileProps["fileContentType"]="image/png"
     Rho::Network.uploadFile(uploadfileProps, url_for(:action => :upload_file_callback))
@@ -147,6 +147,7 @@ class NetworkController < Rho::RhoController
     else
       Alert.show_popup "Posted Failed - #{@params['body']}"
     end
+    Rho::Log.info(@params, "callback results")    
   end
 
   def confirm_basic_auth

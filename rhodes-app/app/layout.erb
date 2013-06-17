@@ -45,7 +45,12 @@
                 // Rhodes custom option!
                 // how long to wait transition end before "loading.." message will be shown
                 $.mobile.loadingMessageDelay = 300; // in ms
-                $.mobile.defaultPageTransition = 'slidefade';
+                <% if Rho::System.platform == "WINDOWS" %>
+                  $.mobile.defaultPageTransition = 'none';
+                <% else %>
+                  $.mobile.defaultPageTransition = 'slidefade';
+                <% end %>
+                
                 // Uncomment these options in case of performance problem in pages transition
                 //$.mobile.defaultPageTransition = 'none';
                 //$.mobile.defaultDialogTransition = 'none';
@@ -62,6 +67,8 @@
         <script type="text/javascript" src="/public/js/samples/camera.js"></script>
         <script type="text/javascript" src="/public/js/samples/database.js"></script>
         <script type="text/javascript" src="/public/js/samples/file.js"></script>
+        <script type="text/javascript" src="/public/js/samples/keycapture.js"></script>
+        <script type="text/javascript" src="/public/js/samples/keystate.js"></script>
         <script type="text/javascript" src="/public/js/samples/log.js"></script>
         <script type="text/javascript" src="/public/js/samples/nativetabbar.js"></script>
         <script type="text/javascript" src="/public/js/samples/nativetoolbar.js"></script>

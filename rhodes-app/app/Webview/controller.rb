@@ -39,11 +39,15 @@ class WebviewController < Rho::RhoController
     Rho::WebView.navigate(url_for(:action => :set_properties))
   end
   
-  def refresh_page
+  def refresh
     # call to refresh the current page.
     Rho::WebView.refresh()
+    redirect :action => :refresh_page
   end
   
+  def refresh_page
+    render
+  end
   def save
     # saves the current page
     # currently not working. Have to check why?

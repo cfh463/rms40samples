@@ -35,6 +35,9 @@ class ApplicationController < Rho::RhoController
   end
   
   def restore_app
+    Rho::Application.minimize
+    sleep(2)
   	Rho::Application.restore
+  	render :action => :confirm_restore_app
   end
 end

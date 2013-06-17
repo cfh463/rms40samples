@@ -1,0 +1,44 @@
+<EXAMPLES >
+           <EXAMPLE title="Capture all hardware keypresses">
+            <SECTIONS>
+               
+              <SECTION>
+               <DESC>
+                   The KeyCapture API lets you intercept hardware keypresses and react on them. You can choose which keys to capture and whether to pass them on to the application after your callback completes
+               </DESC>
+               <CODE>
+                <RUBY>
+           <![CDATA[
+def keycapture_callback(params)
+  Alert.show_popup("Received card reader data: #{@params["keyValue"]}")
+end
+
+def start_keycapture
+  Rho::KeyCapture.captureKey(false,"ALL", url_for(:action => :keycapture_callback))
+end
+  
+def stop_keycapture
+  Rho::KeyCapture.captureKey(false,"ALL", nil)
+end
+                   ]]>
+                 </RUBY>
+                <JAVASCRIPT>
+           <![CDATA[
+function start_keycapture() {
+	Rho.KeyCapture.captureKey(false,"ALL",keycapture_callback);
+}
+
+function stop_keycapture() {
+	Rho.KeyCapture.captureKey(false,"ALL",null);
+}
+  
+function keycapture_callback(params) {
+	Alert("Captured key: "+params["keyValue"]);
+}
+                   ]]>
+                 </JAVASCRIPT>
+               </CODE>
+               </SECTION>
+               </SECTIONS>
+           </EXAMPLE>
+       </EXAMPLES>

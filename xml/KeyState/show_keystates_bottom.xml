@@ -1,0 +1,49 @@
+<EXAMPLES >
+           <EXAMPLE title="Show Keystate at the top of the screen">
+            <SECTIONS>
+               
+              <SECTION>
+               <DESC>
+                   Show the keystates at the bottom of the screen
+               </DESC>
+               <CODE>
+                <RUBY>
+           <![CDATA[
+def show_keystates_bottom
+  margin = 10
+  height = 20
+  width = 20
+  right = Rho::System.screenWidth - margin
+        
+  Rho::KeyState.showStates( {
+    :top => Rho::System.screenHeight - margin - height,
+    :right => right,
+    :width => width,
+    :height => height
+  }) 
+end
+                   ]]>
+                 </RUBY>
+                <JAVASCRIPT>
+           <![CDATA[
+	  function show_keystates_bottom() {
+	    var margin = 10;
+	    var height = 20;
+	    var width = 20;
+	    var right = Rho.System.screenWidth - margin;
+	        
+	    Rho.Keystate.showStates( {
+	      top : Rho.System.screenHeight - margin - height,
+	      right : right,
+	      width : width,
+	      height : height
+	    }); 
+	  }
+
+                   ]]>
+                 </JAVASCRIPT>
+               </CODE>
+               </SECTION>
+               </SECTIONS>
+           </EXAMPLE>
+       </EXAMPLES>

@@ -6,6 +6,7 @@ sim-*
 # build output
 bin/
 public/api/generated/
+public/api/rhoapi-modules.js
 
 # simulator
 rhosimulator/

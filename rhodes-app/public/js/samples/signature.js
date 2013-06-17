@@ -4,8 +4,7 @@ KitchenSink.Samples.Signature = KitchenSink.Samples.Signature || (function() {
 
 		if (params["status"] == "ok") {
 			alert("Signature captured");
-			var signature_area = $(".ui-page-active .sample.javascript img.signature");
-			$(signature_area).attr("src", Rho.Application.expandDatabaseBlobFilePath(params["imageUri"]));
+			update_signature(Rho.Application.expandDatabaseBlobFilePath(params["imageUri"]));
 		} else {
 			alert("Signature capture cancelled");
 		}
@@ -23,8 +22,13 @@ KitchenSink.Samples.Signature = KitchenSink.Samples.Signature || (function() {
 		Rho.Signature.takeFullScreen(properties, signature_callback);
 	}
 	
+    function update_signature(signature) {
+        $("#signature-image").attr('src',signature);
+      }
+
 	return {
-		set_properties : set_properties
+		set_properties : set_properties,
+		update_signature : update_signature
 	};
 
 })();

@@ -14,18 +14,28 @@ class SignatureController < Rho::RhoController
   end
 
   def signature_callback
+    Rho::Log.info("Signature callback received", "Signature example")
     # If status is not 'ok', the capture was cancelled
     if @params['status'] == 'ok'
-    
+      Rho::Log.info("Signature was captured: #{@params["imageUri"]}", "Signature example")
       # By default, the output format is "image", so the imageUri parameter will contain the relative filename of an image
-      # We must convert that relative filename to an absolute path in order to access the file
-      signature = Rho::Application.expandDatabaseBlobFilePath(@params["imageUri"])
+      # We must convert that relative filename to an absolute path in order to access the file. However, if the output format is
+      # "dataUri", then imageUri will contain the image as a data URI we can assign directly to an img element
+      signature = @params["imageUri"]
+        if signature.start_with?("data:image")
+          # substitute newline characters for their representation in a javascript call
+          signature.gsub!("\n","\\n")
+        else
+          signature = Rho::Application.expandDatabaseBlobFilePath(signature)
+        end
+ 
 
       # In our example, we will display the signature as soon as it is captured.
       # We have a javascript function in our page to set the src attribute of an img element and we will call it now
       # 
-      WebView.executeJavascript("updateSignature('#{signature}')")
+      WebView.executeJavascript("KitchenSink.Samples.Signature.update_signature('#{signature}')")
     else
+      Rho::Log.info("Signature capture was cancelled", "Signature example")
       # if we did not really capture a signature, there is nothing else to do here
       WebView.navigateBack
     end  
@@ -53,7 +63,7 @@ class SignatureController < Rho::RhoController
 #    render :action => :show_signature
   end
 
-  def capture_as_datauri
+  def capture_datauri
     # Ask for a DataURI repesentation of the image instead of a file
     Rho::Signature.takeFullScreen({:outputFormat => "dataUri"}, url_for(:action => :signature_callback))
           
