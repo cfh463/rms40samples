@@ -69,7 +69,7 @@ class NetworkController < Rho::RhoController
     # Upload the specified file using HTTP POST.
     uploadfileProps = Hash.new
     uploadfileProps["url"] = "http://www.example.com"
-    uploadfileProps["filename"] = Rho::RhoFile.Join(Rho::Application.publicFolder,"images","backButton.png")
+    uploadfileProps["filename"] = Rho::RhoFile.join(Rho::Application.publicFolder,"images","backButton.png")
     uploadfileProps["body"] = "uploading file"
     uploadfileProps["fileContentType"]="image/png"
     Rho::Network.uploadFile(uploadfileProps, url_for(:action => :upload_file_callback))

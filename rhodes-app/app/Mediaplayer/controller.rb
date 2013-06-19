@@ -17,7 +17,7 @@ class MediaplayerController < Rho::RhoController
   def mediaplayer_callback
    @ringtones = @params
    @ringtones = [] if @ringtones.nil?
-   Webview.navigate(url_for(:action => :all_ringtones,:query => { :ringtones => @ringtones }))
+   Rho::WebView.navigate(url_for(:action => :all_ringtones,:query => { :ringtones => @ringtones }))
   end
   
   def all_ringtones
