@@ -21,6 +21,17 @@ class VideocaptureController < Rho::RhoController
     puts "Result is #{@params['transferResult']}"
     puts "Name is #{@params['fileName']}"       
     puts "Size is #{@params['size']}" 
+    render :action => :index
+  end
+  
+  def capture_video_with_resolution
+    Rho::Videocapture.fileName = '/RhoVideoCapture'
+    Rho::Videocapture.resolution = @params['resolution']
+    Rho::Videocapture.duration = 10000
+    Rho::Videocapture.start(url_for(:action => :resolution_callback))
   end
 
+  def resolution_callback
+    render :action => :select_resolution
+  end
 end
