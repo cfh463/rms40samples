@@ -30,6 +30,6 @@ class VideocaptureController < Rho::RhoController
     Rho::Videocapture.resolution = @params['resolution']
     Rho::Videocapture.duration = 60000
     Rho::Videocapture.start(url_for(:action => :save_captured_video))
-    redirect :select_resoluation
+    redirect :select_resolution
   end
 end
