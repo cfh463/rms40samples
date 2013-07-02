@@ -64,7 +64,7 @@
         <li><a href="<%= url_for :controller => :Database, :action => :initdb %>">Init DB</a></li>    
         <li><a href="#">Import</a></li>
         <li><a href="#">Export</a></li>
-        <li><a href="#">Seed</a></li>
+        <li><a href="<%= url_for :controller => :Database, :action => :seed_db%>">Seed</a></li>
         <li><a href="<%= url_for :controller => :Database, :action => :transactions %>">Transactions</a></li>
       </ul>
     </div>

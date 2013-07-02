@@ -56,4 +56,26 @@ class DatabaseController < Rho::RhoController
     Rho::Database.commit
     
   end
+
+  def seed_db
+    render
+  end 
+
+  def seeddb
+    if !Rho::Database.isTableExist('Product')
+      Rho::Database.executeSQL("Create table Products (product_id integer, active integer)")
+    end
+    Rho::Database.executeSQL("Insert into products (product_id,active) values (0,1)")
+    Rho::Database.executeSQL("Insert into products (product_id,active) values (1,1)")
+    Rho::Database.executeSQL("Insert into products (product_id,active) values (2,1)")
+    Rho::Database.executeSQL("Insert into products (product_id,active) values (3,1)")
+    Rho::Database.executeSQL("Insert into products (product_id,active) values (4,1)")
+    Rho::Database.executeSQL("Insert into products (product_id,active) values (5,1)")
+    Rho::Database.executeSQL("Insert into products (product_id,active) values (6,1)")
+    Rho::Database.executeSQL("Insert into products (product_id,active) values (7,1)")
+    Rho::Database.executeSQL("Insert into products (product_id,active) values (8,1)")
+    Rho::Database.executeSQL("Insert into products (product_id,active) values (9,1)")
+    Rho::Database.executeSQL("Insert into products (product_id,active) values (10,1)")
+    redirect :seed_db
+  end
 end
