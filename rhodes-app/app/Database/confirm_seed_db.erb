@@ -14,13 +14,11 @@
     <%= render :partial => "/partials/language_tabs" %>
     
     <div class="sample ruby">
-      <ul>
-      <li><a href="<%= url_for :action => :seeddb %>" data-role="button">Seed DB</a></li>    
-      </ul>
+      <a href="<%= url_for :action => :seed_db %>" data-role="button">Seed DB</a>
     </div>
     
     <div class="sample javascript">
-          <a href="#" data-role="button" onclick="">Seed DB - Not yet Implemented</a>
+          <a href="#" data-role="button" onclick="KitchenSink.Samples.Database.seed_db()">Seed DB</a>
     </div>
   </div>   
 </div>
