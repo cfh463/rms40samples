@@ -75,7 +75,31 @@ class DatabaseController < Rho::RhoController
     Rho::Database.executeSQL("Insert into products (product_id,active) values (7,1)")
     Rho::Database.executeSQL("Insert into products (product_id,active) values (8,1)")
     Rho::Database.executeSQL("Insert into products (product_id,active) values (9,1)")
-    Rho::Database.executeSQL("Insert into products (product_id,active) values (10,1)")
+    Alert.show_popup "Seed"
     redirect :seed_db
+  end
+
+  def export_db
+    render
+  end
+
+  def exportdb 
+   #export database
+   exportPath = Rho::Database.export('user')
+   Alert.show_popup "Export path - #{exportPath}"
+   redirect :export_db
+  end
+
+  def import_db
+    render
+  end
+
+  def importdb
+    #export database
+    exportPath = Rho::Database.export('user')
+    #import database
+    Rho::Database.database_import('user',exportPath)
+    Alert.show_popup "Database Import Succeeded"
+    redirect :import_db
   end
 end
