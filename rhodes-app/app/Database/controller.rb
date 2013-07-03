@@ -75,7 +75,7 @@ class DatabaseController < Rho::RhoController
     Rho::Database.executeSQL("Insert into products (product_id,active) values (7,1)")
     Rho::Database.executeSQL("Insert into products (product_id,active) values (8,1)")
     Rho::Database.executeSQL("Insert into products (product_id,active) values (9,1)")
-    Alert.show_popup "Seed"
+    Alert.show_popup "Seed Succeeded"
     redirect :seed_db
   end
 
