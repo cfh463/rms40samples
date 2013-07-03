@@ -46,10 +46,10 @@ class DatabaseController < Rho::RhoController
     
     # Execute updates - we can issue multiple SQL commands within the same transaction
     
-    db.executeSql("Update users_sample set active = 0 where user_id = 2")
-    db.executeSql("Update users_sample set active = 0 where user_id = 3")
-    db.executeSql("Update users_sample set active = 0 where user_id = 4")
-    db.executeSql("Update users_sample set active = 0 where user_id = 5")
+    db.executeSql("Update users_sample set active = 0 where user_id = ?", [2])
+    db.executeSql("Update users_sample set active = 0 where user_id = ?", [3])
+    db.executeSql("Update users_sample set active = 0 where user_id = ?", [4])
+    db.executeSql("Update users_sample set active = 0 where user_id = ?", [5])
     
     # This is the point of no return. After commitTransaction is called, all the updates will become permanent
     db.commitTransaction
@@ -73,25 +73,22 @@ class DatabaseController < Rho::RhoController
     db = open_db
     db.executeSql("Drop table if exists users_sample")
     db.executeSql("Create table users_sample (user_id integer, active integer)")
+    
+    # one way to execute inserts is to simply have a hardcoded SQL command
     db.executeSql("Insert into users_sample (user_id,active) values (0,1)")
-    db.executeSql("Insert into users_sample (user_id,active) values (1,1)")
-    db.executeSql("Insert into users_sample (user_id,active) values (2,1)")
-    db.executeSql("Insert into users_sample (user_id,active) values (3,1)")
-    db.executeSql("Insert into users_sample (user_id,active) values (4,1)")
-    db.executeSql("Insert into users_sample (user_id,active) values (5,1)")
 
-    db.executeSql("Drop table if exists products")
-    db.executeSql("Create table products (product_id integer, active integer)")    
-    db.executeSql("Insert into products (product_id,active) values (0,1)")
-    db.executeSql("Insert into products (product_id,active) values (1,1)")
-    db.executeSql("Insert into products (product_id,active) values (2,1)")
-    db.executeSql("Insert into products (product_id,active) values (3,1)")
-    db.executeSql("Insert into products (product_id,active) values (4,1)")
-    db.executeSql("Insert into products (product_id,active) values (5,1)")
-    db.executeSql("Insert into products (product_id,active) values (6,1)")
-    db.executeSql("Insert into products (product_id,active) values (7,1)")
-    db.executeSql("Insert into products (product_id,active) values (8,1)")
-    db.executeSql("Insert into products (product_id,active) values (9,1)")
+    # the other is to use parameters. Use this style if your data is dynamic, never use string interpolation in SQL
+    db.executeSql("Insert into users_sample (user_id,active) values (?,?)",[1,1])
+    db.executeSql("Insert into users_sample (user_id,active) values (?,?)",[2,1])
+    db.executeSql("Insert into users_sample (user_id,active) values (?,?)",[3,1])
+    db.executeSql("Insert into users_sample (user_id,active) values (?,?)",[4,1])
+    db.executeSql("Insert into users_sample (user_id,active) values (?,?)",[5,1])
+
+    # we could have written the above more succintly using a block
+    (6..9).each do |user_id|
+      db.executeSql("Insert into users_sample (user_id,active) values (?,1)",[user_id])
+    end
+    
     Alert.show_popup "Seed Succeeded"
     redirect :confirm_seed_db
   end

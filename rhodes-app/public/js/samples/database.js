@@ -29,29 +29,20 @@ KitchenSink.Samples.Database = KitchenSink.Samples.Database || (function() {
 	
 	function seed_db() {
 		var db = open_db();
-
+		// Erase old table if present
 	    db.executeSql("Drop table if exists users_sample");
 	    db.executeSql("Create table users_sample (user_id integer, active integer)");
 	    db.executeSql("Insert into users_sample (user_id,active) values (0,1)");
-	    db.executeSql("Insert into users_sample (user_id,active) values (1,1)");
-	    db.executeSql("Insert into users_sample (user_id,active) values (2,1)");
-	    db.executeSql("Insert into users_sample (user_id,active) values (3,1)");
-	    db.executeSql("Insert into users_sample (user_id,active) values (4,1)");
-	    db.executeSql("Insert into users_sample (user_id,active) values (5,1)");
-
-	    db.executeSql("Drop table if exists products");
-	    db.executeSql("Create table products (product_id integer, active integer)");    
-	    db.executeSql("Insert into products (product_id,active) values (0,1)");
-	    db.executeSql("Insert into products (product_id,active) values (1,1)");
-	    db.executeSql("Insert into products (product_id,active) values (2,1)");
-	    db.executeSql("Insert into products (product_id,active) values (3,1)");
-	    db.executeSql("Insert into products (product_id,active) values (4,1)");
-	    db.executeSql("Insert into products (product_id,active) values (5,1)");
-	    db.executeSql("Insert into products (product_id,active) values (6,1)");
-	    db.executeSql("Insert into products (product_id,active) values (7,1)");
-	    db.executeSql("Insert into products (product_id,active) values (8,1)");
-	    db.executeSql("Insert into products (product_id,active) values (9,1)");
 	    
+	    db.executeSql("Insert into users_sample (user_id,active) values (?,?)",[1,1]);
+	    db.executeSql("Insert into users_sample (user_id,active) values (?,?)",[2,1]);
+	    db.executeSql("Insert into users_sample (user_id,active) values (?,?)",[3,1]);
+	    db.executeSql("Insert into users_sample (user_id,active) values (?,?)",[4,1]);
+	    db.executeSql("Insert into users_sample (user_id,active) values (?,?)",[5,1]);
+	    
+	    for (var i=6; i<10; i++) {
+	    	db.executeSql("Insert into users_sample (user_id,active) values (?,?)",[i,1]);
+	    }
 		db.close();
 		
 		alert("Database seeded successfully");
@@ -65,7 +56,7 @@ KitchenSink.Samples.Database = KitchenSink.Samples.Database || (function() {
 	    db.startTransaction();
 	    
 	    // Execute updates
-	    db.executeSql("Delete from users_sample where active = 1");
+	    db.executeSql("Delete from users_sample where active = ?",[1]);
 	    
 	    // Uh oh... maybe we should not really do that after all. Let's rollback the transaction
 	    db.rollbackTransaction();
@@ -79,10 +70,10 @@ KitchenSink.Samples.Database = KitchenSink.Samples.Database || (function() {
 	    
 	    // Execute updates - we can issue multiple SQL commands within the same transaction
 	    
-	    db.executeSql("Update users_sample set active = 0 where user_id = 2");
-	    db.executeSql("Update users_sample set active = 0 where user_id = 3");
-	    db.executeSql("Update users_sample set active = 0 where user_id = 4");
-	    db.executeSql("Update users_sample set active = 0 where user_id = 5");
+	    db.executeSql("Update users_sample set active = 0 where user_id = ?",[2]);
+	    db.executeSql("Update users_sample set active = 0 where user_id = ?",[3]);
+	    db.executeSql("Update users_sample set active = 0 where user_id = ?",[4]);
+	    db.executeSql("Update users_sample set active = 0 where user_id = ?",[5]);
 	    
 	    // This is the point of no return. After commitTransaction is called, all the updates will become permanent
 	    db.commitTransaction();
