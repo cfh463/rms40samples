@@ -12,7 +12,7 @@ class CameraController < Rho::RhoController
   
   def take_picture_with_default_camera
     # Capture an image from the default camera on the device, using the default image settings
-    Rho::Camera.take_picture({}, :picture_taken_callback)
+    Rho::Camera.takePicture({}, :picture_taken_callback)
   end
   
   def picture_taken_callback

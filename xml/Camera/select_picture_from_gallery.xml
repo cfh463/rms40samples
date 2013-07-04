@@ -10,7 +10,7 @@
                 <RUBY>
            <![CDATA[
 def select_picture_from_gallery 
-  Rho::Camera.choose_picture({}, url_for(:action => :picture_taken_callback))
+  Rho::Camera.choosePicture({}, url_for(:action => :picture_taken_callback))
 end
 
 def picture_taken_callback
@@ -28,7 +28,7 @@ end
                 <JAVASCRIPT>
            <![CDATA[
 function select_picture_from_gallery() {
-  Rho.Camera.choose_picture({}, picture_taken_callback);
+  Rho.Camera.choosePicture({}, picture_taken_callback);
 }
 
 function picture_taken_callback(params) {

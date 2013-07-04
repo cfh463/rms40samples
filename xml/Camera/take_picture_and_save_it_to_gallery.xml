@@ -10,7 +10,7 @@
                 <RUBY>
            <![CDATA[
 def take_picture_and_save_it_to_gallery
-  Rho::Camera.choose_picture({}, url_for(:action => :picture_taken_callback_save_to_gallery))    
+  Rho::Camera.choosePicture({}, url_for(:action => :picture_taken_callback_save_to_gallery))    
 end
   
 def picture_taken_callback_save_to_gallery
@@ -28,7 +28,7 @@ end
                 <JAVASCRIPT>
            <![CDATA[
 function take_picture_and_save_it_to_gallery() {
-  Rho.Camera.choose_picture({}, picture_taken_callback_save_to_gallery);
+  Rho.Camera.choosePicture({}, picture_taken_callback_save_to_gallery);
 }
 
 function picture_taken_callback_save_to_gallery(params) {

@@ -23,7 +23,7 @@ def control_image_properties
   Rho::Camera.flashMode = "on"
     
   # Now, take the picture
-  Rho::Camera.take_picture({}, :picture_taken_callback)    
+  Rho::Camera.takePicture({}, :picture_taken_callback)    
 end
 
 def picture_taken_callback
@@ -54,7 +54,7 @@ function control_image_properties() {
   Rho.Camera.flashMode = "on";
   
   // Now, take the picture
-  Rho.Camera.take_picture({}, picture_taken_callback);      
+  Rho.Camera.takePicture({}, picture_taken_callback);      
 }
 
 function picture_taken_callback(params) {
