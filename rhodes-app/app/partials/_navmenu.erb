@@ -61,11 +61,11 @@
       <h3>Database</h3>
       
       <ul data-role="listview" data-inset="true">
-        <li><a href="<%= url_for :controller => :Database, :action => :initdb %>">Init DB</a></li>    
-        <li><a href="#">Import</a></li>
-        <li><a href="#">Export</a></li>
-        <li><a href="#">Seed</a></li>
-        <li><a href="<%= url_for :controller => :Database, :action => :transactions %>">Transactions</a></li>
+        <li><a href="<%= url_for :controller => :Database, :action => :confirm_init_db %>">Init DB</a></li>
+        <li><a href="<%= url_for :controller => :Database, :action => :confirm_export_db %>">Export</a></li>    
+        <li><a href="<%= url_for :controller => :Database, :action => :confirm_import_db %>">Import</a></li>
+        <li><a href="<%= url_for :controller => :Database, :action => :confirm_seed_db %>">Seed</a></li>
+        <li><a href="<%= url_for :controller => :Database, :action => :confirm_transactions %>">Transactions</a></li>
       </ul>
     </div>
 

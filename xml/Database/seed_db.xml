@@ -1,0 +1,45 @@
+<EXAMPLES >
+           <EXAMPLE title="Seed database">
+               <SECTIONS>
+               <SECTION>
+               <DESC>
+					There may be times when you need to insert rows directly into the database, possibly the first time the application starts, or if you save data received from a source other than a RhoConnect server. There two ways to insert data
+               </DESC>
+               <CODE>
+               <RUBY>
+           <![CDATA[
+db = Rho::Database.new(Rho::Application.databaseFilePath("sample"),"sample")
+# Erase old table if present
+db.executeSql("Drop table if exists users_sample")
+db.executeSql("Create table users_sample (user_id integer, active integer)")
+
+# Method #1 of inserting data: simple SQL statements. This is discouraged unless your data is hardcoded and bundled with the application
+db.executeSql("Insert into users_sample (user_id,active) values (0,1)")
+
+# Method #2: similar to the above, but using parameters for the values. Always use this format for inserts where the data to insert is not known at compile time, do not build SQL statements with string interpolation as this can lead to errors or even SQL injection attacks
+db.executeSql("Insert into users_sample (user_id,active) values (?,?)", [1,1])
+
+db.close
+]]>
+				</RUBY>
+				<JAVASCRIPT>
+		           <![CDATA[
+var db = new Rho.Database(Rho.Application.databaseFilePath('sample'), 'sample');
+// Erase old table if present
+db.executeSql("Drop table if exists users_sample");
+db.executeSql("Create table users_sample (user_id integer, active integer)");
+
+// Method #1 of inserting data: simple SQL statements. This is discouraged unless your data is hardcoded and bundled with the application
+db.executeSql("Insert into users_sample (user_id,active) values (0,1)");
+// Method #2: similar to the above, but using parameters for the values. Always use this format for inserts where the data to insert is not known at compile time, do not build SQL statements with string interpolation as this can lead to errors or even SQL injection attacks
+db.executeSql("Insert into users_sample (user_id,active) values (?,?)",[1,1]);
+
+db.close();
+]]>
+				</JAVASCRIPT>
+								
+               </CODE>
+               </SECTION>
+               </SECTIONS>
+           </EXAMPLE>
+       </EXAMPLES>
