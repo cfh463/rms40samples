@@ -12,12 +12,12 @@ KitchenSink.Samples.Camera = KitchenSink.Samples.Camera || (function($) {
     
     function take_picture_with_default_camera() {
       // Capture an image from the default camera on the device, using the default image settings
-      Rho.Camera.take_picture({}, picture_taken_callback);
+      Rho.Camera.takePicture({}, picture_taken_callback);
     }
 
     function take_picture_with_camera(cameraIndex) {
       var camera = cameras[cameraIndex];
-      camera.take_picture({}, picture_taken_callback);
+      camera.takePicture({}, picture_taken_callback);
     }
     
     function choose_camera() {
@@ -70,11 +70,11 @@ KitchenSink.Samples.Camera = KitchenSink.Samples.Camera || (function($) {
       Rho.Camera.flashMode = "on";
       
       // Now, take the picture
-      Rho.Camera.take_picture({}, picture_taken_callback);   
+      Rho.Camera.takePicture({}, picture_taken_callback);   
     }
     
     function select_picture_from_gallery() {
-      Rho.Camera.choose_picture({}, picture_taken_callback);
+      Rho.Camera.choosePicture({}, picture_taken_callback);
     }
     
     function picture_taken_callback_save_to_gallery(params) {
@@ -86,7 +86,7 @@ KitchenSink.Samples.Camera = KitchenSink.Samples.Camera || (function($) {
     }
     
     function take_picture_and_save_it_to_gallery() {
-      Rho.Camera.choose_picture({}, picture_taken_callback_save_to_gallery);
+      Rho.Camera.choosePicture({}, picture_taken_callback_save_to_gallery);
     }
     	
 	return {

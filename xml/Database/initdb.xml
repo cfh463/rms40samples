@@ -1,0 +1,23 @@
+<EXAMPLES >
+           <EXAMPLE title="Initialize database">
+               <SECTIONS>
+               <SECTION>
+               <DESC>
+                   You can create your own database for use with your RhoMobile application. Simply try to open a database file and, if it does not exist, it will be created for you automatically.
+               </DESC>
+               <CODE>
+               <RUBY>
+           <![CDATA[
+db = Rho::Database.new(Rho::Application.databaseFilePath("sample"),"sample")
+]]>
+				</RUBY>
+				<JAVASCRIPT>
+		           <![CDATA[
+var db = Rho.Database.new(Rho.Application.databaseFilePath("sample"),"sample");
+]]>
+				</JAVASCRIPT>
+               </CODE>
+               </SECTION>
+               </SECTIONS>
+           </EXAMPLE>
+       </EXAMPLES>

@@ -12,8 +12,8 @@
     <%= render :partial => "/partials/language_tabs" %>
     
     <div class="sample ruby">
-        Is Screen Autorotated: <%= @is_auto_rotated %> 
-        <a href="<%= url_for(:action => toggle_autorotation) %>" data-role="button">Toggle autorotation</a> 
+        Autorotation <%= @is_auto_rotated ? "enabled" : "disabled" %> 
+        <a href="<%= url_for(:action => :toggle_autorotation) %>" data-role="button">Toggle autorotation</a> 
     </div>
     
     <div class="sample javascript">

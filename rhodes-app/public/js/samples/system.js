@@ -36,11 +36,10 @@ KitchenSink.Samples.System = KitchenSink.Samples.System || (function() {
 	}
 
 	function zip() {
-		// unzip file
-		Rho.System.unzipFile("/app/public/sample.zip");
-
-		// zip file
-		Rho.System.zipFile("/app/public/zipfile.zip", "/app/public/sample.txt");
+		var destination_zip = Rho.RhoFile.join(Rho.Application.userFolder,"public.zip");
+		
+		Rho.System.zipFiles(destination_zip, Rho.Application.publicFolder, ["css", "images"]);
+		alert("Public folder zipped in "+destination_zip);
 	}
 
 	return {

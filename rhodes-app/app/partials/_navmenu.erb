@@ -61,11 +61,11 @@
       <h3>Database</h3>
       
       <ul data-role="listview" data-inset="true">
-        <li><a href="<%= url_for :controller => :Database, :action => :initdb %>">Init DB</a></li>    
-        <li><a href="#">Import</a></li>
-        <li><a href="#">Export</a></li>
-        <li><a href="#">Seed</a></li>
-        <li><a href="<%= url_for :controller => :Database, :action => :transactions %>">Transactions</a></li>
+        <li><a href="<%= url_for :controller => :Database, :action => :confirm_init_db %>">Init DB</a></li>
+        <li><a href="<%= url_for :controller => :Database, :action => :confirm_export_db %>">Export</a></li>    
+        <li><a href="<%= url_for :controller => :Database, :action => :confirm_import_db %>">Import</a></li>
+        <li><a href="<%= url_for :controller => :Database, :action => :confirm_seed_db %>">Seed</a></li>
+        <li><a href="<%= url_for :controller => :Database, :action => :confirm_transactions %>">Transactions</a></li>
       </ul>
     </div>
 
@@ -113,7 +113,7 @@
       <h3>Mediaplayer</h3>
       
       <ul data-role="listview" data-inset="true">
-         <li><a href="<%= url_for :controller => :Mediaplayer, :action => :list_ringtones %>">Play ringtones</a></li>
+         <li><a href="<%= url_for :controller => :Mediaplayer, :action => :load_ringtones %>">Play ringtones</a></li>
       </ul>
     </div>
     
@@ -148,11 +148,11 @@
       <h3>Network</h3>
       
        <ul data-role="listview" data-inset="true">
-        <li><a href="<%= url_for :controller => :Network, :action => :network_availability %>">Detect network availability</a></li>
+        <li><a href="<%= url_for :controller => :Network, :action => :confirm_network_availability %>">Detect network availability</a></li>
         <li><a href="<%= url_for :controller => :Network, :action => :confirm_detect_network_events %>">Detect network events</a></li>
-        <li><a href="<%= url_for :controller => :Network, :action => :upload %>">Upload file</a></li>
-        <li><a href="<%= url_for :controller => :Network, :action => :download %>">Download file</a></li>
-        <li><a href="<%= url_for :controller => :Network, :action => :headers_and_verbs %>">Using http headers and verbs</a></li>
+        <li><a href="<%= url_for :controller => :Network, :action => :confirm_upload %>">Upload file</a></li>
+        <li><a href="<%= url_for :controller => :Network, :action => :confirm_download %>">Download file</a></li>
+        <li><a href="<%= url_for :controller => :Network, :action => :confirm_headers_and_verbs %>">Using http headers and verbs</a></li>
         <li><a href="<%= url_for :controller => :Network, :action => :confirm_basic_auth %>">Basic authentication</a></li>      
       </ul>
     </div>
@@ -165,11 +165,7 @@
       </ul>
     </div>
 
-    <div data-role="collapsible">
-      <h3>ORM</h3>
-    </div>
-    
-    
+
     <div data-role="collapsible"  data-filter="screenorientation autorotate callback change">
         <h3>Screen orientation</h3>
         
@@ -195,11 +191,8 @@
       
       <ul data-role="listview" data-inset="true">
         <li><a href="<%= url_for :controller => :Signature, :action => :edit_properties %>">Set capture properties</a></li>
-        <li><a href="#">Capture to file</a></li>
-        <li><a href="<%= url_for :controller => :Signature, :action => :capture_datauri %>">Capture to dataURI</a></li>
-        <li><a href="<%= url_for :controller => :Signature, :action => :capture_fullscreen %>">Capture full-screen</a></li>
-        <li><a href="<%= url_for :controller => :Signature, :action => :capture_inline %>">Capture in a window (responsive)</a></li>
-        <li><a href="#">Change orientation before / after capture</a></li>
+        <li><a href="<%= url_for :controller => :Signature, :action => :confirm_capture_datauri %>">Capture to dataURI</a></li>
+        <li><a href="<%= url_for :controller => :Signature, :action => :confirm_capture_inline %>">Capture in a window (responsive)</a></li>
       </ul>
       
     </div>
@@ -213,7 +206,7 @@
        <li><a href="<%= url_for :controller => :System, :action => :install_app %>">Install / uninstall other applications</a></li>
        <li><a href="<%= url_for :controller => :System, :action => :get_version %>">Detecting version information</a></li>
        <li><a href="<%= url_for :controller => :System, :action => :get_local_serverport %>">LocalServerPort for debug purposes</a></li>
-       <li><a href="<%= url_for :controller => :System, :action => :zip %>">Zipping files</a></li>      
+       <li><a href="<%= url_for :controller => :System, :action => :confirm_zip %>">Zipping files</a></li>      
      </ul>
         
     </div>
