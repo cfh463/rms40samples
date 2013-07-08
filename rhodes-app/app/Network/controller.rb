@@ -17,11 +17,6 @@ class NetworkController < Rho::RhoController
     @network = Rho::Network.hasNetwork
   end
 
-  def network_events
-
-  end
-
-
   def detect_connection
   	Alert.show_popup "Detect connection host motorolasolutions.com"
   	puts "detect_connection---------------"
@@ -73,6 +68,7 @@ class NetworkController < Rho::RhoController
     uploadfileProps["body"] = "uploading file"
     uploadfileProps["fileContentType"]="image/png"
     Rho::Network.uploadFile(uploadfileProps, url_for(:action => :upload_file_callback))
+    render :action => :transferring
   end
 
   def upload_file_callback
@@ -81,15 +77,21 @@ class NetworkController < Rho::RhoController
   	else
   		Alert.show_popup "Upload Failed."
   	end
+    Rho::WebView.navigate(url_for(:action => :confirm_upload))  	
   end
 
+  def confirm_download
+    render
+  end
+  
   def download_file
     # Download a file to the specified filename. Be careful with the overwriteFile parameter!
     downloadfileProps = Hash.new
     downloadfileProps["url"]='http://www.google.com/images/icons/product/chrome-48.png'
-    downloadfileProps["filename"] = Rho::RhoFile.join(Rho::Application.userFolder,"images","sample.png")
+    downloadfileProps["filename"] = Rho::RhoFile.join(Rho::Application.userFolder,"sample.png")
     downloadfileProps["overwriteFile"] = true
     Rho::Network.downloadFile(downloadfileProps, url_for(:action => :download_file_callback))
+    render :action => :transferring
   end
   
   def download_file_callback
@@ -98,6 +100,7 @@ class NetworkController < Rho::RhoController
   	else
   		Alert.show_popup "Download Failed"
   	end
+  	Rho::WebView.navigate(url_for(:action => :confirm_download))
   end
 
   def get
@@ -106,6 +109,7 @@ class NetworkController < Rho::RhoController
     getProps['url'] = "http://www.apache.org/licenses/LICENSE-2.0"
     getProps['headers'] = {"Content-Type" => "application/json"}
     Rho::Network.get(getProps, url_for(:action => :get_callback))
+    render :action => :transferring
   end
   
   def get_callback

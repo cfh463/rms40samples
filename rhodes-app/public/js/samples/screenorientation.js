@@ -3,16 +3,20 @@ KitchenSink.Samples.Screenorientation = KitchenSink.Samples.Screenorientation ||
 	
 	function toggle_autorotation() {
   	   Rho.ScreenOrientation.autoRotate=!Rho.ScreenOrientation.autoRotate;
-	   is_auto_rotate = Rho.ScreenOrientation.autoRotate;
+	   var is_auto_rotate = Rho.ScreenOrientation.autoRotate;
 	   alert("Is Screen Autorotated:" + is_auto_rotate)
 	}
 	
 	function orientation_callback(params) {
-		alert("The screen changed orientation");
+		alert("The screen changed orientation "+params);
 	}
 	
 	function set_callback() {
-		ScreenOrientation.setScreenOrientationEvent(orientation_callback);
+		Rho.ScreenOrientation.setScreenOrientationEvent(orientation_callback);
+	}
+	
+	function remove_callback() {
+		Rho.ScreenOrientation.setScreenOrientationEvent(null);
 	}
 	
 	function left_handed() {
@@ -34,6 +38,7 @@ KitchenSink.Samples.Screenorientation = KitchenSink.Samples.Screenorientation ||
 	return {
 		toggle_autorotation: toggle_autorotation,
 		set_callback: set_callback,
+		remove_callback : remove_callback,
 		upside_down: upside_down,
 		left_handed: left_handed,
 		right_handed: right_handed,

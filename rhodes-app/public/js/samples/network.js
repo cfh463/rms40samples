@@ -27,7 +27,7 @@ KitchenSink.Samples.Network = KitchenSink.Samples.Network || (function() {
 		// Upload the specified file using HTTP POST.
 		uploadfileProps = {
 			url: "http://www.example.com",
-			filename: Rho.RhoFile.join(Rho.Application.publicFolder,"images","backButton.png"),
+			filename: Rho.RhoFile.join(Rho.Application.publicFolder, "images", "backButton.png"),
 			body: "uploading file",
 			fileContentType: "image/png"
 		};
@@ -37,7 +37,7 @@ KitchenSink.Samples.Network = KitchenSink.Samples.Network || (function() {
 
 	function download_file_callback(params) {
 		if (params["status"] == "ok") {
-			alert("Download Succeeded, path is /public/images/sample.png");
+			alert("Download Succeeded");
 		} else {
 			alert("Download Failed");
 		}
@@ -47,7 +47,7 @@ KitchenSink.Samples.Network = KitchenSink.Samples.Network || (function() {
 		// Download a file to the specified filename. Be careful with the overwriteFile parameter!
 		downloadfileProps = {
 			url: "http://www.google.com/images/icons/product/chrome-48.png",
-			filename: Rho.RhoFile.join(Rho.Application.publicFolder,"images","sample.png"),
+			filename: Rho.RhoFile.join(Rho.Application.userFolder, "images", "sample.png"),
 			overwriteFile: true
 		};
 		Rho.Network.downloadFile(downloadfileProps, download_file_callback);
@@ -64,29 +64,64 @@ KitchenSink.Samples.Network = KitchenSink.Samples.Network || (function() {
 
 		alert("Cell network: " + cell_network + "\nWi-Fi network: " + wifi_network + "\nNetwork: " + network);
 	}
-	
-    function basic_auth() {
-        getProps = {
-          url: "http://rhodes-basic-auth.herokuapp.com/secret.json",
-          headers: {"Content-Type" : "application/json"},
-          authType: "basic",
-          authUser: "test",
-          authPassword: "test12345"
-        };
-        Rho.Network.get(getProps, auth_callback);
-      }
 
-      function auth_callback(params){
-          alert(params["body"])
-      }
+	function basic_auth() {
+		getProps = {
+			url: "http://rhodes-basic-auth.herokuapp.com/secret.json",
+			headers: { "Content-Type": "application/json" },
+			authType: "basic",
+			authUser: "test",
+			authPassword: "test12345"
+		};
+		Rho.Network.get(getProps, auth_callback);
+	}
+
+	function auth_callback(params) {
+		alert(params["body"])
+	}
 	
+	function get() {
+		getProps = {
+			url: "http://www.apache.org/licenses/LICENSE-2.0",
+			headers: { "Content-Type": "application/json" }
+		};
+		Rho.Network.get(getProps, get_callback);
+	}
+
+	function get_callback(params) {
+		if (params["status"] == "ok") {
+			alert(params["body"])
+		} else {
+			alert("Failed");
+		}
+	}
+
+	function post() {
+		var body = '{"product" : {"name" : "test_name", "brand" : "test_brand", "sku" : "1" , "price" : "$2000" , "quantity" : "2" } }';
+		postProps = {
+			url: "http://rhostore.herokuapp.com/products.json",
+			headers: { "Content-Type": "application/json" },
+			body: body
+		};
+		Rho.Network.post(postProps, post_callback);
+	}
+
+	function post_callback(params) {
+		if (params["status"] == "ok") {
+			alert("POST Succeeded");
+		} else {
+			alert("POST Failed");
+		}
+	}
 	return {
 		start_status_notify: start_status_notify,
 		stop_status_notify: stop_status_notify,
 		upload_file: upload_file,
 		download_file: download_file,
 		network_availability: network_availability,
-		basic_auth: basic_auth
+		basic_auth: basic_auth,
+		get : get,
+		post : post
 	};
 
 })();

@@ -28,6 +28,7 @@ class DatabaseController < Rho::RhoController
   def transactions
     # Let's assume we have a table called users_sample with a two columns, "user_id" and "active"
     db = open_db
+
     # Begin transaction
     db.startTransaction
     
@@ -55,14 +56,22 @@ class DatabaseController < Rho::RhoController
     db.commitTransaction
     
     db.close
-    
+
     redirect :confirm_transactions
   end
 
   def confirm_transactions
     db = open_db
-    @users = db.executeSql("Select user_id,active from users_sample")
-    render
+    
+    if !db.isTableExist("users_sample")
+      db.close
+      Alert.show_popup("Please seed the database before running this sample")
+      redirect :action => :confirm_seed_db
+    else
+      @users = db.executeSql("Select user_id,active from users_sample")
+      db.close
+      render      
+    end
   end
   
   def confirm_seed_db
@@ -89,6 +98,8 @@ class DatabaseController < Rho::RhoController
       db.executeSql("Insert into users_sample (user_id,active) values (?,1)",[user_id])
     end
     
+    db.close
+    
     Alert.show_popup "Seed Succeeded"
     redirect :confirm_seed_db
   end
@@ -99,7 +110,9 @@ class DatabaseController < Rho::RhoController
 
   def export_db 
    #export database
-   export_path = Rhom::Rhom.database_export("sample")
+   db = open_db
+   export_path = db.export
+   db.close
    Alert.show_popup "Export path - #{export_path}"
    redirect :confirm_export_db
   end
@@ -110,9 +123,13 @@ class DatabaseController < Rho::RhoController
 
   def import_db
     #export database
-    export_path = Rhom::Rhom.database_export("sample")
+    db = open_db
+    export_path = db.export
     #import database
-    Rhom::Rhom.database_import('sample',export_path)
+    db.close
+    db = open_db
+    db.import(export_path)
+    db.close
     Alert.show_popup "Database Import Succeeded"
     redirect :confirm_import_db
   end

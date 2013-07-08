@@ -15,15 +15,20 @@ KitchenSink.Samples.Database = KitchenSink.Samples.Database || (function() {
 	
 	function export_db() {
 	   // export database
-	   var export_path = Rho.Rhom.database_export("sample");
+	   var db = open_db();
+	   var export_path = db.export();
+	   db.close();
 	   alert("Export path - " + export_path);
 	}
 	
 	function import_db() {
 		// export database
-		var export_path = Rho.Rhom.database_export("sample");
-		// import database
-	    Rho.Rhom.database_import("sample",export_path);
+		var db = open_db();
+		var export_path = db.export();
+		db.close();
+		
+		db = open_db();
+		db.import(export_path);
 	    alert("Database Import Succeeded");
 	}
 	

@@ -25,12 +25,10 @@ class SystemController < Rho::RhoController
    
   end
 
-  def install_or_uninstall_app
+  def install_app
      #install an application from given url
-  	Rho::System.applicationInstall("/bin/target/android/rhodes-app-debug.apk")
+  	Rho::System.applicationInstall()
 
-  	# uninstall the application
-		Rho::System.applicationUninstall("rhodes-app")
   end
 
   def get_version_info
@@ -45,11 +43,10 @@ class SystemController < Rho::RhoController
   end
 
   def zip_files
-  	# unzip a file 
-  	Rho::System.unzipFile("/app/public/sample.zip")
-
-  	# zip a file
-  	Rho::System.zipFile("/app/public", "/app/public/sample.txt")
+    destination_zip = Rho::RhoFile.join(Rho::Application.userFolder, "public.zip")
+  	Rho::System.zipFiles(destination_zip, Rho::Application.publicFolder, ["css", "images"])
+  	Alert.show_popup("Public folder zipped in #{destination_zip}")
+  	redirect :action => :confirm_zip
   end
   
   def get_version
@@ -61,5 +58,9 @@ class SystemController < Rho::RhoController
       # Get port of the local (embedded) HTTP server
       @local_port = Rho::System.localServerPort()
       #Alert.show_popup(local_port)
-    end
+  end
+  
+  def confirm_zip
+    render
+  end
 end
