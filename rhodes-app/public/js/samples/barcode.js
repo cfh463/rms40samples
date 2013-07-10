@@ -41,6 +41,16 @@ KitchenSink.Samples.Barcode = KitchenSink.Samples.Barcode || (function() {
     	
     	return result;
     }
+
+    function set_symbology() {
+        // For the purpose of this example, let's say our application only needs to recognize one type of barcode.
+        // In that case, we will disable all decoders...
+        Rho.Barcode.allDecoders = false;
+        // ... and enable only the one we are interested in:
+        Rho.Barcode.upca = true;
+        // All other barcode symbologies will be ignored
+        this.scan_using_default_scanner();
+    }
     
     function set_properties() {
       // assign properties
@@ -53,7 +63,8 @@ KitchenSink.Samples.Barcode = KitchenSink.Samples.Barcode || (function() {
       // invoke scanner to see the different settings at work
       this.scan_using_default_scanner();
     }
-    
+
+
     function set_audible_options() {
     	var decodeVolume = $.mobile.activePage.find("input[name=decodeVolume]").val();
     	var decodeFrequency = $.mobile.activePage.find("input[name=decodeFrequency]").val();
@@ -76,6 +87,7 @@ KitchenSink.Samples.Barcode = KitchenSink.Samples.Barcode || (function() {
 		scan_using_default_scanner : scan_using_default_scanner,
 		scan_using_chosen_scanner : scan_using_chosen_scanner,
 		enumerate_scanners : enumerate_scanners,
+        set_symbology : set_symbology,
 		set_properties : set_properties,
 		set_audible_options : set_audible_options,
 		update_scanner_result : update_scanner_result
