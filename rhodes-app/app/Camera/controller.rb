@@ -12,7 +12,7 @@ class CameraController < Rho::RhoController
   
   def take_picture_with_default_camera
     # Capture an image from the default camera on the device, using the default image settings
-    Rho::Camera.takePicture({}, :picture_taken_callback)
+    Rho::Camera.takePicture({}, url_for(:action => :picture_taken_callback))
   end
   
   def picture_taken_callback
@@ -38,7 +38,7 @@ class CameraController < Rho::RhoController
   
   def take_picture_using_chosen_camera
     camera = $cameras[@params["cameraIndex"].to_i]
-    camera.take({}, url_for(:action => :picture_taken_callback))
+    camera.takePicture({}, url_for(:action => :picture_taken_callback))
   end
   
   def determine_camera_capabilities
@@ -61,7 +61,7 @@ class CameraController < Rho::RhoController
     Rho::Camera.flashMode = "on"
     
     # Now, take the picture
-    Rho::Camera.take_picture({}, :picture_taken_callback)    
+    Rho::Camera.takePicture({}, url_for(:action => :picture_taken_callback))    
   end
   
   def edit_image_properties
@@ -74,15 +74,15 @@ class CameraController < Rho::RhoController
     Rho::Camera.desiredWidth = @params[:desiredWidth]
     Rho::Camera.desiredHeight = @params[:desiredHeight]
       
-    Rho::Camera.take_picture({}, :picture_taken_callback)      
+    Rho::Camera.takePicture({}, url_for(:action => :picture_taken_callback))      
   end
   
   def select_picture_from_gallery 
-    Rho::Camera.choose_picture({}, url_for(:action => :picture_taken_callback))
+    Rho::Camera.choosePicture({}, url_for(:action => :picture_taken_callback))
   end
   
   def take_picture_and_save_it_to_gallery
-    Rho::Camera.choose_picture({}, url_for(:action => :picture_taken_callback_save_to_gallery))    
+    Rho::Camera.choosePicture({}, url_for(:action => :picture_taken_callback_save_to_gallery))    
   end
   
   def picture_taken_callback_save_to_gallery

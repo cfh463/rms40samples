@@ -60,7 +60,7 @@ class SignatureController < Rho::RhoController
   end
 
   def capture_inline_docapture
-    Rho::Signature.capture(:signature_callback)
+    Rho::Signature.capture(url_for( :action => :signature_callback))
     redirect :action => :confirm_capture_inline
   end
   

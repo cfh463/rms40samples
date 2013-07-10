@@ -84,7 +84,7 @@ class LogController < Rho::RhoController
       render :action => :server_log
     else
       Alert.show_popup "Log FileContents are empty."
-      render :action => :index
+      render :action => :confirm_read_log
     end
   end
 

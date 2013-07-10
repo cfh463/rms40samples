@@ -10,7 +10,7 @@ class NetworkController < Rho::RhoController
 		render
   end
 
-  def network_availability
+  def confirm_network_availability
   	# check the network availability
   	@cell_network = Rho::Network.hasCellNetwork
   	@wifi_network = Rho::Network.hasWifiNetwork

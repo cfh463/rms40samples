@@ -22,7 +22,7 @@ android:
 extensions:
   - json
   - rho-javascript
-#  - barcode
+  - barcode
   - cardreader
   - signature
   - mediaplayer
