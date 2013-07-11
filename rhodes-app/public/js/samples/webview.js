@@ -47,7 +47,8 @@ KitchenSink.Samples.Webview = KitchenSink.Samples.Webview || (function() {
 	}
 	
 	function savePage() {
-		alert("Yet to implement")
+		var filename=Rho.RhoFile.join(Rho.Application.appBundleFolder,'current_page.jpeg');
+		Rho.WebView.save("jpeg",filename);
 	}
 
 	return {
@@ -58,7 +59,8 @@ KitchenSink.Samples.Webview = KitchenSink.Samples.Webview || (function() {
 		currentURL: currentURL,
 		executeJavascript: executeJavascript,
 		navigate: navigate,
-		refresh: refresh
+		refresh: refresh,
+		savePage: savePage
 	};
 
 })();

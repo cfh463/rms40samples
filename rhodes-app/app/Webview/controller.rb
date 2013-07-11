@@ -49,8 +49,10 @@ class WebviewController < Rho::RhoController
   end
   def save
     # saves the current page
-    # currently not working. Have to check why?
-   # Rho::WebView.save('jpeg','/app')
+    filename = Rho::RhoFile.join(Rho::Application.appBundleFolder,'current_page.jpeg')
+    Rho::WebView.save('jpeg',filename)
+    # Alert.show_popup "Saved the current page"
+    redirect :action => :save_page
   end
   
   def call_js
@@ -61,3 +63,4 @@ class WebviewController < Rho::RhoController
     render
   end
 end
+
