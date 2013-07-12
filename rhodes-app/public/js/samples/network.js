@@ -27,7 +27,7 @@ KitchenSink.Samples.Network = KitchenSink.Samples.Network || (function() {
 		// Upload the specified file using HTTP POST.
 		uploadfileProps = {
 			url: "http://www.example.com",
-			filename: Rho.RhoFile.join(Rho.Application.publicFolder, "/images/backButton.png"),
+			filename: Rho.RhoFile.join(Rho.RhoFile.join(Rho.Application.publicFolder, "images"), "backButton.png"),
 			body: "uploading file",
 			fileContentType: "image/png"
 		};
@@ -37,7 +37,7 @@ KitchenSink.Samples.Network = KitchenSink.Samples.Network || (function() {
 
 	function download_file_callback(params) {
 		if (params["status"] == "ok") {
-			alert("Download Succeeded");
+			alert("Download Succeeded. File saved to "+Rho.RhoFile.join(Rho.Application.userFolder, "sample.png"));
 		} else {
 			alert("Download Failed");
 		}
@@ -47,7 +47,7 @@ KitchenSink.Samples.Network = KitchenSink.Samples.Network || (function() {
 		// Download a file to the specified filename. Be careful with the overwriteFile parameter!
 		downloadfileProps = {
 			url: "http://www.google.com/images/icons/product/chrome-48.png",
-			filename: Rho.RhoFile.join(Rho.Application.publicFolder, "/images/sample.png"),
+			filename: Rho.RhoFile.join(Rho.Application.userFolder, "sample.png"),
 			overwriteFile: true
 		};
 		Rho.Network.downloadFile(downloadfileProps, download_file_callback);
