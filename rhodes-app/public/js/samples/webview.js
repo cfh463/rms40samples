@@ -47,7 +47,7 @@ KitchenSink.Samples.Webview = KitchenSink.Samples.Webview || (function() {
 	}
 	
 	function savePage() {
-		var filename=Rho.RhoFile.join(Rho.Application.appBundleFolder,'current_page.jpeg');
+		var filename = Rho.RhoFile.join(Rho.Application.userFolder,'current_page.jpeg');
 		Rho.WebView.save("jpeg",filename);
 	}
 
