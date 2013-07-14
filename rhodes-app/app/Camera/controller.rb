@@ -10,6 +10,10 @@ class CameraController < Rho::RhoController
     render
   end
   
+  def confirm_take_picture_with_default_camera
+    render
+  end
+  
   def take_picture_with_default_camera
     # Capture an image from the default camera on the device, using the default image settings
     Rho::Camera.takePicture({}, url_for(:action => :picture_taken_callback))
@@ -22,7 +26,7 @@ class CameraController < Rho::RhoController
       Rho::WebView.navigate(url_for(:action => :show_picture, :query => {:image => Rho::Application.expandDatabaseBlobFilePath(@params["imageUri"])}))
     else
       # Otherwise we are done here
-      Rho::WebView.navigate(url_for(:action => :index))
+      Rho::WebView.navigate(url_for(:action => :picture_was_not_taken))
     end
   end
   
@@ -37,7 +41,7 @@ class CameraController < Rho::RhoController
   end
   
   def take_picture_using_chosen_camera
-    camera = $cameras[@params["cameraIndex"].to_i]
+    camera = $cameras[@params["camera_index"].to_i]
     camera.takePicture({}, url_for(:action => :picture_taken_callback))
   end
   
