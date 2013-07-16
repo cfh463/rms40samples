@@ -56,7 +56,7 @@ KitchenSink.Samples.Camera = KitchenSink.Samples.Camera || (function($) {
       $("#camera_capabilities").html(capabilitiesList);
     }
     
-    function control_image_properties() {
+    function sample_control_image_properties() {
       // Instead of accepting the defaults, let's set some properties to our liking
       
       // We will ask for a PNG file...
@@ -72,6 +72,29 @@ KitchenSink.Samples.Camera = KitchenSink.Samples.Camera || (function($) {
       // Now, take the picture
       Rho.Camera.takePicture({}, picture_taken_callback);   
     }
+
+    function _read_properties_from_form() {
+    	var result={};
+    	$.mobile.activePage.find("form input[type=radio]:checked").each(function() {
+    		var element = $(this);
+    		result[element.attr('name')] = element.val();
+    	});
+    	
+    	return result;
+    }
+    
+    function set_image_properties() {
+    	var properties = _read_properties_from_form();
+    	var resolution = properties.resolution.split("x");
+    	var desired_width = resolution[0];
+    	var desired_height = resolution[1];
+    	
+    	Rho.Camera.takePicture({
+    		compressionFormat : properties["compressionFormat"],
+			desiredWidth : desired_width,
+			desiredHeight: desired_height
+    	}, picture_taken_callback);
+    }
     
     function select_picture_from_gallery() {
       Rho.Camera.choosePicture({}, picture_taken_callback);
@@ -86,15 +109,16 @@ KitchenSink.Samples.Camera = KitchenSink.Samples.Camera || (function($) {
     }
     
     function take_picture_and_save_it_to_gallery() {
-      Rho.Camera.choosePicture({}, picture_taken_callback_save_to_gallery);
+      Rho.Camera.takePicture({}, picture_taken_callback_save_to_gallery);
     }
     	
 	return {
 		take_picture_with_default_camera : take_picture_with_default_camera,
 		choose_camera : choose_camera,
 		determine_camera_capabilities : determine_camera_capabilities,
-		control_image_properties : control_image_properties,
-		take_picture_and_save_it_to_gallery : take_picture_and_save_it_to_gallery
+		set_image_properties : set_image_properties,
+		take_picture_and_save_it_to_gallery : take_picture_and_save_it_to_gallery,
+		select_picture_from_gallery : select_picture_from_gallery
 	};
 
 })(jQuery);

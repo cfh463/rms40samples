@@ -26,9 +26,10 @@ extensions:
   - cardreader
   - signature
   - mediaplayer
+  - mediacapture
   - screenorientation
 #  - sensor
 capabilities:
   - camera
   - calendar
-  - motorola_browser
+#  - motorola_browser

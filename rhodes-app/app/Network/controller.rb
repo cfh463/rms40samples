@@ -10,7 +10,7 @@ class NetworkController < Rho::RhoController
 		render
   end
 
-  def network_availability
+  def confirm_network_availability
   	# check the network availability
   	@cell_network = Rho::Network.hasCellNetwork
   	@wifi_network = Rho::Network.hasWifiNetwork
@@ -64,7 +64,7 @@ class NetworkController < Rho::RhoController
     # Upload the specified file using HTTP POST.
     uploadfileProps = Hash.new
     uploadfileProps["url"] = "http://www.example.com"
-    uploadfileProps["filename"] = Rho::RhoFile.join(Rho::Application.publicFolder,"images","backButton.png")
+    uploadfileProps["filename"] = Rho::RhoFile.join(Rho::RhoFile.join(Rho::Application.publicFolder,"images"),"backButton.png")
     uploadfileProps["body"] = "uploading file"
     uploadfileProps["fileContentType"]="image/png"
     Rho::Network.uploadFile(uploadfileProps, url_for(:action => :upload_file_callback))
@@ -88,7 +88,7 @@ class NetworkController < Rho::RhoController
     # Download a file to the specified filename. Be careful with the overwriteFile parameter!
     downloadfileProps = Hash.new
     downloadfileProps["url"]='http://www.google.com/images/icons/product/chrome-48.png'
-    downloadfileProps["filename"] = Rho::RhoFile.join(Rho::Application.userFolder,"sample.png")
+    downloadfileProps["filename"] = Rho::RhoFile.join(Rho::Application.userFolder, "sample.png")
     downloadfileProps["overwriteFile"] = true
     Rho::Network.downloadFile(downloadfileProps, url_for(:action => :download_file_callback))
     render :action => :transferring
@@ -96,7 +96,7 @@ class NetworkController < Rho::RhoController
   
   def download_file_callback
   	if @params["status"] == "ok"
-  		Alert.show_popup "Download Success,path is /public/images/sample.png "
+  		Alert.show_popup "Download Success. File saved to " + Rho::RhoFile.join(Rho::Application.userFolder, "sample.png")
   	else
   		Alert.show_popup "Download Failed"
   	end

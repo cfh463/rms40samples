@@ -34,12 +34,12 @@
       <h3>Camera</h3>
       
       <ul data-role="listview" data-inset="true">
-        <li><a href="<%= url_for :controller => :Camera, :action => :take_picture_with_default_camera %>">Take a picture with default camera/settings</a></li>
+        <li><a href="<%= url_for :controller => :Camera, :action => :confirm_take_picture_with_default_camera %>">Take a picture with default camera/settings</a></li>
         <li><a href="<%= url_for :controller => :Camera, :action => :choose_camera %>">Choose camera to use</a></li>
         <li><a href="<%= url_for :controller => :Camera, :action => :determine_camera_capabilities %>">Determine camera capabilities</a></li>
-        <li><a href="<%= url_for :controller => :Camera, :action => :edit_image_properties %>">Control image properties (size, resolution, etc)</a></li>
-        <li><a href="<%= url_for :controller => :Camera, :action => :select_picture_from_gallery %>">Select picture from gallery</a></li>
-        <li><a href="<%= url_for :controller => :Camera, :action => :take_picture_and_save_it_to_gallery %>">Take picture and save it to the gallery</a></li>
+        <li><a href="<%= url_for :controller => :Camera, :action => :edit_image_properties %>">Control image properties</a></li>
+        <li><a href="<%= url_for :controller => :Camera, :action => :confirm_select_picture_from_gallery %>">Select picture from gallery</a></li>
+        <li><a href="<%= url_for :controller => :Camera, :action => :confirm_take_picture_and_save_it_to_gallery %>">Take picture and save it to the gallery</a></li>
       </ul>
     </div>
           
@@ -210,7 +210,16 @@
      </ul>
         
     </div>
-
+    
+    <div data-role="collapsible"  data-filter="video capture capture the video and save it">
+     <h3>Videocapture</h3>
+     
+     <ul data-role="listview" data-inset="true">
+       <li><a href="<%= url_for :controller => :Videocapture, :action => :index %>">Capture a 1-minute video and save it</a></li>
+       <li><a href="<%= url_for :controller => :Videocapture, :action => :select_resolution %>">Capture a video letting the user select the resolution</a></li>
+     </ul>
+        
+    </div>
 
     <div data-role="collapsible"  data-filter="webview web view execute javascript navigate refresh save">
       <h3>Webview</h3>
@@ -220,7 +229,7 @@
         <li><a href="<%= url_for :controller => :Webview, :action => :call_js %>">Executing javascript</a></li> 
         <li><a href="<%= url_for :controller => :Webview, :action => :navigate %>">Navigating to pages</a></li>    
         <li><a href="<%= url_for :controller => :Webview, :action => :refresh_page %>">Refreshing the page</a></li>  
-        <li><a href="<%= url_for :controller => :Webview, :action => :save_page %>">Saving the page - yet to implement</a></li>    
+        <li><a href="<%= url_for :controller => :Webview, :action => :save_page %>">Saving the page</a></li>    
       </ul>
     </div>
 
