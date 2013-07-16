@@ -79,7 +79,6 @@ KitchenSink.Samples.Barcode = KitchenSink.Samples.Barcode || (function() {
     
     function update_scanner_result(message) {
     	var element = $(".ui-page-active .scanner_result");
-    	alert(element);
     	element.html(message);
     }
     
