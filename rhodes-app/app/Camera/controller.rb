@@ -10,19 +10,44 @@ class CameraController < Rho::RhoController
     render
   end
   
+  def confirm_take_picture_with_default_camera
+    render
+  end
+  
   def take_picture_with_default_camera
     # Capture an image from the default camera on the device, using the default image settings
-    Rho::Camera.takePicture({}, url_for(:action => :picture_taken_callback))
+    Rho::Camera.takePicture({:fileName => Rho::RhoFile.join(Rho::Application.userFolder,"tmp")}, url_for(:action => :picture_taken_callback))
   end
   
   def picture_taken_callback
+    Rho::Log.info(@params.inspect,"callback params")
     # Did we really take a picture?
     if (@params["status"]=="ok")
-      # If so, show it
-      Rho::WebView.navigate(url_for(:action => :show_picture, :query => {:image => Rho::Application.expandDatabaseBlobFilePath(@params["imageUri"])}))
+      # If so, copy it from its temporary location and show it
+      tmp_image = @params["imageUri"]
+      # remove URL schema
+      if (tmp_image.start_with?("file://"))
+        tmp_image["file://"]=""
+        extension = Rho::RhoFile.basename(tmp_image).split(".")[1]
+        saved_image = Rho::RhoFile.join(Rho::Application.userFolder,"image.#{extension}")
+  
+        # delete previous file if it exists
+        result = Rho::RhoFile.deleteFile(saved_image)
+        
+        Rho::Log.info("Result of deleting #{saved_image} : #{result}", "CAMERA CALLBACK")
+  
+        # rename temporary file to new location
+        result = Rho::RhoFile.rename(tmp_image,saved_image)
+        Rho::Log.info("Result of renaming #{tmp_image} to #{saved_image} : #{result}", "CAMERA CALLBACK")
+        
+        Rho::Log.info("#{saved_image} exists?: #{Rho::RhoFile.exists(saved_image)}", "CAMERA CALLBACK")
+      else
+        saved_image = tmp_image
+      end
+      Rho::WebView.navigate(url_for(:action => :show_picture, :query => {:image => saved_image}))
     else
       # Otherwise we are done here
-      Rho::WebView.navigate(url_for(:action => :index))
+      Rho::WebView.navigate(url_for(:action => :picture_was_not_taken))
     end
   end
   
@@ -37,8 +62,8 @@ class CameraController < Rho::RhoController
   end
   
   def take_picture_using_chosen_camera
-    camera = $cameras[@params["cameraIndex"].to_i]
-    camera.takePicture({}, url_for(:action => :picture_taken_callback))
+    camera = $cameras[@params["camera_index"].to_i]
+    camera.takePicture({:fileName => Rho::RhoFile.join(Rho::Application.userFolder,"tmp")}, url_for(:action => :picture_taken_callback))
   end
   
   def determine_camera_capabilities
@@ -61,38 +86,51 @@ class CameraController < Rho::RhoController
     Rho::Camera.flashMode = "on"
     
     # Now, take the picture
-    Rho::Camera.takePicture({}, url_for(:action => :picture_taken_callback))    
+    Rho::Camera.takePicture({:fileName => Rho::RhoFile.join(Rho::Application.userFolder,"tmp")}, url_for(:action => :picture_taken_callback))    
   end
   
   def edit_image_properties
     @valid_sizes = Rho::Camera.supportedSizeList
-    Rho::Log.info(@valid_sizes.inspect,"VALID SIZES")
+    render
   end
   
   def set_image_properties
-    Rho::Camera.compressionFormat = @params[:compressionFormat]
-    Rho::Camera.desiredWidth = @params[:desiredWidth]
-    Rho::Camera.desiredHeight = @params[:desiredHeight]
-      
-    Rho::Camera.takePicture({}, url_for(:action => :picture_taken_callback))      
+    Rho::Log.info(@params.inspect,"Image properties - parameters")
+    desiredWidth, desiredHeight = @params["resolution"].split("x")
+
+    Rho::Camera.takePicture({
+      :fileName => Rho::RhoFile.join(Rho::Application.userFolder,"tmp"),
+      :compressionFormat => @params["compressionFormat"], 
+      :desiredWidth => desiredWidth,
+      :desiredHeight => desiredHeight
+    },
+    url_for(:action => :picture_taken_callback))      
   end
   
   def select_picture_from_gallery 
-    Rho::Camera.choosePicture({}, url_for(:action => :picture_taken_callback))
+    Rho::Camera.choosePicture({:fileName => Rho::RhoFile.join(Rho::Application.userFolder,"tmp")}, url_for(:action => :picture_taken_callback))
+  end
+  
+  def confirm_take_picture_and_save_it_to_gallery
+    render
   end
   
   def take_picture_and_save_it_to_gallery
-    Rho::Camera.choosePicture({}, url_for(:action => :picture_taken_callback_save_to_gallery))    
+    Rho::Camera.takePicture({
+      :fileName => Rho::RhoFile.join(Rho::Application.userFolder,"tmp"),
+      :saveToDeviceGallery => true
+    }, url_for(:action => :picture_taken_callback))    
   end
   
   def picture_taken_callback_save_to_gallery
     # Did we really take a picture?
     if (@params["status"]=="ok")
       # If so, save it to the gallery
-      Rho::Camera.saveImageToDeviceGallery(Rho::Application.expandDatabaseBlobFilePath(@params["imageUri"]))
+      Rho::Camera.saveImageToDeviceGallery(@params["imageUri"])
+      Alert.show_popup("Image saved to gallery")
     end
 
-    Rho::WebView.navigate(url_for(:action => :index))
+    Rho::WebView.navigate(url_for(:action => :confirm_take_picture_and_save_it_to_gallery))
     
   end  
 end

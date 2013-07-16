@@ -22,13 +22,14 @@ android:
 extensions:
   - json
   - rho-javascript
-  - barcode
+#  - barcode
   - cardreader
   - signature
   - mediaplayer
+  - mediacapture
   - screenorientation
-  - sensor
+#  - sensor
 capabilities:
   - camera
   - calendar
-  - motorola_browser
+#  - motorola_browser
