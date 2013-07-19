@@ -21,11 +21,19 @@
       <h3>Barcode</h3>
       
       <ul data-role="listview" data-inset="true">
-        <li><a href="<%= url_for :controller => :Barcode, :action => :confirm_scan_using_default_scanner %>">Scan using default scanner</a></li>
-        <li><a href="<%= url_for :controller => :Barcode, :action => :choose_scanner %>">Choose scanner to use</a></li>
-        <li><a href="<%= url_for :controller => :Barcode, :action => :confirm_set_symbology %>">Set symbology</a></li>
-        <li><a href="<%= url_for :controller => :Barcode, :action => :edit_properties %>">Control scanner properties</a></li>
-        <li><a href="<%= url_for :controller => :Barcode, :action => :edit_audible_options %>">Change audible options</a></li>
+        <% if Rho::System.platform == "ANDROID" || Rho::System.platform == "APPLE" || Rho::System.platform == "WINDOWS" %>
+          <% if !Rho::Barcode.enumerate.empty? %>
+            <li><a href="<%= url_for :controller => :Barcode, :action => :confirm_scan_using_default_scanner %>">Scan using default scanner</a></li>
+            <li><a href="<%= url_for :controller => :Barcode, :action => :choose_scanner %>">Choose scanner to use</a></li>
+            <li><a href="<%= url_for :controller => :Barcode, :action => :confirm_set_symbology %>">Set symbology</a></li>
+            <li><a href="<%= url_for :controller => :Barcode, :action => :edit_properties %>">Control scanner properties</a></li>
+            <li><a href="<%= url_for :controller => :Barcode, :action => :edit_audible_options %>">Change audible options</a></li>
+          <% else %>
+            <li>Device does not have a Barcode</li>
+          <% end %>
+        <% else %>
+          <li>Barcode supports on Android, IOS and Windows Mobile</li>  
+        <% end %>
       </ul>
     </div>
   
@@ -34,12 +42,16 @@
       <h3>Camera</h3>
       
       <ul data-role="listview" data-inset="true">
-        <li><a href="<%= url_for :controller => :Camera, :action => :confirm_take_picture_with_default_camera %>">Take a picture with default camera/settings</a></li>
-        <li><a href="<%= url_for :controller => :Camera, :action => :choose_camera %>">Choose camera to use</a></li>
-        <li><a href="<%= url_for :controller => :Camera, :action => :determine_camera_capabilities %>">Determine camera capabilities</a></li>
-        <li><a href="<%= url_for :controller => :Camera, :action => :edit_image_properties %>">Control image properties</a></li>
-        <li><a href="<%= url_for :controller => :Camera, :action => :confirm_select_picture_from_gallery %>">Select picture from gallery</a></li>
-        <li><a href="<%= url_for :controller => :Camera, :action => :confirm_take_picture_and_save_it_to_gallery %>">Take picture and save it to the gallery</a></li>
+        <% if Rho::System.hasCamera %>
+          <li><a href="<%= url_for :controller => :Camera, :action => :confirm_take_picture_with_default_camera %>">Take a picture with default camera/settings</a></li>
+          <li><a href="<%= url_for :controller => :Camera, :action => :choose_camera %>">Choose camera to use</a></li>
+          <li><a href="<%= url_for :controller => :Camera, :action => :determine_camera_capabilities %>">Determine camera capabilities</a></li>
+          <li><a href="<%= url_for :controller => :Camera, :action => :edit_image_properties %>">Control image properties</a></li>
+          <li><a href="<%= url_for :controller => :Camera, :action => :confirm_select_picture_from_gallery %>">Select picture from gallery</a></li>
+          <li><a href="<%= url_for :controller => :Camera, :action => :confirm_take_picture_and_save_it_to_gallery %>">Take picture and save it to the gallery</a></li>
+        <% else %>
+          <li>Device does not have Camera</li>
+        <% end %>
       </ul>
     </div>
           
@@ -49,10 +61,14 @@
       
       <ul data-role="listview" data-inset="true">
        <% if Rho::System.platform == "ANDROID" ||  Rho::System.platform == "WINDOWS" %>
-        <li><a href="<%= url_for(:controller => :Cardreader, :action => :open_cardreader) %>">Connecting to the card reader</a></li>
-        <li><a href="#">Reading card data</a></li>
-        <li><a href="<%= url_for(:controller => :Cardreader, :action => :properties) %>">Setting card reader properties</a></li>
-        <li><a href="#">More - see http://edgedocs.rhomobile.com/rhoelements/cardreader/#htmljavascript-examples for inspiration</a></li> 
+        <% if !Rho::CardReader.enumerate.empty? %>
+          <li><a href="<%= url_for(:controller => :Cardreader, :action => :open_cardreader) %>">Connecting to the card reader</a></li>
+          <li><a href="#">Reading card data</a></li>
+          <li><a href="<%= url_for(:controller => :Cardreader, :action => :properties) %>">Setting card reader properties</a></li>
+          <li><a href="#">More - see http://edgedocs.rhomobile.com/rhoelements/cardreader/#htmljavascript-examples for inspiration</a></li>
+        <% else %>
+          <li>Device does not have a Cardreader</li>
+        <% end %>
       <% else %>
         <li>Card reader supports on Android and Windows Mobile</li>
       <% end %>     
@@ -94,7 +110,11 @@
       <h3>Keystate</h3>
       
       <ul data-role="listview" data-inset="true">
-         <li><a href="<%= url_for :controller => :Keystate, :action => :index %>">Show key state icons</a></li>
+        <% if Rho::System.platform == "WINDOWS" %>
+          <li><a href="<%= url_for :controller => :Keystate, :action => :index %>">Show key state icons</a></li>
+        <% else %>
+          <li>Keystate supports only on Windows Mobile</li>
+        <% end %>
       </ul>
     </div>
     
@@ -117,7 +137,11 @@
       <h3>Mediaplayer</h3>
       
       <ul data-role="listview" data-inset="true">
-         <li><a href="<%= url_for :controller => :Mediaplayer, :action => :load_ringtones %>">Play ringtones</a></li>
+        <% if Rho::System.platform == "ANDROID" || Rho::System.platform == "APPLE" || Rho::System.platform == "WINDOWS" %>
+          <li><a href="<%= url_for :controller => :Mediaplayer, :action => :load_ringtones %>">Play ringtones</a></li>
+        <% else %>
+          <li>Mediaplayer supports on Android, IOS and Windows Mobile</li>
+        <% end %>
       </ul>
     </div>
     
@@ -125,11 +149,7 @@
       <h3>Native Tabbar</h3>
 
        <ul data-role="listview" data-inset="true">
-          <% if Rho::System.platform == "ANDROID" || Rho::System.platform == "APPLE" || Rho::System.platform == "WINDOWS" %>
-            <li><a href="<%= url_for :controller => :NativeTabbar, :action => :tabbar_menu %>">Create Tabbar</a></li>
-          <% else %>
-            <li>Native Tabbar supports on Android, IOS and Windows Mobile</li>
-          <% end %>
+          <li><a href="<%= url_for :controller => :NativeTabbar, :action => :tabbar_menu %>">Create Tabbar</a></li>
        </ul>
     </div>
     
@@ -138,11 +158,7 @@
       <h3>Native Toolbar</h3>
       
        <ul data-role="listview" data-inset="true">
-        <% if Rho::System.platform == "ANDROID" || Rho::System.platform == "APPLE" || Rho::System.platform == "WINDOWS" %>
           <li><a href="<%= url_for :controller => :NativeToolbar, :action => :toolbar_menu %>">Create Toolbar</a></li>
-        <% else %>
-          <li>Native Toolbar supports on Android, IOS and Windows Mobile</li>
-        <% end %>
        </ul>
     </div>
 
@@ -177,9 +193,13 @@
         <h3>Screen orientation</h3>
         
         <ul data-role="listview" data-inset="true">
-          <li><a href="<%= url_for :controller => :Screenorientation, :action => :auto_rotate %>">Auto-rotate</a></li>
-          <li><a href="<%= url_for :controller => :Screenorientation, :action => :confirm_set_callback %>">Detect changes</a></li> 
-          <li><a href="<%= url_for :controller => :Screenorientation, :action => :change_orientations %>">Change orientation</a></li>    
+          <% if Rho::System.platform == "ANDROID" || Rho::System.platform == "APPLE" || Rho::System.platform == "WINDOWS" %>
+            <li><a href="<%= url_for :controller => :Screenorientation, :action => :auto_rotate %>">Auto-rotate</a></li>
+            <li><a href="<%= url_for :controller => :Screenorientation, :action => :confirm_set_callback %>">Detect changes</a></li> 
+            <li><a href="<%= url_for :controller => :Screenorientation, :action => :change_orientations %>">Change orientation</a></li> 
+          <% else %>
+            <li>Screen orientation supports Android, IOS and Windows Mobile</li>
+          <% end %>  
         </ul>
     </div>
 
@@ -188,7 +208,11 @@
         <h3>Sensors</h3>
         
         <ul data-role="listview" data-inset="true">
-          <li><a href="<%= url_for :controller => :Sensors, :action => :accelerometer_test %>">Accelerometer</a></li>
+          <% if Rho::System.platform == "ANDROID" || Rho::System.platform == "APPLE" || Rho::System.platform == "WINDOWS" %>
+            <li><a href="<%= url_for :controller => :Sensors, :action => :accelerometer_test %>">Accelerometer</a></li>
+          <% else %>
+            <li>Sensors supports Android, IOS and Windows Mobile</li>
+          <% end %>  
         </ul>
     </div>
 
@@ -197,9 +221,13 @@
       <h3>Signature</h3>
       
       <ul data-role="listview" data-inset="true">
-        <li><a href="<%= url_for :controller => :Signature, :action => :edit_properties %>">Set capture properties</a></li>
-        <li><a href="<%= url_for :controller => :Signature, :action => :confirm_capture_datauri %>">Capture to dataURI</a></li>
-        <li><a href="<%= url_for :controller => :Signature, :action => :confirm_capture_inline %>">Capture in a window (responsive)</a></li>
+        <% if Rho::System.platform == "ANDROID" || Rho::System.platform == "APPLE" || Rho::System.platform == "WINDOWS" %>
+          <li><a href="<%= url_for :controller => :Signature, :action => :edit_properties %>">Set capture properties</a></li>
+          <li><a href="<%= url_for :controller => :Signature, :action => :confirm_capture_datauri %>">Capture to dataURI</a></li>
+          <li><a href="<%= url_for :controller => :Signature, :action => :confirm_capture_inline %>">Capture in a window (responsive)</a></li>
+        <% else %>
+            <li>Signature supports Android, IOS and Windows Mobile</li>
+          <% end %>  
       </ul>
       
     </div>
@@ -219,12 +247,16 @@
     </div>
     
     <div data-role="collapsible"  data-filter="video capture capture the video and save it">
-     <h3>Videocapture</h3>
+      <h3>Videocapture</h3>
      
-     <ul data-role="listview" data-inset="true">
-       <li><a href="<%= url_for :controller => :Videocapture, :action => :index %>">Capture a 1-minute video and save it</a></li>
-       <li><a href="<%= url_for :controller => :Videocapture, :action => :select_resolution %>">Capture a video letting the user select the resolution</a></li>
-     </ul>
+      <ul data-role="listview" data-inset="true">
+        <% if !Rho::Videocapture.enumerate.empty? %>  
+          <li><a href="<%= url_for :controller => :Videocapture, :action => :index %>">Capture a 1-minute video and save it</a></li>
+          <li><a href="<%= url_for :controller => :Videocapture, :action => :select_resolution %>">Capture a video letting the user select the resolution</a></li>
+        <% else %>
+            <li>Device does not have cameras for captuing video</li>
+        <% end %> 
+      </ul>
         
     </div>
 
