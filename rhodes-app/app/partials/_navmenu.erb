@@ -48,10 +48,14 @@
       <h3>Card reader</h3>
       
       <ul data-role="listview" data-inset="true">
-       <li><a href="<%= url_for(:controller => :Cardreader, :action => :open_cardreader) %>">Connecting to the card reader</a></li>
-       <li><a href="#">Reading card data</a></li>
-       <li><a href="<%= url_for(:controller => :Cardreader, :action => :properties) %>">Setting card reader properties</a></li>
-       <li><a href="#">More - see http://edgedocs.rhomobile.com/rhoelements/cardreader/#htmljavascript-examples for inspiration</a></li>      
+       <% if Rho::System.platform == "ANDROID" ||  Rho::System.platform == "WINDOWS" %>
+        <li><a href="<%= url_for(:controller => :Cardreader, :action => :open_cardreader) %>">Connecting to the card reader</a></li>
+        <li><a href="#">Reading card data</a></li>
+        <li><a href="<%= url_for(:controller => :Cardreader, :action => :properties) %>">Setting card reader properties</a></li>
+        <li><a href="#">More - see http://edgedocs.rhomobile.com/rhoelements/cardreader/#htmljavascript-examples for inspiration</a></li> 
+      <% else %>
+        <li>Card reader supports on Android and Windows Mobile</li>
+      <% end %>     
      </ul>
       
     </div>
@@ -121,7 +125,11 @@
       <h3>Native Tabbar</h3>
 
        <ul data-role="listview" data-inset="true">
-           <li><a href="<%= url_for :controller => :NativeTabbar, :action => :tabbar_menu %>">Create Tabbar</a></li>
+          <% if Rho::System.platform == "ANDROID" || Rho::System.platform == "APPLE" || Rho::System.platform == "WINDOWS" %>
+            <li><a href="<%= url_for :controller => :NativeTabbar, :action => :tabbar_menu %>">Create Tabbar</a></li>
+          <% else %>
+            <li>Native Tabbar supports on Android, IOS and Windows Mobile</li>
+          <% end %>
        </ul>
     </div>
     
@@ -130,7 +138,11 @@
       <h3>Native Toolbar</h3>
       
        <ul data-role="listview" data-inset="true">
-        <li><a href="<%= url_for :controller => :NativeToolbar, :action => :toolbar_menu %>">Create Toolbar</a></li>
+        <% if Rho::System.platform == "ANDROID" || Rho::System.platform == "APPLE" || Rho::System.platform == "WINDOWS" %>
+          <li><a href="<%= url_for :controller => :NativeToolbar, :action => :toolbar_menu %>">Create Toolbar</a></li>
+        <% else %>
+          <li>Native Toolbar supports on Android, IOS and Windows Mobile</li>
+        <% end %>
        </ul>
     </div>
 
@@ -139,7 +151,11 @@
       <h3>Navbar</h3>
       
        <ul data-role="listview" data-inset="true">
-        <li><a href="<%= url_for :controller => :Navbar, :action => :navbar_menu %>">Create Navbar</a></li>
+        <% if Rho::System.platform == "APPLE" %>
+          <li><a href="<%= url_for :controller => :Navbar, :action => :navbar_menu %>">Create Navbar</a></li>
+        <% else %>
+          <li>Navbar supports only on iOS</li>
+        <% end %>
        </ul>
     </div>
 
@@ -157,15 +173,6 @@
       </ul>
     </div>
     
-    
-    <div data-role="collapsible">
-      <h3>Process</h3>
-      <ul data-role="listview" data-inset="true">
-        <li><a href="<%= url_for :controller => :Process, :action => :index %>">Run external applications</a></li>
-      </ul>
-    </div>
-
-
     <div data-role="collapsible"  data-filter="screenorientation autorotate callback change">
         <h3>Screen orientation</h3>
         
