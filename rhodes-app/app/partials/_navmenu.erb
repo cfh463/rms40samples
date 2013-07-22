@@ -37,7 +37,9 @@
       </ul>
     </div>
   
-    
+<%
+=begin
+%>
     <div data-role="collapsible" data-filter="camera picture image gallery">
       <h3>Camera</h3>
       
@@ -54,6 +56,9 @@
         <% end %>
       </ul>
     </div>
+<%
+=end
+%>
           
     <% if Rho::System.platform == "ANDROID" ||  Rho::System.platform == "WINDOWS" %>    
     <div data-role="collapsible"  data-filter="cardreader card reader msr magnetic stripe credit identification">
@@ -239,7 +244,9 @@
      </ul>
         
     </div>
-    
+<%
+=begin
+%>    
     <div data-role="collapsible"  data-filter="video capture capture the video and save it">
       <h3>Videocapture</h3>
      
@@ -253,7 +260,9 @@
       </ul>
         
     </div>
-
+<%
+=end
+%>
     <div data-role="collapsible"  data-filter="webview web view execute javascript navigate refresh save">
       <h3>Webview</h3>
 
