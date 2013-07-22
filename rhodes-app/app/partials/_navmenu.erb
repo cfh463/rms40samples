@@ -32,7 +32,7 @@
             <li>Device does not have a Barcode</li>
           <% end %>
         <% else %>
-          <li>Barcode supports on Android, IOS and Windows Mobile</li>  
+          <li>Barcode is supported only on Android, IOS and Windows Mobile</li>  
         <% end %>
       </ul>
     </div>
@@ -64,7 +64,6 @@
           <li><a href="<%= url_for(:controller => :Cardreader, :action => :open_cardreader) %>">Connecting to the card reader</a></li>
           <li><a href="#">Reading card data</a></li>
           <li><a href="<%= url_for(:controller => :Cardreader, :action => :properties) %>">Setting card reader properties</a></li>
-          <li><a href="#">More - see http://edgedocs.rhomobile.com/rhoelements/cardreader/#htmljavascript-examples for inspiration</a></li>
         <% else %>
           <li>Device does not have a Cardreader</li>
         <% end %>
@@ -109,7 +108,7 @@
         <% if Rho::System.platform == "WINDOWS" %>
           <li><a href="<%= url_for :controller => :Keystate, :action => :index %>">Show key state icons</a></li>
         <% else %>
-          <li>Keystate supports only on Windows Mobile</li>
+          <li>Keystate is supported only on Windows Mobile</li>
         <% end %>
       </ul>
     </div>
@@ -136,7 +135,7 @@
         <% if Rho::System.platform == "ANDROID" || Rho::System.platform == "APPLE" || Rho::System.platform == "WINDOWS" %>
           <li><a href="<%= url_for :controller => :Mediaplayer, :action => :load_ringtones %>">Play ringtones</a></li>
         <% else %>
-          <li>Mediaplayer supports on Android, IOS and Windows Mobile</li>
+          <li>Mediaplayer is supported on Android, iOS and Windows Mobile</li>
         <% end %>
       </ul>
     </div>
@@ -193,7 +192,7 @@
             <li><a href="<%= url_for :controller => :Screenorientation, :action => :confirm_set_callback %>">Detect changes</a></li> 
             <li><a href="<%= url_for :controller => :Screenorientation, :action => :change_orientations %>">Change orientation</a></li> 
           <% else %>
-            <li>Screen orientation supports Android, IOS and Windows Mobile</li>
+            <li>Screen orientation is supported on Android, iOS and Windows Mobile</li>
           <% end %>  
         </ul>
     </div>
@@ -206,7 +205,7 @@
           <% if Rho::System.platform == "ANDROID" || Rho::System.platform == "APPLE" || Rho::System.platform == "WINDOWS" %>
             <li><a href="<%= url_for :controller => :Sensors, :action => :accelerometer_test %>">Accelerometer</a></li>
           <% else %>
-            <li>Sensors supports Android, IOS and Windows Mobile</li>
+            <li>Sensors are supported on Android, iOS and Windows Mobile</li>
           <% end %>  
         </ul>
     </div>
@@ -221,7 +220,7 @@
           <li><a href="<%= url_for :controller => :Signature, :action => :confirm_capture_datauri %>">Capture to dataURI</a></li>
           <li><a href="<%= url_for :controller => :Signature, :action => :confirm_capture_inline %>">Capture in a window (responsive)</a></li>
         <% else %>
-            <li>Signature supports Android, IOS and Windows Mobile</li>
+            <li>Signature is supported on Android, iOS and Windows Mobile</li>
           <% end %>  
       </ul>
       
@@ -246,8 +245,8 @@
      
       <ul data-role="listview" data-inset="true">
         <% if !Rho::Videocapture.enumerate.empty? %>  
-          <li><a href="<%= url_for :controller => :Videocapture, :action => :index %>">Capture a 1-minute video and save it</a></li>
-          <li><a href="<%= url_for :controller => :Videocapture, :action => :select_resolution %>">Capture a video letting the user select the resolution</a></li>
+          <li><a href="<%= url_for :controller => :Videocapture, :action => :index %>">Capture 1-minute video</a></li>
+          <li><a href="<%= url_for :controller => :Videocapture, :action => :select_resolution %>">Set capture resolution</a></li>
         <% else %>
             <li>Device does not have cameras for captuing video</li>
         <% end %> 
