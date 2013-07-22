@@ -1,0 +1,32 @@
+<EXAMPLES >
+           <EXAMPLE title="Beep">
+            <SECTIONS>
+               
+              <SECTION>
+               <DESC>
+                   If the device has a hardware beeper, this code will emit sound for two seconds
+               </DESC>
+               <CODE>
+                <RUBY>
+           <![CDATA[
+Rho::Notification.beep({
+  :frequency => 40000,
+  :volume => 1,
+  :duration => 2000
+})
+]]>
+                 </RUBY>
+                <JAVASCRIPT>
+           <![CDATA[
+      Rho.Notification.beep({
+          frequency : 40000,
+          volume : 1,
+          duration : 2000
+        })
+]]>
+                 </JAVASCRIPT>
+               </CODE>
+               </SECTION>
+               </SECTIONS>
+           </EXAMPLE>
+</EXAMPLES>
