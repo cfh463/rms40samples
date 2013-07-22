@@ -1,0 +1,73 @@
+<EXAMPLES >
+           <EXAMPLE title="This is the title for the example that will be the heading of the section and appear in the menu">
+            <SECTIONS>
+               
+              <SECTION>
+               <DESC>
+                   This is a section that shows the same exact code in both Javascript and Ruby. Wherever possible we should show both. If the example is showing how JS and RUby talk to each other then use the other method
+               </DESC>
+               <CODE>
+                <RUBY>
+           <![CDATA[
+def popup_with_multiple_buttons
+  Rho::Notification.showPopup({
+    :message => "How are you feeling today?",
+    :title => "Hey there",
+    :icon => :question,
+    :buttons => [
+      { :id => "1",
+        :title => "Amazing"
+      },
+      { :id => "42",
+        :title => "Super"
+      },
+      { :id => "3",
+        :title => "Great"
+      }
+      ]
+  },url_for(:action => :popup_callback))
+  redirect :notification_menu
+end
+
+def popup_callback
+  Rho::Notification.showPopup({
+    :message => "You clicked a button with id=#{@params["button_id"]}, index=#{@params["button_index"]} and title=#{@params["button_title"]}",
+    :buttons => ["OK"]
+  })
+end
+                   ]]>
+                 </RUBY>
+                <JAVASCRIPT>
+           <![CDATA[
+function popup_with_multiple_buttons() {
+    Rho.Notification.showPopup({
+        message : "How are you feeling today?",
+        title : "Hey there",
+        icon : "question",
+        buttons : [
+          { id : "1",
+            title : "Amazing"
+          },
+          { id : "42",
+            title : "Super"
+          },
+          { id : "3",
+            title : "Great"
+          }
+          ]
+      },popup_callback);  
+}
+
+function popup_callback(params) {
+    Rho.Notification.showPopup({
+        message : "You clicked a button with id="+params.button_id+", index="+params.button_index+" and title="+params.button_title,
+        buttons : ["OK"]
+      });   
+}
+                   ]]>
+                 </JAVASCRIPT>
+               </CODE>
+               </SECTION>
+               </SECTIONS>
+           </EXAMPLE>
+       </EXAMPLES>
