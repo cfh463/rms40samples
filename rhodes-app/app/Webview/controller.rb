@@ -51,7 +51,7 @@ class WebviewController < Rho::RhoController
     # saves the current page
     filename = Rho::RhoFile.join(Rho::Application.userFolder,'current_page.jpeg')
     Rho::WebView.save('jpeg',filename)
-    # Alert.show_popup "Saved the current page"
+    Alert.show_popup "Current page was saved in the #{filename}"
     redirect :action => :save_page
   end
   

@@ -1,0 +1,26 @@
+<div data-role="page">
+
+  <%= render :partial => "/partials/page_head" %>
+    
+  <div data-role="content">
+  
+    <%= render :partial => "/partials/example_header", :locals => {:title => "Create navbar", :description => "
+      Create Native Navbar
+    " }
+    %>
+      <%= render :partial => "/partials/language_tabs" %>
+    
+
+      <div class="sample ruby">
+        <a href="<%= url_for :action => :beep %>" data-role="button">Beep</a>
+        <a href="<%= url_for :action => :popup %>" data-role="button">Popup</a>
+        <a href="<%= url_for :action => :popup_with_multiple_buttons %>" data-role="button">Popup - multiple buttons</a>
+      </div>
+      
+      <div class="sample javascript">
+    	  <a href="#" data-role="button" onclick="KitchenSink.Samples.Notification.beep()">Beep</a>
+    	  <a href="#" data-role="button" onclick="KitchenSink.Samples.Notification.popup()">Popup</a>
+    	  <a href="#" data-role="button" onclick="KitchenSink.Samples.Notification.popup_with_multiple_buttons()">Popup - multiple buttons</a>
+      </div>
+
+  </div>

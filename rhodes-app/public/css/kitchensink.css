@@ -5,9 +5,9 @@
 }
 
 .example_description {
-	display: none;
+	display: block;
 }
 
-.sample.javascript {
+.sample.ruby {
 	display:none;
 }

@@ -26,7 +26,7 @@ class ScreenorientationController < Rho::RhoController
   end
   
   def orientation_callback
-    Alert.show_popup("The screen changed orientation")
+    Alert.show_popup("The screen changed orientation. The new orientation is: #{@params["result"]}")
   end
   
   def left_handed_position
