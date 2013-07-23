@@ -8,7 +8,7 @@ KitchenSink.Samples.Screenorientation = KitchenSink.Samples.Screenorientation ||
 	}
 	
 	function orientation_callback(params) {
-		alert("The screen changed orientation. The new orientation is "+params.result);
+		alert("The screen changed orientation. The new orientation is "+params);
 	}
 	
 	function set_callback() {
