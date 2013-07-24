@@ -24,6 +24,7 @@ extensions:
   - rho-javascript
 #  - barcode
   - cardreader
+  - hardwarekeys
   - signature
   - mediaplayer
   - mediacapture
