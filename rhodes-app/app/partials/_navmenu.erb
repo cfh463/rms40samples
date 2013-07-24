@@ -22,7 +22,7 @@
       
       <ul data-role="listview" data-inset="true">
         <% if Rho::System.platform == "ANDROID" || Rho::System.platform == "APPLE" || Rho::System.platform == "WINDOWS" %>
-          <% if !Rho::Barcode.enumerate.empty? %>
+          <% if Rho::System.isRhoSimulator ? Rho::System.isRhoSimulator : !Rho::Barcode.enumerate.empty? %>
             <li><a href="<%= url_for :controller => :Barcode, :action => :confirm_scan_using_default_scanner %>">Scan using default scanner</a></li>
             <li><a href="<%= url_for :controller => :Barcode, :action => :choose_scanner %>">Choose scanner to use</a></li>
             <li><a href="<%= url_for :controller => :Barcode, :action => :confirm_set_symbology %>">Set symbology</a></li>
@@ -60,12 +60,12 @@
 =end
 %>
           
-    <% if Rho::System.platform == "ANDROID" ||  Rho::System.platform == "WINDOWS" %>    
+    <% if Rho::System.platform == "ANDROID" ||  Rho::System.platform == "WINDOWS" || Rho::System.isMotorolaDevice %>    
     <div data-role="collapsible"  data-filter="cardreader card reader msr magnetic stripe credit identification">
       <h3>Card reader</h3>
       
       <ul data-role="listview" data-inset="true">
-        <% if !Rho::CardReader.enumerate.empty? %>
+        <% if Rho::System.isRhoSimulator ? Rho::System.isRhoSimulator : !Rho::CardReader.enumerate.empty? %>
           <li><a href="<%= url_for(:controller => :Cardreader, :action => :open_cardreader) %>">Connecting to the card reader</a></li>
           <li><a href="#">Reading card data</a></li>
           <li><a href="<%= url_for(:controller => :Cardreader, :action => :properties) %>">Setting card reader properties</a></li>
@@ -110,7 +110,7 @@
       <h3>Keystate</h3>
       
       <ul data-role="listview" data-inset="true">
-        <% if Rho::System.platform == "WINDOWS" %>
+        <% if Rho::System.platform == "WINDOWS" || Rho::System.isMotorolaDevice %>
           <li><a href="<%= url_for :controller => :Keystate, :action => :index %>">Show key state icons</a></li>
         <% else %>
           <li>Keystate is supported only on Windows Mobile</li>
@@ -259,7 +259,7 @@
       <h3>Videocapture</h3>
      
       <ul data-role="listview" data-inset="true">
-        <% if !Rho::Videocapture.enumerate.empty? %>  
+        <% if Rho::System.isRhoSimulator ? Rho::System.isRhoSimulator : !Rho::Videocapture.enumerate.empty? %>  
           <li><a href="<%= url_for :controller => :Videocapture, :action => :index %>">Capture 1-minute video</a></li>
           <li><a href="<%= url_for :controller => :Videocapture, :action => :select_resolution %>">Set capture resolution</a></li>
         <% else %>

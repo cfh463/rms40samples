@@ -10,15 +10,17 @@
     %>
 
     <%= render :partial => "/partials/language_tabs" %>
-    
-    <div class="sample ruby">
-      <a data-role="button" href="<%= url_for :action => :minimize_app %>">Minimize application</a>
-    </div>
-    
-    <div class="sample javascript">
-      <a href="#" data-role="button" onclick="KitchenSink.Samples.Application.minimize_app()">Minimize application</a>    
-    </div>
-    
+    <% if Rho::System.platform == "WINDOWS" || Rho::System.isRhoSimulator %> 
+      <div class="sample ruby">
+        <a data-role="button" href="<%= url_for :action => :minimize_app %>">Minimize application</a>
+      </div>
+      
+      <div class="sample javascript">
+        <a href="#" data-role="button" onclick="KitchenSink.Samples.Application.minimize_app()">Minimize application</a>    
+      </div>
+    <% else %>
+       Minimize application is supported only on Windows Mobile
+    <% end %>
   </div>
 
 </div>

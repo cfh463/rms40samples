@@ -10,14 +10,17 @@
     %>
 
     <%= render :partial => "/partials/language_tabs" %>
-    
-    <div class="sample ruby">
-      <a href="<%= url_for :action => :save %>" data-role="button">Save the page</a>  
-    </div>
-    
-    <div class="sample javascript">
-          <a href="#" data-role="button" onclick="KitchenSink.Samples.Webview.savePage()">Save the page</a>    
-    </div>
+    <% if Rho::System.platform == "ANDROID" %> 
+      <div class="sample ruby">
+        <a href="<%= url_for :action => :save %>" data-role="button">Save the page</a>  
+      </div>
+      
+      <div class="sample javascript">
+            <a href="#" data-role="button" onclick="KitchenSink.Samples.Webview.savePage()">Save the page</a>    
+      </div>
+    <% else %>
+       Save the page is supported only on Android
+    <% end %>
     
     
   </div
