@@ -142,7 +142,7 @@ class NetworkController < Rho::RhoController
     postProps['body'] = body
     postProps['httpVerb'] = "POST"
     Rho::Network.post( postProps, url_for(:action => :post_callback)) 
-    render :action => :headers_and_verbs
+    render :action => :confirm_headers_and_verbs
   end
 
   def post_callback
