@@ -10,15 +10,17 @@ class KeycaptureController < Rho::RhoController
     render
   end
 
-  def keycapture_callback(params)
-    Alert.show_popup("Received card reader data: #{@params["keyValue"]}")
+  def keycapture_callback
+    Alert.show_popup("Captured key: #{@params["keyValue"]}")
   end
 
   def start_keycapture
-    Rho::KeyCapture.captureKey(false,"ALL", url_for(:action => :keycapture_callback))
+    Rho::KeyCapture.captureKey(false,"all", url_for(:action => :keycapture_callback))
+    redirect :action => :index
   end
   
   def stop_keycapture
-    Rho::KeyCapture.captureKey(false,"ALL", nil)
+    Rho::KeyCapture.captureKey(false,"all", "")
+    redirect :action => :index
   end
 end
