@@ -74,6 +74,10 @@ class LogController < Rho::RhoController
     render
   end
   
+  def confirm_send_log_file
+    render
+  end
+  
   def send_log_file
     # Read log file
     @logFileContentBefore = Rho::Log.readLogFile 16384
@@ -89,5 +93,7 @@ class LogController < Rho::RhoController
   end
 
   def send_log_callback
+    Alert.show_popup("Result of sending log file: #{@params["status"]}")
+    WebView.navigate(url_for(:action => :confirm_send_log_file))
   end
 end
