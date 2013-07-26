@@ -12,9 +12,11 @@ class NetworkController < Rho::RhoController
 
   def confirm_network_availability
   	# check the network availability
-  	@cell_network = Rho::Network.hasCellNetwork
-  	@wifi_network = Rho::Network.hasWifiNetwork
-    @network = Rho::Network.hasNetwork
+    if (Rho::System.platform == "ANDROID" || Rho::System.platform == "APPLE" || Rho::System.platform == "WINDOWS")
+  	  @cell_network = Rho::Network.hasCellNetwork
+  	  @wifi_network = Rho::Network.hasWifiNetwork
+      @network = Rho::Network.hasNetwork
+    end
   end
 
   def detect_connection
