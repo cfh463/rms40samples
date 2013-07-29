@@ -5,10 +5,11 @@ KitchenSink.Samples.Webview = KitchenSink.Samples.Webview || (function() {
 		var fullScreen = Rho.WebView.fullScreen;
 		var currentURL = Rho.WebView.currentURL();
 		var currentLocation =Rho.WebView.currentLocation();
-	
-
-		var message = "CurrentURL: " + currentURL + "\n" + "Current Location: " + currentLocation + "\n" + "Full Screen: " + fullScreen;
-
+        if (Rho.System.platform == "ANDROID" || Rho.System.platform == "APPLE"){
+         	var message = "CurrentURL: " + currentURL + "\n" + "Current Location: " + currentLocation + "\n" + "Full Screen: " + fullScreen;
+        }else{
+        	var message = "Current Location: " + currentLocation + "\n" + "Full Screen: " + fullScreen;
+        }
 		alert(message);
 	}
 	

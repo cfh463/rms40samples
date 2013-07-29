@@ -14,7 +14,9 @@
     <div class="sample ruby">
       <ul>
         <li>Fullscreen: <%= @fullScreen %></li>
-        <li>Current URL: <%= @currentURL %></li>
+        <% if (Rho::System.platform == "ANDROID" || Rho::System.platform == "APPLE") %> 
+          <li>Current URL: <%= @currentURL %></li>
+        <% end %>
         <li>Current Location: <%= @currentLocation %></li>
       </ul>
       <a href="<%= url_for(:action => :toggle_fullscreen) %>" data-role="button">Toggle fullscreen</a>

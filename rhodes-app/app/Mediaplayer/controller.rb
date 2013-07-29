@@ -10,8 +10,12 @@ class MediaplayerController < Rho::RhoController
   end
   
   def load_ringtones
-    Rho::Mediaplayer.getAllRingtones(url_for(:action => :mediaplayer_callback))
-    render :action => :loading
+    if (Rho::System.platform == "ANDROID" ||  Rho::System.platform == "WINDOWS")
+      Rho::Mediaplayer.getAllRingtones(url_for(:action => :mediaplayer_callback))
+      render :action => :loading
+    else 
+      render :action => :list_ringtones
+    end
   end
   
   def mediaplayer_callback
@@ -22,7 +26,7 @@ class MediaplayerController < Rho::RhoController
   end
   
   def list_ringtones
-     @ringtones = @params["ringtones"]
+      @ringtones = @params["ringtones"]
      render
   end
   
