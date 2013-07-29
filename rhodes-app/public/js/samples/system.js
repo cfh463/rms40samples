@@ -16,12 +16,15 @@ KitchenSink.Samples.System = KitchenSink.Samples.System || (function() {
 		alert(message);
 	}
 
-	function install_or_uninstall_app() {
+	function install_apk() {
 		// install an application from given url
-		Rho.System.applicationInstall("/bin/target/android/rhodes-app-debug.apk");
+		Rho.System.applicationInstall("http://rhodes-server-log.herokuapp.com/simple_app_signed.apk");
+		alert("Simpleapp-rhodes is installing")
+	}
 
+	function uninstall_app() {
 		// uninstall the application
-		Rho.System.applicationUninstall("rhodes-app");
+		Rho.System.applicationUninstall("com.rhomobile.rhodesapp");
 	}
 
 	function get_version_info() {
@@ -44,7 +47,8 @@ KitchenSink.Samples.System = KitchenSink.Samples.System || (function() {
 
 	return {
 		capabilities: capabilities,
-		install_or_uninstall_app: install_or_uninstall_app,
+		install_apk: install_apk,
+		uninstall_app: uninstall_app,
 		get_version_info: get_version_info,
 		local_serverport: local_serverport,
 		zip: zip
