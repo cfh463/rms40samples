@@ -10,26 +10,22 @@
     %>
 
       <div class="sample javascript">
-        <a href="#" data-role="button" onclick="KitchenSink.Samples.ORM.create_model()">Create model</a>
-        <a href="#" data-role="button" onclick="KitchenSink.Samples.ORM.create_object()">Create object</a>
+        <a href="#" data-role="button" onclick="KitchenSink.Samples.ORM.create_model()">Initialize model</a>
+        <a href="#" data-role="button" onclick="KitchenSink.Samples.ORM.refresh_view()">Load products</a>
+        <a href="#" data-role="button" onclick="KitchenSink.Samples.ORM.create_object()">Create product</a>
         
-        <div id="products_table">
-          <% if @products %>
+        <div id="products_table" style="width: 100%">
           <table>
-            <tr>
-              <th>Name</th>
-              <th>Brand</th>
-              <th>Price</th>
-            </tr>
-            <% @products.each do |product| %>
+            <thead>
               <tr>
-                <td><%= product.name %></td>
-                <td><%= product.brand %></td>
-                <td><%= product.price %></td>
+                <th>Name</th>
+                <th>Brand</th>
+                <th>Price</th>
               </tr>
-            <% end %>
+            </thead>
+            <tbody>
+            </tbody>
           </table>
-          <% end %>
         </div>
       </div>
 
