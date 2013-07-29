@@ -9,7 +9,7 @@ var KitchenSink = (function() {
 		}
 		
 		function filter_navmenu() {
-			var searchText = $(this).val();
+			var searchText = $(this).val().toLowerCase();
 			var sections = $(this).closest(".navmenu").find(".navmenu_sections");
 			
 			sections.find("div[data-role=collapsible]").each(function() {

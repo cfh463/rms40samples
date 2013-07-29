@@ -10,14 +10,18 @@
     %>
 
     <%= render :partial => "/partials/language_tabs" %>
-    
-    <div class="sample ruby">
-      <a data-role="button" href="<%= url_for :action => :restore_app %>">Restore application</a>
-    </div>
-    
-    <div class="sample javascript">
-      <a href="#" data-role="button" onclick="KitchenSink.Samples.Application.restore_app()">Restore application</a>    
-    </div>
+    <% if (Rho::System.platform == "WINDOWS" || Rho::System.platform == "WINDOWS_DESKTOP") %> 
+      <div class="sample ruby">
+        <a data-role="button" href="<%= url_for :action => :restore_app %>">Restore application</a>
+      </div>
+      
+      <div class="sample javascript">
+        <a href="#" data-role="button" onclick="KitchenSink.Samples.Application.restore_app()">Restore application</a>    
+      </div>
+    <% else %>
+       Restore application is supported only on Windows Mobile and Windows Destop
+    <% end %>
+
     
   </div>
 

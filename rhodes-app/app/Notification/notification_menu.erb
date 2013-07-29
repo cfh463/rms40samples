@@ -12,15 +12,23 @@
     
 
       <div class="sample ruby">
-        <a href="<%= url_for :action => :beep %>" data-role="button">Beep</a>
-        <a href="<%= url_for :action => :popup %>" data-role="button">Popup</a>
-        <a href="<%= url_for :action => :popup_with_multiple_buttons %>" data-role="button">Popup - multiple buttons</a>
+        <% if (Rho::System.platform == "ANDROID" || Rho::System.platform == "WINDOWS") && (!Rho::System.isRhoSimulator && Rho::System.isMotorolaDevice )%>
+          <a href="<%= url_for :action => :beep %>" data-role="button">Beep</a>
+        <% end %>
+        <% if Rho::System.platform != "WP8" %>
+          <a href="<%= url_for :action => :popup %>" data-role="button">Popup</a>
+          <a href="<%= url_for :action => :popup_with_multiple_buttons %>" data-role="button">Popup - multiple buttons</a>
+        <% end %>
       </div>
       
       <div class="sample javascript">
-    	  <a href="#" data-role="button" onclick="KitchenSink.Samples.Notification.beep()">Beep</a>
-    	  <a href="#" data-role="button" onclick="KitchenSink.Samples.Notification.popup()">Popup</a>
-    	  <a href="#" data-role="button" onclick="KitchenSink.Samples.Notification.popup_with_multiple_buttons()">Popup - multiple buttons</a>
+        <% if (Rho::System.platform == "ANDROID" || Rho::System.platform == "WINDOWS") && (!Rho::System.isRhoSimulator && Rho::System.isMotorolaDevice )%>
+    	    <a href="#" data-role="button" onclick="KitchenSink.Samples.Notification.beep()">Beep</a>
+        <% end %>
+        <% if Rho::System.platform != "WP8" %>
+    	    <a href="#" data-role="button" onclick="KitchenSink.Samples.Notification.popup()">Popup</a>
+    	    <a href="#" data-role="button" onclick="KitchenSink.Samples.Notification.popup_with_multiple_buttons()">Popup - multiple buttons</a>
+        <% end %>
       </div>
 
   </div>

@@ -36,15 +36,20 @@ KitchenSink.Samples.Log = KitchenSink.Samples.Log || (function() {
 	  }
 
 	  function send_log_file () {
-		    var log_contents = Rho.Log.readLogFile(16384);
+	  	//see server log at http://rhodes-server-log.herokuapp.com/server_logs
+		    var log_contents = Rho.Log.readLogFile(400);
 		    if (log_contents){
-		      Rho.Log.destinationURI = "http://localhost:3000/rholog?log_name=RMS_CodeSample_App_Log";
+		      Rho.Log.destinationURI = "http://rhodes-server-log.herokuapp.com/rholog?log_name=RMS_CodeSample_App_Log";
 		      Rho.Log.sendLogFile(send_log_callback);
 		    } else{
 		      alert("Log FileContents are empty");
 		    }
 		  }
-	
+
+	  function send_log_callback(params) {
+		  alert("Result of sending the log file: "+params.status);
+	  }
+		  
 	return {
 		log_categories : log_categories,
 		start_logging_memory_usage : start_logging_memory_usage,
@@ -55,4 +60,4 @@ KitchenSink.Samples.Log = KitchenSink.Samples.Log || (function() {
 		send_log_file : send_log_file
 	};
 
-})();
+})()

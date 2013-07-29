@@ -9,7 +9,7 @@ KitchenSink.Samples.Keycapture = KitchenSink.Samples.Keycapture || (function() {
 	  }
 	  
 	  function keycapture_callback(params) {
-		  Alert("Captured key: "+params["keyValue"]);
+		  alert("Captured key: "+params["keyValue"]);
 	  }
 
 	  

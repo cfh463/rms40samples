@@ -9,27 +9,30 @@
     %>
 
   <%= render :partial => "/partials/language_tabs" %>
+  <% if (Rho::System.platform == "ANDROID" || Rho::System.platform == "WINDOWS")  %>
+    <div data-role="content">
 
-  <div data-role="content">
-
-    <div class="sample ruby">  	
-    	<% unless @ringtones %>
-    	  No ring tones
-    	<% else %>
-      	<% @ringtones.each do |key,v| %>
-      	  <%= link_to key, { :action => 'play', :query => { :name => key} } %> <br/>
-    	  <% end %>
-    	<% end %>
-  	</div>
-    	
-  	<div class="sample javascript">
-  	  <a href="#" onclick="KitchenSink.Samples.MediaPlayer.list_ringtones()" data-role="button">List ringtones</a>
-  	  
-  	  <ul class="ringtone_list">
-  	  </ul>
-  	  
-  	  <a class="stop_ringtone" href="#" onclick="KitchenSink.Samples.MediaPlayer.stop_ringtone()" data-role="button">Stop playing</a>
-  	</div>
-  </div>
+      <div class="sample ruby">  	
+      	<% unless @ringtones %>
+      	  No ring tones
+      	<% else %>
+        	<% @ringtones.each do |key,v| %>
+        	  <%= link_to key, { :action => 'play', :query => { :name => key} } %> <br/>
+      	  <% end %>
+      	<% end %>
+    	</div>
+      	
+    	<div class="sample javascript">
+    	  <a href="#" onclick="KitchenSink.Samples.MediaPlayer.list_ringtones()" data-role="button">List ringtones</a>
+    	  
+    	  <ul class="ringtone_list">
+    	  </ul>
+    	  
+    	  <a class="stop_ringtone" href="#" onclick="KitchenSink.Samples.MediaPlayer.stop_ringtone()" data-role="button">Stop playing</a>
+    	</div>
+    </div>
+  <% else %>
+    Show all ringtones and play them  is supported only on Android and Windows Mobile
+  <% end %>
 
 </div>
