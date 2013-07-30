@@ -35,6 +35,7 @@ class SystemController < Rho::RhoController
   def uninstall_app
     # uninstall the application
     Rho::System.applicationUninstall(get_uninstall_app_name)
+    redirect :action => :confirm_install_app
   end
  
   def get_install_app_url
