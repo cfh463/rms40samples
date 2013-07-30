@@ -41,7 +41,8 @@ KitchenSink.Samples.System = KitchenSink.Samples.System || (function() {
 		}
 		// uninstall the application
 		if (Rho.System.isApplicationInstalled(app_name)){
-			Rho.System.applicationUninstall(app_name);	
+			Rho.System.applicationUninstall(app_name);
+			alert("simple_app is uninstalled")
 		}else{
 			alert("Please install application before running this sample")
 		}

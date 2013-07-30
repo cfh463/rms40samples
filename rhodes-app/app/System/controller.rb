@@ -36,6 +36,7 @@ class SystemController < Rho::RhoController
     # uninstall the application
     if Rho::System.isApplicationInstalled(get_uninstall_app_name)
       Rho::System.applicationUninstall(get_uninstall_app_name)
+      Rho::Notification.showPopup("simple_app is uninstalled")
     else 
       Rho::Notification.showPopup("Please install application before running this sample")
     end
