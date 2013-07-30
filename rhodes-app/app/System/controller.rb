@@ -26,9 +26,36 @@ class SystemController < Rho::RhoController
   end
 
   def install_app
-     #install an application from given url
-  	Rho::System.applicationInstall()
+    #install an android application from given url
+    Rho::System.applicationInstall(get_install_app_url)
+    Rho::Notification.showPopup("Application is ready to install")
+    redirect :action => :confirm_install_app
+  end
 
+  def uninstall_app
+    # uninstall the application
+    Rho::System.applicationUninstall(get_uninstall_app_name)
+    redirect :action => :confirm_install_app
+  end
+ 
+  def get_install_app_url
+    if Rho::System.platform == "ANDROID"
+      return "http://rhodes-server-log.herokuapp.com/simple_app_signed.apk"
+    elsif Rho::System.platform == "WINDOWS"
+      return "http://rhodes-server-log.herokuapp.com/simple_app.cab"
+    else 
+      return ""
+    end
+  end 
+
+  def get_uninstall_app_name
+    if Rho::System.platform == "ANDROID"
+      return "com.rhomobile.rhodesapp"
+    elsif Rho::System.platform == "WINDOWS"
+      return "rhomobile rhodes-app/rhodes-app.exe"
+    else 
+      return "rhomobile/rhodes-app/rhodes-app.exe"
+    end
   end
 
   def get_version_info
