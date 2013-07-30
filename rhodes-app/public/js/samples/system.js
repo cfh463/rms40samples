@@ -33,14 +33,19 @@ KitchenSink.Samples.System = KitchenSink.Samples.System || (function() {
 	function uninstall_app() {
 		var app_name
 		if (Rho.System.platform == "ANDROID"){
-		 	app_name = "com.rhomobile.rhodesapp"
+		 	app_name = "com.rhomobile.simple_app"
 		}else if (Rho.System.platform == "WINDOWS"){
-			app_name = "rhomobile rhodes-app/rhodes-app.exe"
+			app_name = "rhomobile simple_app/simple_app.exe"
 		}else{
-			app_name = "rhomobile/rhodes-app/rhodes-app.exe"
+			app_name = "rhomobile/simple_app/simple_app.exe"
 		}
 		// uninstall the application
-		Rho.System.applicationUninstall(app_name);
+		if (Rho.System.isApplicationInstalled(app_name)){
+			Rho.System.applicationUninstall(app_name);	
+		}else{
+			alert("Please install application before running this sample")
+		}
+		
 	}
 
 	function get_version_info() {

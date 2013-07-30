@@ -34,7 +34,11 @@ class SystemController < Rho::RhoController
 
   def uninstall_app
     # uninstall the application
-    Rho::System.applicationUninstall(get_uninstall_app_name)
+    if Rho::System.isApplicationInstalled(get_uninstall_app_name)
+      Rho::System.applicationUninstall(get_uninstall_app_name)
+    else 
+      Rho::Notification.showPopup("Please install application before running this sample")
+    end
     redirect :action => :confirm_install_app
   end
  
@@ -44,17 +48,18 @@ class SystemController < Rho::RhoController
     elsif Rho::System.platform == "WINDOWS"
       return "http://rhodes-server-log.herokuapp.com/simple_app.cab"
     else 
+      #Url for Windows Desktop 
       return ""
     end
   end 
 
   def get_uninstall_app_name
     if Rho::System.platform == "ANDROID"
-      return "com.rhomobile.rhodesapp"
+      return "com.rhomobile.simple_app"
     elsif Rho::System.platform == "WINDOWS"
-      return "rhomobile rhodes-app/rhodes-app.exe"
+      return "rhomobile simple_app/simple_app.exe"
     else 
-      return "rhomobile/rhodes-app/rhodes-app.exe"
+      return "rhomobile/simple_app/simple_app.exe"
     end
   end
 
