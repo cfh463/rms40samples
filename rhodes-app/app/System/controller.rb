@@ -66,19 +66,27 @@ class SystemController < Rho::RhoController
 
   def get_version_info
   	version_info = Rho::System.osVersion
-  	Alert.show_popup(version_info)
+    Rho::Notification.showPopup({
+      :message => "#{version_info}",
+      :buttons => ["OK"]
+    })
   end
 
   def local_serverport
   	# Get port of the local (embedded) HTTP server
   	local_port = Rho::System.localServerPort()
-  	Alert.show_popup(local_port)
+    Rho::Notification.showPopup({
+      :message => "#{local_port}",
+      :buttons => ["OK"]
+    })
   end
 
   def zip_files
     destination_zip = Rho::RhoFile.join(Rho::Application.userFolder, "public.zip")
   	Rho::System.zipFiles(destination_zip, Rho::Application.publicFolder, ["css", "images"])
-  	Alert.show_popup("Public folder zipped in #{destination_zip}")
+    Rho::Notification.showPopup({
+      :buttons => ["OK"]
+    })
   	redirect :action => :confirm_zip
   end
   

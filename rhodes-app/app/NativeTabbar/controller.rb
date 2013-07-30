@@ -44,6 +44,9 @@ class NativeTabbarController < Rho::RhoController
   end
   
   def tabbar_callback
-    Alert.show_popup("Switching to tab #{@params["tab_index"]}")
+    Rho::Notification.showPopup({
+      :message => "Switching to tab #{@params["tab_index"]}",
+      :buttons => ["OK"]
+    })
   end
 end

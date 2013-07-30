@@ -11,7 +11,10 @@ class KeycaptureController < Rho::RhoController
   end
 
   def keycapture_callback
-    Alert.show_popup("Captured key: #{@params["keyValue"]}")
+    Rho::Notification.showPopup({
+      :message => "Captured key: #{@params["keyValue"]}",
+      :buttons => ["OK"]
+    })
   end
 
   def start_keycapture

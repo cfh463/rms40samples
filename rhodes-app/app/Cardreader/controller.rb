@@ -20,7 +20,10 @@ class CardreaderController < Rho::RhoController
   end
   
   def cardreader_callback
-    Alert.show_popup("Received card reader data: #{@params[:data]}")
+    Rho::Notification.showPopup({
+      :message => "Received card reader data: #{@params[:data]}",
+      :buttons => ["OK"]
+    })
   end
   def properties
     render

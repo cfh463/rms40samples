@@ -19,7 +19,10 @@ class DatabaseController < Rho::RhoController
     Rho::Log.info("Initializing database", "Init DB Sample")
     db = open_db
     Rho::Log.info("Database initialized", "Init DB Sample")
-    Alert.show_popup("Sample database initialized")
+    Rho::Notification.showPopup({
+      :message => "Sample database initialized",
+      :buttons => ["OK"]
+    })
     db.close
     
     redirect :confirm_init_db
@@ -65,7 +68,10 @@ class DatabaseController < Rho::RhoController
     
     if !db.isTableExist("users_sample")
       db.close
-      Alert.show_popup("Please seed the database before running this sample")
+      Rho::Notification.showPopup({
+        :message => "Please seed the database before running this sample",
+        :buttons => ["OK"]
+      })
       redirect :action => :confirm_seed_db
     else
       @users = db.executeSql("Select user_id,active from users_sample")
@@ -99,8 +105,10 @@ class DatabaseController < Rho::RhoController
     end
     
     db.close
-    
-    Alert.show_popup "Seed Succeeded"
+    Rho::Notification.showPopup({
+        :message => "Seed Succeeded",
+        :buttons => ["OK"]
+      })
     redirect :confirm_seed_db
   end
 
@@ -113,7 +121,10 @@ class DatabaseController < Rho::RhoController
    db = open_db
    export_path = db.export
    db.close
-   Alert.show_popup "Export path - #{export_path}"
+   Rho::Notification.showPopup({
+      :message => "Export path - #{export_path}",
+      :buttons => ["OK"]
+   })
    redirect :confirm_export_db
   end
 
@@ -130,7 +141,10 @@ class DatabaseController < Rho::RhoController
     db = open_db
     db.import(export_path)
     db.close
-    Alert.show_popup "Database Import Succeeded"
+    Rho::Notification.showPopup({
+      :message => "Database Import Succeeded",
+      :buttons => ["OK"]
+    })
     redirect :confirm_import_db
   end
 end
