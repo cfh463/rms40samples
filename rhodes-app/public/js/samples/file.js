@@ -4,7 +4,7 @@ KitchenSink.Samples.File = KitchenSink.Samples.File || (function() {
 		var result = "";
 
 		if (link_base) {
-			var level_up = '<li><a href="#" class="filesample folder" data-path="' + escape(Rho.RhoFile.dirname(link_base)) + '">[One level up]</a></li>';
+			var level_up = '<li><a href="#" data-role="button" class="filesample folder" data-path="' + escape(Rho.RhoFile.dirname(link_base)) + '">[One level up]</a></li>';
 			result += level_up;
 		}
 
@@ -14,7 +14,7 @@ KitchenSink.Samples.File = KitchenSink.Samples.File || (function() {
 			var element = entry;
 
 			if (link_base) {
-				element = '<a href="#" class="filesample folder" data-path="' + escape(Rho.RhoFile.join(link_base, entry)) + '">' + element + '</a>';
+				element = '<a href="#" data-role="button" class="filesample folder" data-path="' + escape(Rho.RhoFile.join(link_base, entry)) + '">' + element + '</a>';
 			}
 
 			element = "<li>" + element + "</li>";

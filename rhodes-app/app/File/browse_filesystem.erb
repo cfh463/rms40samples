@@ -15,13 +15,11 @@
     
     <div class="sample ruby">
       Folders:
-      <ul>
       <!-- TODO: move from RhoFile to File when implemented -->
-        <li><a href="<%= url_for :action=> :browse_filesystem, :query => {:start_from_path => Rho::RhoFile.dirname(@start_from_path)} %>">[One level up]</a></li>      
+        <a data-role="button" href="<%= url_for :action=> :browse_filesystem, :query => {:start_from_path => Rho::RhoFile.dirname(@start_from_path)} %>">[One level up]</a>      
         <% @folders.each do |folder| %>
-            <li><a href="<%= url_for :action=> :browse_filesystem, :query => {:start_from_path => Rho::RhoFile.join(@start_from_path,folder)} %>"><%= folder %></a></li> 
+            <a data-role="button" href="<%= url_for :action=> :browse_filesystem, :query => {:start_from_path => Rho::RhoFile.join(@start_from_path,folder)} %>"><%= folder %></a> 
         <% end %>
-      </ul>
         
       Files:
       <ul>
