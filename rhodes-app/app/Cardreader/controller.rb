@@ -15,13 +15,14 @@ class CardreaderController < Rho::RhoController
   end
   
   def connect
-    Rho::CardReader.open({}, url_for(:action => :cardreader_callback))
+    Rho::CardReader.open(url_for(:action => :cardreader_callback))
     redirect :open_cardreader
   end
   
   def cardreader_callback
+    p @params,"--------------------cardreader_callback"
     Rho::Notification.showPopup({
-      :message => "Received card reader data: #{@params[:data]}",
+      :message => "Received card reader data: #{@params["data"]}",
       :buttons => ["OK"]
     })
   end
@@ -32,9 +33,12 @@ class CardreaderController < Rho::RhoController
     # Configure the MSR to output keystrokes instead of calling a function when a card is swiped
     # Note the absence of a callback parameter
     # Also, After emitting the keystrokes, automatically send a "Tab" keypress
-    Rho::CardReader.open({:autoTab => true})
-      
+    Rho::CardReader.autoTab = true
+    Rho::CardReader.open(url_for(:action => :cardreader_callback))
+
     # Instead of "Tab", we could request a simulated "Enter" 
-    Rho::CardReader.open({:autoEnter => true})
+    Rho::CardReader.autoEnter = true
+    Rho::CardReader.open(url_for(:action => :cardreader_callback))
+    redirect :properties
   end
 end
