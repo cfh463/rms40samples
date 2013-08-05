@@ -34,7 +34,12 @@ class SystemController < Rho::RhoController
 
   def uninstall_app
     # uninstall the application
-    Rho::System.applicationUninstall(get_uninstall_app_name)
+    if Rho::System.isApplicationInstalled(get_uninstall_app_name)
+      Rho::System.applicationUninstall(get_uninstall_app_name)
+      Rho::Notification.showPopup("simple_app is uninstalled")
+    else 
+      Rho::Notification.showPopup("Please install application before running this sample")
+    end
     redirect :action => :confirm_install_app
   end
  
@@ -44,35 +49,44 @@ class SystemController < Rho::RhoController
     elsif Rho::System.platform == "WINDOWS"
       return "http://rhodes-server-log.herokuapp.com/simple_app.cab"
     else 
+      #Url for Windows Desktop 
       return ""
     end
   end 
 
   def get_uninstall_app_name
     if Rho::System.platform == "ANDROID"
-      return "com.rhomobile.rhodesapp"
+      return "com.rhomobile.simple_app"
     elsif Rho::System.platform == "WINDOWS"
-      return "rhomobile rhodes-app/rhodes-app.exe"
+      return "rhomobile simple_app/simple_app.exe"
     else 
-      return "rhomobile/rhodes-app/rhodes-app.exe"
+      return "rhomobile/simple_app/simple_app.exe"
     end
   end
 
   def get_version_info
   	version_info = Rho::System.osVersion
-  	Alert.show_popup(version_info)
+    Rho::Notification.showPopup({
+      :message => "#{version_info}",
+      :buttons => ["OK"]
+    })
   end
 
   def local_serverport
   	# Get port of the local (embedded) HTTP server
   	local_port = Rho::System.localServerPort()
-  	Alert.show_popup(local_port)
+    Rho::Notification.showPopup({
+      :message => "#{local_port}",
+      :buttons => ["OK"]
+    })
   end
 
   def zip_files
     destination_zip = Rho::RhoFile.join(Rho::Application.userFolder, "public.zip")
   	Rho::System.zipFiles(destination_zip, Rho::Application.publicFolder, ["css", "images"])
-  	Alert.show_popup("Public folder zipped in #{destination_zip}")
+    Rho::Notification.showPopup({
+      :buttons => ["OK"]
+    })
   	redirect :action => :confirm_zip
   end
   

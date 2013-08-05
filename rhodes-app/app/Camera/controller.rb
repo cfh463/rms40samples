@@ -127,7 +127,10 @@ class CameraController < Rho::RhoController
     if (@params["status"]=="ok")
       # If so, save it to the gallery
       Rho::Camera.saveImageToDeviceGallery(@params["imageUri"])
-      Alert.show_popup("Image saved to gallery")
+      Rho::Notification.showPopup({
+        :message => "Image saved to gallery",
+        :buttons => ["OK"]
+      })
     end
 
     Rho::WebView.navigate(url_for(:action => :confirm_take_picture_and_save_it_to_gallery))

@@ -12,15 +12,11 @@
     <%= render :partial => "/partials/language_tabs" %>
     
     <div class="sample ruby">
-      <ul>
-<li><a href="<%= url_for(:action => :connect) %>">Connecting to the card reader</a></li>
-   
-      </ul>
-    </div>
+      <a data-role="button" href="<%= url_for(:action => :connect) %>">Connecting to the card reader</a>
+     </div>
     
     <div class="sample javascript">
-          <a href="#" data-role="button" onclick="KitchenSink.Samples.CardReader.connect()">Connecting to the card reader</a>
+      <a href="#" data-role="button" onclick="KitchenSink.Samples.CardReader.connect()">Connecting to the card reader</a>
     </div>
-    
-    
+
   </div>

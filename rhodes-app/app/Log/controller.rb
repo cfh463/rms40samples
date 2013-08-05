@@ -87,13 +87,19 @@ class LogController < Rho::RhoController
       Rho::Log.sendLogFile(url_for(:action => :send_log_callback))
       render :action => :server_log
     else
-      Alert.show_popup "Log FileContents are empty."
+      Rho::Notification.showPopup({
+        :message => "Log FileContents are empty",
+        :buttons => ["OK"]
+      })
       render :action => :confirm_read_log
     end
   end
 
   def send_log_callback
-    Alert.show_popup("Result of sending log file: #{@params["status"]}")
+    Rho::Notification.showPopup({
+        :message => "Result of sending log file: #{@params["status"]}",
+        :buttons => ["OK"]
+    })
     WebView.navigate(url_for(:action => :confirm_send_log_file))
   end
 end

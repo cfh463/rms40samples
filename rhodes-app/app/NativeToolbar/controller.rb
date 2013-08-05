@@ -30,7 +30,10 @@ class NativeToolbarController < Rho::RhoController
   end
 
   def show_alert
-    Alert.show_popup("This alert was invoked from a NativeToolbar button")
+    Rho::Notification.showPopup({
+      :message => "This alert was invoked from a NativeToolbar button",
+      :buttons => ["OK"]
+    })
   end
   
   def remove_toolbar

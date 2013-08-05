@@ -22,7 +22,10 @@ class VideocaptureController < Rho::RhoController
     puts "Result is #{@params['transferResult']}"
     puts "Name is #{@params['fileName']}"       
     puts "Size is #{@params['size']}" 
-    Alert.show_popup("Video was saved in the #{@params['fileName']} ")
+    Rho::Notification.showPopup({
+      :message => "Video was saved in the #{@params['fileName']}",
+      :buttons => ["OK"]
+    })
   end
   
   def capture_video_with_resolution

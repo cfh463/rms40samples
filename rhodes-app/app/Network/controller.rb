@@ -20,7 +20,10 @@ class NetworkController < Rho::RhoController
   end
 
   def detect_connection
-  	Alert.show_popup "Detect connection host motorolasolutions.com"
+    Rho::Notification.showPopup({
+      :message => "Detect connection host motorolasolutions.com",
+      :buttons => ["OK"]
+    })
   	puts "detect_connection---------------"
   	networkProps = Hash.new
   	networkProps['host'] = 'www.motorolasolutions.com'
@@ -33,28 +36,43 @@ class NetworkController < Rho::RhoController
   def connectionEventCallback
   	puts "Detect connection callback event #{@params}---------------"
   	if @params['connectionInformation'] == 'Disconnected'
-  		Alert.show_popup "Connection Lost"
+      Rho::Notification.showPopup({
+        :message => "Connection Lost",
+        :buttons => ["OK"]
+      })
   	else
-  		Alert.show_popup "Connection Restored"
+      Rho::Notification.showPopup({
+        :message => "Connection Restored",
+        :buttons => ["OK"]
+      })
   	end
   end
 
   def start_status_notify
     # Request the system to check every 3 seconds and call us back if there is a change in network connectivity
   	Rho::Network.startStatusNotify(3000, url_for(:action => :status_notify_callback))
-    Alert.show_popup "Started network status notifications"
+    Rho::Notification.showPopup({
+      :message => "Started network status notifications",
+      :buttons => ["OK"]
+    })
     redirect :confirm_detect_network_events
   end
 
   # This is our notification that the status of the network changed. old_status and new_status can be "disconnected" or "connected"
   def status_notify_callback
-  	Alert.show_popup("Network status changed from #{@params["prev_status"]} to #{@params["current_status"]}")
+    Rho::Notification.showPopup({
+      :message => "Network status changed from #{@params["prev_status"]} to #{@params["current_status"]}",
+      :buttons => ["OK"]
+    })
   end
 
   def stop_status_notify
     # Stop network status notifications
   	Rho::Network.stopStatusNotify
-    Alert.show_popup "Stopped network status notifications"
+    Rho::Notification.showPopup({
+      :message => "Stopped network status notifications",
+      :buttons => ["OK"]
+    })
     redirect :confirm_detect_network_events
   end
 
@@ -75,9 +93,15 @@ class NetworkController < Rho::RhoController
 
   def upload_file_callback
   	if @params["status"] == "ok"
-  		Alert.show_popup "Upload Succeeded."
+      Rho::Notification.showPopup({
+        :message => "Upload Succeeded",
+        :buttons => ["OK"]
+      })
   	else
-  		Alert.show_popup "Upload Failed."
+      Rho::Notification.showPopup({
+        :message => "Upload Failed",
+        :buttons => ["OK"]
+      })
   	end
     Rho::WebView.navigate(url_for(:action => :confirm_upload))  	
   end
@@ -98,9 +122,14 @@ class NetworkController < Rho::RhoController
   
   def download_file_callback
   	if @params["status"] == "ok"
-  		Alert.show_popup "Download Success. File saved to " + Rho::RhoFile.join(Rho::Application.userFolder, "sample.png")
+      Rho::Notification.showPopup({
+        :message => "Download Success. File saved to " + Rho::RhoFile.join(Rho::Application.userFolder, "sample.png"),
+        :buttons => ["OK"]
+      })
   	else
-  		Alert.show_popup "Download Failed"
+      Rho::Notification.showPopup({
+        :buttons => ["OK"]
+      })
   	end
   	Rho::WebView.navigate(url_for(:action => :confirm_download))
   end
@@ -127,7 +156,9 @@ class NetworkController < Rho::RhoController
   end
 
   def show_error
-    Alert.show_popup "Get Failed"
+    Rho::Notification.showPopup({
+      :buttons => ["OK"]
+    })
     render :action => :index
   end
 
@@ -149,9 +180,15 @@ class NetworkController < Rho::RhoController
 
   def post_callback
     if @params['status'] == "ok"
-      Alert.show_popup "Posted Success - #{@params['body']}"
+      Rho::Notification.showPopup({
+        :message => "Posted Success - #{@params['body']}",
+        :buttons => ["OK"]
+      })
     else
-      Alert.show_popup "Posted Failed - #{@params['body']}"
+      Rho::Notification.showPopup({
+        :message => "Posted Failed - #{@params['body']}",
+        :buttons => ["OK"]
+      })
     end
     Rho::Log.info(@params, "callback results")    
   end
@@ -169,7 +206,10 @@ class NetworkController < Rho::RhoController
       :authUser => "test",
       :authPassword => "test12345"
     )
-    Alert.show_popup "#{@response['body']}"
+    Rho::Notification.showPopup({
+      :message => "#{@response['body']}",
+      :buttons => ["OK"]
+    })
     redirect :action => :confirm_basic_auth
   end
 end

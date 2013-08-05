@@ -4,17 +4,18 @@ KitchenSink.Samples.CardReader = KitchenSink.Samples.CardReader || (function() {
       }
       
       function connect() {
-        Rho.CardReader.open({}, cardreader_callback);
+        Rho.CardReader.open(cardreader_callback);
       }
       
       function setProperties() {
         // Configure the MSR to output keystrokes instead of calling a function when a card is swiped
         // Note the absence of a callback parameter
         // Also, After emitting the keystrokes, automatically send a "Tab" keypress
+        Rho.CardReader.autoTab = true;
+        Rho.CardReader.open(cardreader_callback);
 
-        Rho.CardReader.open({autoTab : true});
-        
-        Rho.CardReader.open({autoEnter : true});
+        Rho.CardReader.autoEnter = true;
+        Rho.CardReader.open(cardreader_callback);
       }
 	
 	return {

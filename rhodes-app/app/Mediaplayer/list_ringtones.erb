@@ -17,7 +17,9 @@
       	  No ring tones
       	<% else %>
         	<% @ringtones.each do |key,v| %>
-        	  <%= link_to key, { :action => 'play', :query => { :name => key} } %> <br/>
+            <a herf="<%= url_for :action => :play, :query => { :name => key } %>" data-role="button">
+              <%= key %>
+            </a><br/>
       	  <% end %>
       	<% end %>
     	</div>
