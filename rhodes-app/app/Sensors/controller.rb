@@ -11,9 +11,9 @@ class SensorsController < Rho::RhoController
   end
   
   def accelerometer_callback
-    @accelerometer_x = @params['x']
-    @accelerometer_y = @params['y']
-    @accelerometer_z = @params['z']
+    @accelerometer_x = @params['accelerometer_x']
+    @accelerometer_y = @params['accelerometer_y']
+    @accelerometer_z = @params['accelerometer_z']
     Rho::WebView.executeJavascript("$('.ui-page-active .accelerometer_x').text('#{@accelerometer_x}');")
     Rho::WebView.executeJavascript("$('.ui-page-active .accelerometer_y').text('#{@accelerometer_y}');")
     Rho::WebView.executeJavascript("$('.ui-page-active .accelerometer_z').text('#{@accelerometer_z}');")
