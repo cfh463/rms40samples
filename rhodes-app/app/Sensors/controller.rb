@@ -14,7 +14,9 @@ class SensorsController < Rho::RhoController
     @accelerometer_x = @params['x']
     @accelerometer_y = @params['y']
     @accelerometer_z = @params['z']
-    Rho::WebView.refresh
+    Rho::WebView.executeJavascript("$('.ui-page-active .accelerometer_x').text('#{@accelerometer_x}');")
+    Rho::WebView.executeJavascript("$('.ui-page-active .accelerometer_y').text('#{@accelerometer_y}');")
+    Rho::WebView.executeJavascript("$('.ui-page-active .accelerometer_z').text('#{@accelerometer_z}');")
   end
   
   def start_accelerometer_test
@@ -28,13 +30,13 @@ class SensorsController < Rho::RhoController
         :buttons => ["OK"]
       })
     end  
-    render :accelerometer_test
+    redirect :accelerometer_test
   end
   
   def stop_accelerometer_test
     if $accelerometer_sensor != nil
       $accelerometer_sensor.stop
     end
-    render :accelerometer_test
+    redirect :accelerometer_test
   end
 end
