@@ -18,12 +18,23 @@ class SensorsController < Rho::RhoController
   end
   
   def start_accelerometer_test
-    Rho::Sensors.watchAccelerometer(200, url_for(:action => accelerometer_callback))
+    $accelerometer_sensor = Rho::Sensor.makeSensorByType(Rho::Sensor::SENSOR_TYPE_ACCELEROMETER)
+    if $accelerometer_sensor != nil
+      $accelerometer_sensor.minimumGap = 1000
+      $accelerometer_sensor.start(url_for(:action => :accelerometer_callback))
+    else
+      Rho::Notification.showPopup({
+        :message => "Device has not Accelerometer sensor",
+        :buttons => ["OK"]
+      })
+    end  
     render :accelerometer_test
   end
   
   def stop_accelerometer_test
-    Rho::Sensors.stopAccelerometer
+    if $accelerometer_sensor != nil
+      $accelerometer_sensor.stop
+    end
     render :accelerometer_test
   end
 end
