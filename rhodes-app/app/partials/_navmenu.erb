@@ -36,6 +36,15 @@
         <% end %>
       </ul>
     </div>
+
+    <div data-role="collapsible" data-filter="battery status indicator">
+      <h3>Battery</h3>
+
+      <ul data-role="listview" data-inset="true">
+        <li><a href="<%= url_for :controller => :Battery, :action => :confirm_battery_status %>">Retrieve the Battery status</a></li>
+        <li><a href="<%= url_for :controller => :Battery, :action => :confirm_battery_indicator %>">Working with the Battery indicator</a></li>
+      </ul>
+    </div>
   
 <%
 =begin
