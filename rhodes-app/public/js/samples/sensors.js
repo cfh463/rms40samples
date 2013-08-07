@@ -8,14 +8,21 @@ KitchenSink.Samples.Sensors = KitchenSink.Samples.Sensors || (function() {
 	
 	function start_accelerometer() {
 		accelerometer = Rho.Sensor.makeSensorByType(Rho.Sensor.SENSOR_TYPE_ACCELEROMETER);
-		accelerometer.minimumGap = 1000
-		accelerometer.start(accelerometer_callback);
-		alert("Started accelerometer")
+		if (accelerometer != null){
+			accelerometer.minimumGap = 1000
+			accelerometer.start(accelerometer_callback);
+			alert("Started accelerometer")
+		}else{
+			alert("Device has not Accelerometer sensor")
+		}
+
 	}
 	
 	function stop_accelerometer() {
-		accelerometer.stop();
-		alert("Stoped accelerometer")
+		if (accelerometer != null){
+			accelerometer.stop();
+			alert("Stoped accelerometer")
+		}
 	}
 	
 	
