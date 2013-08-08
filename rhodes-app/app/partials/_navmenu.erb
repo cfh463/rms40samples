@@ -251,6 +251,15 @@
         </ul>
     </div>
 
+    <div data-role="collapsible" data-filter="signal strength indicator">
+      <h3>Signal</h3>
+
+      <ul data-role="listview" data-inset="true">
+        <li><a href="<%= url_for :controller => :Signal, :action => :confirm_signal_status %>">Retrieve the Signal status</a></li>
+        <li><a href="<%= url_for :controller => :Signal, :action => :confirm_signal_indicator %>">Working with the Signal indicator</a></li>
+      </ul>
+    </div>
+
 <% 
 =begin
 %>  
