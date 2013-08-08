@@ -148,6 +148,18 @@
     </div>
 
     <div data-role="collapsible"  data-filter="nativetabbar tabbar tab bar">
+      <h3>Native Menubar</h3>
+    
+      <ul data-role="listview" data-inset="true">
+        <% if (Rho::System.platform == "WINDOWS") %>
+          <li><a href="<%= url_for :controller => :NativeMenubar, :action => :menubar_menu %>">Addding to the menu bar</a></li>
+        <% else %>
+          <li>This sample is only available on Windows Mobile</li>
+        <% end %> 
+      </ul>
+    </div>
+
+    <div data-role="collapsible"  data-filter="nativetabbar tabbar tab bar">
       <h3>Native Tabbar</h3>
 
       <ul data-role="listview" data-inset="true">
