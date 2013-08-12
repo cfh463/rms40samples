@@ -13,24 +13,26 @@
     <div data-role="content">
 
       <div class="sample ruby">  	
-      	<% unless @ringtones %>
+      	<% unless $ringtones %>
       	  No ring tones
       	<% else %>
-        	<% @ringtones.each do |key,v| %>
-            <a herf="<%= url_for :action => :play, :query => { :name => key } %>" data-role="button">
-              <%= key %>
+        	<% $ringtones.each do |ringtone| %>
+            <a href="<%= url_for :action => :play, :query => { :name => ringtone["name"] } %>" data-role="button">
+              <%= ringtone["name"] %>
             </a><br/>
       	  <% end %>
       	<% end %>
     	</div>
       	
     	<div class="sample javascript">
-    	  <a href="#" onclick="KitchenSink.Samples.MediaPlayer.list_ringtones()" data-role="button">List ringtones</a>
+    	  <a href="#" onclick="KitchenSink.Samples.Mediaplayer.list_ringtones()" data-role="button">List ringtones</a>
     	  
-    	  <ul class="ringtone_list">
-    	  </ul>
-    	  
-    	  <a class="stop_ringtone" href="#" onclick="KitchenSink.Samples.MediaPlayer.stop_ringtone()" data-role="button">Stop playing</a>
+    	  <a style="display:none" class="stop_ringtone" href="#" onclick="KitchenSink.Samples.Mediaplayer.stop_ringtone()" data-role="button">Stop playing</a>
+
+        <ul class="ringtone_list">
+        </ul>
+        
+
     	</div>
     </div>
   <% else %>

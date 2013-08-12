@@ -36,6 +36,15 @@
         <% end %>
       </ul>
     </div>
+
+    <div data-role="collapsible" data-filter="battery status indicator">
+      <h3>Battery</h3>
+
+      <ul data-role="listview" data-inset="true">
+        <li><a href="<%= url_for :controller => :Battery, :action => :confirm_battery_status %>">Retrieve the Battery status</a></li>
+        <li><a href="<%= url_for :controller => :Battery, :action => :confirm_battery_indicator %>">Working with the Battery indicator</a></li>
+      </ul>
+    </div>
   
 <%
 =begin
@@ -242,7 +251,18 @@
         </ul>
     </div>
 
-    
+    <div data-role="collapsible" data-filter="signal strength indicator">
+      <h3>Signal</h3>
+
+      <ul data-role="listview" data-inset="true">
+        <li><a href="<%= url_for :controller => :Signal, :action => :confirm_signal_status %>">Retrieve the Signal status</a></li>
+        <li><a href="<%= url_for :controller => :Signal, :action => :confirm_signal_indicator %>">Working with the Signal indicator</a></li>
+      </ul>
+    </div>
+
+<% 
+=begin
+%>  
     <div data-role="collapsible"  data-filter="signature capture fullscreen full-screen full screen inline line handwriting hand writing">
       <h3>Signature</h3>
       
@@ -257,7 +277,9 @@
       </ul>
       
     </div>
-
+<%
+=end
+%>
 
     <div data-role="collapsible"  data-filter="system capabilities install uninstall version server port local zip unzip">
      <h3>System</h3>
