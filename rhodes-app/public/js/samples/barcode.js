@@ -55,7 +55,6 @@ KitchenSink.Samples.Barcode = KitchenSink.Samples.Barcode || (function() {
     function set_properties() {
       // assign properties
       var properties = _read_properties_from_form();
-      Rho.Log.info(properties, "Scanning properties");
       Rho.Barcode.aimMode = properties["aimMode"];
       Rho.Barcode.aimType = properties["aimType"];
       Rho.Barcode.beamWidth = properties["beamWidth"];
