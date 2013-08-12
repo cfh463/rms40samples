@@ -10,31 +10,24 @@ class MediaplayerController < Rho::RhoController
   end
   
   def load_ringtones
-    if (Rho::System.platform == "ANDROID" ||  Rho::System.platform == "WINDOWS")
       Rho::Mediaplayer.getAllRingtones(url_for(:action => :mediaplayer_callback))
       render :action => :loading
-    else 
-      render :action => :list_ringtones
-    end
   end
   
   def mediaplayer_callback
-   @ringtones = @params
-   
-   @ringtones = [] if @ringtones.nil?
-   Rho::WebView.navigate(url_for(:action => :list_ringtones,:query => { :ringtones => @ringtones }))
+   $ringtones = @params["result"]
+   Rho::WebView.navigate(url_for(:action => :list_ringtones))
   end
   
   def list_ringtones
-      @ringtones = @params["ringtones"]
-     render
+    render
   end
   
   def play
      puts "Play ringtone"
 
      $selected = @params['name']
-     Rho::Mediaplayer.playRingTone @params['name']
+     Rho::Mediaplayer.playRingTone($selected)
      render :action => :playing
   end
   

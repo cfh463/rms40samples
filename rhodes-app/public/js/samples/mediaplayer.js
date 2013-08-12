@@ -5,9 +5,9 @@ KitchenSink.Samples.Mediaplayer = KitchenSink.Samples.Mediaplayer || (function()
 		var result = "";
 		for (var i=0; i<ringtones.length; i++) {
 			var name = ringtones[i]["name"];
-			result+='<li><a href="#" class="play_ringtone" data-ringtone="'+encode(name)+'">'+name+'</a></li>";
+			result+='<li><a href="#" class="play_ringtone" data-ringtone="'+escape(name)+'">'+name+'</a></li>';
 		}
-		
+
 		$(".ui-page-active ul.ringtone_list").html(result);
 	}
 	
@@ -27,7 +27,7 @@ KitchenSink.Samples.Mediaplayer = KitchenSink.Samples.Mediaplayer || (function()
 	
 	
 	$(document).on("click", "a.play_ringtone", function() {
-		var name = $(this).data('ringtone');
+		var name = unescape($(this).data('ringtone'));
 		alert("Playing: "+name);
 		play_ringtone(name);
 	});
