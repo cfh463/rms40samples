@@ -19,11 +19,6 @@ class ApplicationController < Rho::RhoController
     @user_folder = Rho::Application.userFolder
   end
 
-   def set_locale
-    @previous_locale = Rho::Application.locale
-  	Rho::Application.setLocale('de')
-  	@current_locale = Rho::Application.locale
-   end
 
    def quit_app 
     Rho::Application.quit
