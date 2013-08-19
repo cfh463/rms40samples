@@ -9,6 +9,7 @@
     " }
     %>
 
+  <% if (Rho::System.platform != "APPLE ") %>
     <%= render :partial => "/partials/language_tabs" %>
     <form action ="<%= url_for(:action => :show_signal_icon) %>">
       <div data-role="controlgroup">
@@ -29,6 +30,11 @@
     </div>
     
     </form>
+
+  <% else %>
+    The signal indicator is not supported on iOS
+  <% end %>
+  
   </div>
 
 
