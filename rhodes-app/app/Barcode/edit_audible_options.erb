@@ -9,6 +9,8 @@
   " }
   %>
 
+  <% if (Rho::System.isMotorolaDevice) %> 
+
   <%= render :partial => "/partials/language_tabs" %>
 
 
@@ -37,7 +39,8 @@
       </div>
       
     </form>
-
-
+  <% else %>
+    Audible options are only available on Motorola Solutions devices
+  <% end %>
   
 </div>
