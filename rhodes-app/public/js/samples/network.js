@@ -7,11 +7,13 @@ KitchenSink.Samples.Network = KitchenSink.Samples.Network || (function() {
 	function start_status_notify() {
 		// Request the system to check every 3 seconds and call us back if there is a change in network connectivity
 		Rho.Network.startStatusNotify(3000, status_notify_callback);
+		alert("Started requesting network availability notifications");
 	}
 
 	function stop_status_notify() {
 		// Stop network status notifications
 		Rho.Network.stopStatusNotify();
+		alert("Stopped requesting network availability notifications");
 	}
 
 	function upload_file_callback(params) {

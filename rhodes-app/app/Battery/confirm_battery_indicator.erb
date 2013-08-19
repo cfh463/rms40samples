@@ -9,27 +9,32 @@
     " }
     %>
 
-    <%= render :partial => "/partials/language_tabs" %>
-    <form action ="<%= url_for(:action => :show_battery_icon) %>">
-      <div data-role="controlgroup">
-      Layout
-      <label><input type="radio" name="iconLayout" value="left" checked>Left</label>
-      <label><input type="radio" name="iconLayout" value="right" >Right</label>
-      <label><input type="radio" name="iconLayout" value="up" >Up</label>
-      <label><input type="radio" name="iconLayout" value="down" >Down</label>
-      </div>
-    <div class="sample ruby">
-      <input type="submit" data-role="button" value="Show Battery Icon">
-      <a href="<%= url_for :action => :hide_battery_icon %>" data-role="button">Hide Battery Icon</a>
-    </div>
-    
-    <div class="sample javascript">
-          <a href="#" data-role="button" onclick="KitchenSink.Samples.Battery.show_battery_icon()">Show Battery Icon</a>
-          <a href="#" data-role="button" onclick="KitchenSink.Samples.Battery.hide_battery_icon()">Hide Battery Icon</a>  
-    </div>
-    
-    </form>
-  </div>
+    <% if (Rho::System.isMotorolaDevice) %>     
 
+      <%= render :partial => "/partials/language_tabs" %>
+      <form action ="<%= url_for(:action => :show_battery_icon) %>">
+        <div data-role="controlgroup">
+        Layout
+        <label><input type="radio" name="iconLayout" value="left" checked>Left</label>
+        <label><input type="radio" name="iconLayout" value="right" >Right</label>
+        <label><input type="radio" name="iconLayout" value="up" >Up</label>
+        <label><input type="radio" name="iconLayout" value="down" >Down</label>
+        </div>
+      <div class="sample ruby">
+        <input type="submit" data-role="button" value="Show Battery Icon">
+        <a href="<%= url_for :action => :hide_battery_icon %>" data-role="button">Hide Battery Icon</a>
+      </div>
+      
+      <div class="sample javascript">
+            <a href="#" data-role="button" onclick="KitchenSink.Samples.Battery.show_battery_icon()">Show Battery Icon</a>
+            <a href="#" data-role="button" onclick="KitchenSink.Samples.Battery.hide_battery_icon()">Hide Battery Icon</a>  
+      </div>
+      
+      </form>
+    </div>
+
+  <% else %>
+    The battery icon is supported only on Motorola Solutions devices
+  <% end %>
 
 </div>
